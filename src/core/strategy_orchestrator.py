@@ -5,6 +5,10 @@ from src.core.event_bus import EventBus
 from src.strategies.sentiment_strategy import SentimentStrategy
 from src.strategies.smart_strategy import SmartStrategy
 from src.strategies.liquidation_strategy import LiquidationStrategy
+from src.strategies.cascade_liquidation_strategy import CascadeLiquidationStrategy
+from src.strategies.flow_imbalance_strategy import FlowImbalanceStrategy
+from src.strategies.rolling_vwap_strategy import RollingVWAPStrategy
+from src.strategies.obi_strategy import OBIStrategy
 
 logger = logging.getLogger("Orchestrator")
 
@@ -13,16 +17,23 @@ class StrategyOrchestrator:
         self.event_bus = event_bus
         self.strategies = [] # Estratégias de Ticks (Preço)
         self.liquidation_strategies = [] # Estratégias de Eventos (Quebras)
+        self.orderbook_strategies = [] # Estratégias de Order Book
         
         # --- EQUIPE DE TICKS ---
         self.strategies.append(SentimentStrategy())
         self.strategies.append(SmartStrategy())
+        self.strategies.append(FlowImbalanceStrategy())
+        self.strategies.append(RollingVWAPStrategy())
         
         # --- EQUIPE DE LIQUIDAÇÃO ---
         # Aqui está o Caçador que faltava!
         self.liquidation_strategies.append(LiquidationStrategy())
+        self.liquidation_strategies.append(CascadeLiquidationStrategy())
         
-        logger.info(f"🧠 Orquestrador iniciado. Tick-Strats: {len(self.strategies)} | Event-Strats: {len(self.liquidation_strategies)}")
+        # --- EQUIPE DE ORDER BOOK ---
+        self.orderbook_strategies.append(OBIStrategy())
+        
+        logger.info(f"🧠 Orquestrador iniciado. Tick-Strats: {len(self.strategies)} | Event-Strats: {len(self.liquidation_strategies)} | OB-Strats: {len(self.orderbook_strategies)}")
 
     # --- PROCESSA PREÇO (TICKS) ---
     async def _process_tick(self, data: dict):
@@ -35,6 +46,13 @@ class StrategyOrchestrator:
     async def _process_liquidation(self, data: dict):
         data['event_type'] = 'liquidation'
         for strategy in self.liquidation_strategies:
+            signal = await strategy.on_tick(data)
+            await self._handle_signal(signal, data, strategy.name)
+
+    # --- PROCESSA ORDER BOOK ---
+    async def _process_orderbook(self, data: dict):
+        data['event_type'] = 'orderbook'
+        for strategy in self.orderbook_strategies:
             signal = await strategy.on_tick(data)
             await self._handle_signal(signal, data, strategy.name)
 
@@ -54,7 +72,8 @@ class StrategyOrchestrator:
             })
 
     async def start(self):
-        # Assina os dois canais
+        # Assina os três canais
         self.event_bus.subscribe('market_data', self._process_tick)
         self.event_bus.subscribe('liquidation_data', self._process_liquidation)
-        logger.info("🧠 Cérebro conectado aos fluxos de Mercado e Liquidação.")
+        self.event_bus.subscribe('orderbook_data', self._process_orderbook)
+        logger.info("🧠 Cérebro conectado aos fluxos de Mercado, Liquidação e Order Book.")
