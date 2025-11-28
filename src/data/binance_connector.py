@@ -1,29 +1,30 @@
 import asyncio
 import logging
-import os
 from binance import AsyncClient, BinanceSocketManager
 from src.core.event_bus import EventBus
 
 logger = logging.getLogger("BinanceConnector")
 
 class BinanceConnector:
-    def __init__(self, api_key: str, api_secret: str, event_bus: EventBus, testnet: bool = True):
+    def __init__(self, api_key: str, api_secret: str, event_bus: EventBus, demo_mode: bool = False):
         self.api_key = api_key
         self.api_secret = api_secret
         self.event_bus = event_bus
-        self.testnet = testnet
-        self.use_demo = os.getenv("USE_DEMO", "false").lower() == "true"
+        self.demo_mode = demo_mode
         self.client = None
         self.bsm = None
 
     async def connect(self):
-        if self.use_demo:
-            logger.info("🔌 Conectando à Binance Demo...")
-            self.client = await AsyncClient.create(self.api_key, self.api_secret)
-            self.client.FUTURES_URL = "https://demo-fapi.binance.com"
+        if self.demo_mode:
+            logger.info("🔌 Conectando à Binance Demo (API Real + Header X-MBX-DEMO)...")
+            # Demo Trading uses REAL API (fapi.binance.com) with special header
+            self.client = await AsyncClient.create(self.api_key, self.api_secret, testnet=False)
+            # Add the demo mode header to all requests
+            if hasattr(self.client, 'session') and self.client.session:
+                self.client.session.headers.update({'X-MBX-DEMO': 'true'})
         else:
-            logger.info(f"🔌 Conectando à Binance (Testnet={self.testnet})...")
-            self.client = await AsyncClient.create(self.api_key, self.api_secret, testnet=self.testnet)
+            logger.info("🔌 Conectando à Binance Produção...")
+            self.client = await AsyncClient.create(self.api_key, self.api_secret, testnet=False)
         
         self.bsm = BinanceSocketManager(self.client)
         logger.info("✅ Binance Conectada.")
