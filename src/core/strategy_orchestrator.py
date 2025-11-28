@@ -1,4 +1,5 @@
 import logging
+from typing import Optional
 from src.core.event_bus import EventBus
 
 # Importa a Tropa de Elite Completa
@@ -22,6 +23,10 @@ class StrategyOrchestrator:
         self.liquidation_strategies = []  # Estratégias de Eventos (Quebras)
         self.orderbook_strategies = []  # Estratégias de Order Book (NOVO!)
         
+        # Meta-Controller e Executor (injetados depois)
+        self.meta_controller = None
+        self.executor = None
+        
         # --- EQUIPE DE TICKS ---
         self.strategies.append(SentimentStrategy())
         self.strategies.append(SmartStrategy())
@@ -37,6 +42,16 @@ class StrategyOrchestrator:
         self.orderbook_strategies.append(OBIStrategy())
         
         logger.info(f"🧠 Orquestrador iniciado. Tick-Strats: {len(self.strategies)} | Event-Strats: {len(self.liquidation_strategies)} | Orderbook-Strats: {len(self.orderbook_strategies)}")
+
+    def set_meta_controller(self, meta_controller) -> None:
+        """Injeta o MetaController (Oráculo)"""
+        self.meta_controller = meta_controller
+        logger.info("🧠 MetaController conectado ao Orchestrator")
+
+    def set_executor(self, executor) -> None:
+        """Injeta o TradeExecutor"""
+        self.executor = executor
+        logger.info("⚡ TradeExecutor conectado ao Orchestrator")
 
     # --- PROCESSA PREÇO (TICKS) ---
     async def _process_tick(self, data: dict):
@@ -66,6 +81,18 @@ class StrategyOrchestrator:
             
             # Garante que o preço existe (na liquidação o preço vem no dado)
             price = data.get('price', 0)
+            
+            # Se tiver MetaController, passa o sinal para votação
+            if self.meta_controller:
+                combined_signal = self.meta_controller.receive_signal(strat_name, signal)
+                
+                # Se o MetaController retornar um sinal combinado, executa
+                if combined_signal and self.executor:
+                    try:
+                        current_price = float(price) if price else 0
+                        await self.executor.execute_signal(combined_signal, current_price)
+                    except Exception as e:
+                        logger.error(f"❌ Erro ao executar sinal: {e}")
             
             await self.event_bus.publish('trade_signal', {
                 'strategy': strat_name,

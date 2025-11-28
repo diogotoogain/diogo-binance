@@ -1,5 +1,6 @@
 import asyncio
 import logging
+import os
 from binance import AsyncClient, BinanceSocketManager
 from src.core.event_bus import EventBus
 
@@ -11,12 +12,19 @@ class BinanceConnector:
         self.api_secret = api_secret
         self.event_bus = event_bus
         self.testnet = testnet
+        self.use_demo = os.getenv("USE_DEMO", "false").lower() == "true"
         self.client = None
         self.bsm = None
 
     async def connect(self):
-        logger.info(f"🔌 Conectando à Binance (Testnet={self.testnet})...")
-        self.client = await AsyncClient.create(self.api_key, self.api_secret, testnet=self.testnet)
+        if self.use_demo:
+            logger.info("🔌 Conectando à Binance Demo...")
+            self.client = await AsyncClient.create(self.api_key, self.api_secret)
+            self.client.FUTURES_URL = "https://demo-fapi.binance.com"
+        else:
+            logger.info(f"🔌 Conectando à Binance (Testnet={self.testnet})...")
+            self.client = await AsyncClient.create(self.api_key, self.api_secret, testnet=self.testnet)
+        
         self.bsm = BinanceSocketManager(self.client)
         logger.info("✅ Binance Conectada.")
 
