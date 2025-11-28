@@ -57,7 +57,7 @@ class VPINStrategy(BaseStrategy):
         """
         Calcula o VPIN atual baseado nos buckets completos.
         
-        VPIN = Σ|V_buy - V_sell| / (n × V)
+        VPIN = Σ|V_buy - V_sell| / Σ(V_buy + V_sell)
         """
         if len(self.buckets) < 10:
             return 0.0
