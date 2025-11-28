@@ -10,6 +10,8 @@ from src.data.binance_connector import BinanceConnector
 from src.core.strategy_orchestrator import StrategyOrchestrator
 from src.core.dashboard import TerminalDashboard
 from src.utils.trade_logger import TradeLogger
+from src.core.meta_controller import MetaController
+from src.execution import RiskManager, PositionManager, TradeExecutor
 
 logging.basicConfig(
     level=logging.INFO,
@@ -47,12 +49,38 @@ async def main():
     asyncio.create_task(event_bus.start())
 
     # 7. Conectar
+    
+    # 4. Meta-Controller (Oráculo)
+    meta_controller = MetaController()
+    orchestrator.set_meta_controller(meta_controller)
+    
+    # 5. Conectar à Binance
     api_key = os.getenv("BINANCE_API_KEY")
     secret = os.getenv("BINANCE_SECRET_KEY")
     connector = BinanceConnector(api_key, secret, event_bus, testnet=True)
     await connector.connect()
+    
+    # 6. Risk & Position Managers
+    risk_manager = RiskManager()
+    position_manager = PositionManager()
+    
+    # 7. Trade Executor
+    executor = TradeExecutor(
+        client=connector.client,
+        position_manager=position_manager,
+        risk_manager=risk_manager
+    )
+    await executor.initialize()
+    orchestrator.set_executor(executor)
+    
+    # 8. Iniciar Orchestrator
+    await orchestrator.start()
+
+    # 9. Bus
+    asyncio.create_task(event_bus.start())
 
     # 8. Ligar TUDO (Ticks + Liquidações)
+    # 10. Ligar TUDO (Ticks + Liquidações)
     stream_task = asyncio.create_task(connector.start_streams("BTCUSDT"))
 
     print("\n💀 CAÇADOR DE LIQUIDEZ ATIVO... Monitorando Ticks e Quebras...\n")
