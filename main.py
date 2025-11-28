@@ -8,6 +8,8 @@ from src.core.event_bus import EventBus
 from src.data.database_manager import DatabaseManager
 from src.data.binance_connector import BinanceConnector
 from src.core.strategy_orchestrator import StrategyOrchestrator
+from src.core.dashboard import TerminalDashboard
+from src.utils.trade_logger import TradeLogger
 from src.core.meta_controller import MetaController
 from src.execution import RiskManager, PositionManager, TradeExecutor
 
@@ -26,6 +28,7 @@ async def main():
     # 1. Infra
     event_bus = EventBus()
     db_manager = DatabaseManager()
+    trade_logger = TradeLogger()
     
     # 2. Banco
     await db_manager.init_models()
@@ -33,6 +36,19 @@ async def main():
 
     # 3. Cérebro
     orchestrator = StrategyOrchestrator(event_bus)
+    await orchestrator.start()
+
+    # 4. Dashboard
+    dashboard = TerminalDashboard(event_bus)
+    await dashboard.start()
+
+    # 5. Trade Logger
+    event_bus.subscribe('trade_signal', trade_logger.on_signal)
+
+    # 6. Bus
+    asyncio.create_task(event_bus.start())
+
+    # 7. Conectar
     
     # 4. Meta-Controller (Oráculo)
     meta_controller = MetaController()
@@ -63,6 +79,7 @@ async def main():
     # 9. Bus
     asyncio.create_task(event_bus.start())
 
+    # 8. Ligar TUDO (Ticks + Liquidações)
     # 10. Ligar TUDO (Ticks + Liquidações)
     stream_task = asyncio.create_task(connector.start_streams("BTCUSDT"))
 
@@ -73,6 +90,7 @@ async def main():
     except asyncio.CancelledError:
         logger.info("Desligando...")
     finally:
+        await dashboard.stop()
         await connector.close()
         await event_bus.stop()
 
