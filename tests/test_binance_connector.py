@@ -2,7 +2,20 @@
 import pytest
 from unittest.mock import AsyncMock, patch, MagicMock
 import sys
+import importlib.util
 sys.path.insert(0, '.')
+
+
+def load_binance_connector():
+    """Helper function to load BinanceConnector module with mocked dependencies."""
+    spec = importlib.util.spec_from_file_location(
+        "binance_connector", 
+        "src/data/binance_connector.py"
+    )
+    module = importlib.util.module_from_spec(spec)
+    sys.modules['src.core.event_bus'] = MagicMock()
+    spec.loader.exec_module(module)
+    return module
 
 
 class TestBinanceConnector:
@@ -13,20 +26,8 @@ class TestBinanceConnector:
 
     def test_initialization_default(self):
         """Test default initialization (non-demo mode)"""
-        # Patch the imports to avoid loading the broken meta_controller
         with patch.dict('sys.modules', {'src.core': MagicMock(), 'src.core.event_bus': MagicMock()}):
-            # Import directly without going through __init__.py
-            import importlib.util
-            spec = importlib.util.spec_from_file_location(
-                "binance_connector", 
-                "src/data/binance_connector.py"
-            )
-            module = importlib.util.module_from_spec(spec)
-            
-            # Mock the EventBus in the module
-            sys.modules['src.core.event_bus'] = MagicMock()
-            spec.loader.exec_module(module)
-            
+            module = load_binance_connector()
             BinanceConnector = module.BinanceConnector
             
             connector = BinanceConnector(
@@ -43,15 +44,7 @@ class TestBinanceConnector:
     def test_initialization_demo_mode(self):
         """Test initialization with demo_mode=True"""
         with patch.dict('sys.modules', {'src.core': MagicMock(), 'src.core.event_bus': MagicMock()}):
-            import importlib.util
-            spec = importlib.util.spec_from_file_location(
-                "binance_connector", 
-                "src/data/binance_connector.py"
-            )
-            module = importlib.util.module_from_spec(spec)
-            sys.modules['src.core.event_bus'] = MagicMock()
-            spec.loader.exec_module(module)
-            
+            module = load_binance_connector()
             BinanceConnector = module.BinanceConnector
             
             connector = BinanceConnector(
@@ -65,15 +58,7 @@ class TestBinanceConnector:
     def test_initialization_production_mode(self):
         """Test initialization with demo_mode=False"""
         with patch.dict('sys.modules', {'src.core': MagicMock(), 'src.core.event_bus': MagicMock()}):
-            import importlib.util
-            spec = importlib.util.spec_from_file_location(
-                "binance_connector", 
-                "src/data/binance_connector.py"
-            )
-            module = importlib.util.module_from_spec(spec)
-            sys.modules['src.core.event_bus'] = MagicMock()
-            spec.loader.exec_module(module)
-            
+            module = load_binance_connector()
             BinanceConnector = module.BinanceConnector
             
             connector = BinanceConnector(
@@ -94,24 +79,12 @@ class TestBinanceConnector:
         mock_client.session = mock_session
         
         with patch.dict('sys.modules', {'src.core': MagicMock(), 'src.core.event_bus': MagicMock()}):
-            import importlib.util
-            spec = importlib.util.spec_from_file_location(
-                "binance_connector", 
-                "src/data/binance_connector.py"
-            )
-            module = importlib.util.module_from_spec(spec)
-            sys.modules['src.core.event_bus'] = MagicMock()
-            
-            # Mock AsyncClient before loading module
-            mock_async_client = MagicMock()
-            mock_async_client.create = AsyncMock(return_value=mock_client)
-            module.AsyncClient = mock_async_client
-            
-            spec.loader.exec_module(module)
-            
+            module = load_binance_connector()
             BinanceConnector = module.BinanceConnector
             
-            # Manually set the mock AsyncClient on the module
+            # Mock AsyncClient.create after module is loaded
+            mock_async_client = MagicMock()
+            mock_async_client.create = AsyncMock(return_value=mock_client)
             module.AsyncClient = mock_async_client
             
             connector = BinanceConnector(
@@ -142,23 +115,12 @@ class TestBinanceConnector:
         mock_client.session = mock_session
         
         with patch.dict('sys.modules', {'src.core': MagicMock(), 'src.core.event_bus': MagicMock()}):
-            import importlib.util
-            spec = importlib.util.spec_from_file_location(
-                "binance_connector", 
-                "src/data/binance_connector.py"
-            )
-            module = importlib.util.module_from_spec(spec)
-            sys.modules['src.core.event_bus'] = MagicMock()
-            
-            # Mock AsyncClient before loading module
-            mock_async_client = MagicMock()
-            mock_async_client.create = AsyncMock(return_value=mock_client)
-            
-            spec.loader.exec_module(module)
-            
+            module = load_binance_connector()
             BinanceConnector = module.BinanceConnector
             
-            # Manually set the mock AsyncClient on the module
+            # Mock AsyncClient.create after module is loaded
+            mock_async_client = MagicMock()
+            mock_async_client.create = AsyncMock(return_value=mock_client)
             module.AsyncClient = mock_async_client
             
             connector = BinanceConnector(
