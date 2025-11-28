@@ -1,0 +1,61 @@
+import pytest
+import sys
+sys.path.insert(0, '.')
+
+from src.execution.position_manager import PositionManager
+
+
+class TestPositionManager:
+    def setup_method(self):
+        self.pm = PositionManager(
+            default_sl_percent=0.01,
+            default_tp_percent=0.02,
+            use_trailing_stop=False
+        )
+
+    def test_initialization(self):
+        assert self.pm.default_sl_percent == 0.01
+        assert self.pm.default_tp_percent == 0.02
+        assert self.pm.has_position() == False
+
+    def test_calculate_sl_tp_long(self):
+        sl, tp = self.pm.calculate_sl_tp(50000, 'BUY')
+        assert sl == 49500  # -1%
+        assert tp == 51000  # +2%
+
+    def test_calculate_sl_tp_short(self):
+        sl, tp = self.pm.calculate_sl_tp(50000, 'SELL')
+        assert sl == 50500  # +1%
+        assert tp == 49000  # -2%
+
+    def test_open_position(self):
+        pos = self.pm.open_position('BTCUSDT', 'BUY', 50000, 0.1)
+        assert pos is not None
+        assert self.pm.has_position() == True
+        assert pos.side == 'LONG'
+
+    def test_cannot_open_duplicate(self):
+        self.pm.open_position('BTCUSDT', 'BUY', 50000, 0.1)
+        pos2 = self.pm.open_position('BTCUSDT', 'BUY', 51000, 0.1)
+        assert pos2 is None
+
+    def test_close_position_profit(self):
+        self.pm.open_position('BTCUSDT', 'BUY', 50000, 0.1)
+        pnl = self.pm.close_position(51000)
+        assert pnl == 100  # (51000-50000) * 0.1
+        assert self.pm.has_position() == False
+
+    def test_close_position_loss(self):
+        self.pm.open_position('BTCUSDT', 'BUY', 50000, 0.1)
+        pnl = self.pm.close_position(49000)
+        assert pnl == -100
+
+    def test_should_close_stop_loss(self):
+        self.pm.open_position('BTCUSDT', 'BUY', 50000, 0.1, 49500, 51000)
+        result = self.pm.should_close(49400)
+        assert result == 'STOP_LOSS'
+
+    def test_should_close_take_profit(self):
+        self.pm.open_position('BTCUSDT', 'BUY', 50000, 0.1, 49500, 51000)
+        result = self.pm.should_close(51100)
+        assert result == 'TAKE_PROFIT'
