@@ -79,6 +79,9 @@ class WebDashboard:
         self._server: Optional[uvicorn.Server] = None
         self._refresh_task: Optional[asyncio.Task] = None
         
+        # Bot pause state
+        self.is_paused = False
+        
         # FastAPI app
         self.app = FastAPI(title="SNAME-MR Dashboard")
         self._setup_routes()
@@ -143,6 +146,18 @@ class WebDashboard:
         async def get_account():
             """Busca resumo da conta (margin balance, wallet balance, unrealized pnl)"""
             return await self._fetch_account_summary()
+        
+        @self.app.post("/api/pause")
+        async def toggle_pause(data: dict):
+            """Pause/resume the bot"""
+            self.is_paused = data.get('paused', False)
+            self._add_log("INFO", f"Bot {'pausado' if self.is_paused else 'retomado'}")
+            return {"paused": self.is_paused}
+        
+        @self.app.get("/api/pause")
+        async def get_pause_status():
+            """Get pause status"""
+            return {"paused": getattr(self, 'is_paused', False)}
         
         @self.app.websocket("/ws")
         async def websocket_endpoint(websocket: WebSocket):
@@ -291,8 +306,24 @@ class WebDashboard:
                         "liquidation_price": float(pos.get('liquidationPrice', 0)),
                         "unrealized_pnl": unrealized_pnl,
                         "pnl_percent": (unrealized_pnl / (entry_price * abs(qty)) * 100) if entry_price > 0 and abs(qty) > 0 else 0,
-                        "leverage": int(pos.get('leverage', 1))
+                        "leverage": int(pos.get('leverage', 1)),
+                        "stop_loss": 0.0,
+                        "take_profit": 0.0
                     }
+                    
+                    # Fetch SL/TP from open orders
+                    try:
+                        orders = await self.connector.client.futures_get_open_orders(symbol='BTCUSDT')
+                        for order in orders:
+                            order_type = order.get('type', '')
+                            stop_price = float(order.get('stopPrice', 0))
+                            if 'STOP' in order_type and 'PROFIT' not in order_type and stop_price > 0:
+                                self.position['stop_loss'] = stop_price
+                            elif 'PROFIT' in order_type and stop_price > 0:
+                                self.position['take_profit'] = stop_price
+                    except Exception as e:
+                        logger.error(f"Error fetching SL/TP orders: {e}")
+                    
                     return self.position;
             
             self.position = {"has_position": False};
@@ -301,6 +332,19 @@ class WebDashboard:
             logger.error(f"Error fetching position: {e}")
         
         return self.position
+    
+    async def _fetch_volume_24h(self) -> float:
+        """Fetch 24h trading volume from Binance."""
+        if not self.connector or not self.connector.client:
+            return 0.0
+        
+        try:
+            ticker = await self.connector.client.futures_ticker(symbol='BTCUSDT')
+            self.volume_24h = float(ticker.get('quoteVolume', 0))
+            return self.volume_24h
+        except Exception as e:
+            logger.error(f"Error fetching 24h volume: {e}")
+            return 0.0
     
     async def _fetch_positions(self) -> List[dict]:
         """Busca todas as posições abertas no formato Binance."""
@@ -619,6 +663,7 @@ class WebDashboard:
             try:
                 await self._fetch_balance();
                 await self._fetch_position();
+                await self._fetch_volume_24h();
                 
                 strategies = {};
                 if self.orchestrator:
@@ -643,7 +688,8 @@ class WebDashboard:
                         "balance": self.balance_data,
                         "position": self.position,
                         "strategies": strategies,
-                        "meta_controller": meta_status
+                        "meta_controller": meta_status,
+                        "volume_24h": self.volume_24h
                     }
                 });
             except Exception as e:
