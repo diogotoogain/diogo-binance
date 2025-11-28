@@ -11,6 +11,25 @@ let reconnectAttempts = 0;
 const maxReconnectAttempts = 10;
 const reconnectDelay = 3000;
 let currentPriceValue = 0; // Store raw numeric price
+let botStartTime = null; // Track bot start time for uptime
+let uptimeInterval = null; // Interval for uptime updates
+let currentPosition = null; // Store current position data
+let lastPingTime = 0; // Track last ping time for latency
+let latencyMs = 0; // Current latency in ms
+let isPaused = false; // Bot pause state
+let soundEnabled = true; // Sound alerts enabled
+let darkMode = true; // Dark/Light mode
+let logFilter = 'all'; // Log filter: all, BUY, SELL, ERROR, INFO
+let equityHistory = []; // Equity curve data
+let tradeStats = { // Trade statistics
+    bestTrade: { pnl: 0, percent: 0 },
+    worstTrade: { pnl: 0, percent: 0 },
+    totalGains: 0,
+    totalLosses: 0,
+    tradeTimes: [],
+    tradesPerHour: 0
+};
+let metaDecisionHistory = []; // Meta-controller decision history
 
 // Note: Initialization is handled at the end of the file
 // to ensure all functions are defined before use
@@ -18,8 +37,92 @@ let currentPriceValue = 0; // Store raw numeric price
 /**
  * Initialize Chart.js price chart
  */
+let chartType = 'line'; // 'line' or 'candlestick'
+let currentTimeframe = '1m';
+let entryPrice = 0;
+let stopLossPrice = 0;
+let takeProfitPrice = 0;
+
+// Horizontal line annotation plugin - registered once
+const horizontalLinePlugin = {
+    id: 'horizontalLines',
+    afterDraw: (chart) => {
+        if (!currentPosition || !currentPosition.has_position) return;
+        
+        const ctx = chart.ctx;
+        const yAxis = chart.scales.y;
+        const chartArea = chart.chartArea;
+        
+        // Draw entry price line (yellow)
+        if (entryPrice > 0) {
+            const yEntry = yAxis.getPixelForValue(entryPrice);
+            if (yEntry >= chartArea.top && yEntry <= chartArea.bottom) {
+                ctx.save();
+                ctx.beginPath();
+                ctx.moveTo(chartArea.left, yEntry);
+                ctx.lineTo(chartArea.right, yEntry);
+                ctx.lineWidth = 2;
+                ctx.strokeStyle = '#fcd34d';
+                ctx.setLineDash([5, 5]);
+                ctx.stroke();
+                ctx.fillStyle = '#fcd34d';
+                ctx.font = '10px Inter';
+                ctx.fillText(`Entry: $${entryPrice.toLocaleString()}`, chartArea.right - 120, yEntry - 5);
+                ctx.restore();
+            }
+        }
+        
+        // Draw stop loss line (red)
+        if (stopLossPrice > 0) {
+            const ySL = yAxis.getPixelForValue(stopLossPrice);
+            if (ySL >= chartArea.top && ySL <= chartArea.bottom) {
+                ctx.save();
+                ctx.beginPath();
+                ctx.moveTo(chartArea.left, ySL);
+                ctx.lineTo(chartArea.right, ySL);
+                ctx.lineWidth = 2;
+                ctx.strokeStyle = '#ef4444';
+                ctx.setLineDash([5, 5]);
+                ctx.stroke();
+                ctx.fillStyle = '#ef4444';
+                ctx.font = '10px Inter';
+                ctx.fillText(`SL: $${stopLossPrice.toLocaleString()}`, chartArea.right - 100, ySL - 5);
+                ctx.restore();
+            }
+        }
+        
+        // Draw take profit line (green)
+        if (takeProfitPrice > 0) {
+            const yTP = yAxis.getPixelForValue(takeProfitPrice);
+            if (yTP >= chartArea.top && yTP <= chartArea.bottom) {
+                ctx.save();
+                ctx.beginPath();
+                ctx.moveTo(chartArea.left, yTP);
+                ctx.lineTo(chartArea.right, yTP);
+                ctx.lineWidth = 2;
+                ctx.strokeStyle = '#22c55e';
+                ctx.setLineDash([5, 5]);
+                ctx.stroke();
+                ctx.fillStyle = '#22c55e';
+                ctx.font = '10px Inter';
+                ctx.fillText(`TP: $${takeProfitPrice.toLocaleString()}`, chartArea.right - 100, yTP - 5);
+                ctx.restore();
+            }
+        }
+    }
+};
+
+// Register plugin once
+let pluginRegistered = false;
+
 function initChart() {
     const ctx = document.getElementById('priceChart').getContext('2d');
+    
+    // Register plugin only once
+    if (!pluginRegistered) {
+        Chart.register(horizontalLinePlugin);
+        pluginRegistered = true;
+    }
     
     priceChart = new Chart(ctx, {
         type: 'line',
@@ -85,6 +188,85 @@ function initChart() {
 }
 
 /**
+ * Initialize equity chart
+ */
+let equityChart = null;
+
+function initEquityChart() {
+    const ctx = document.getElementById('equityChart');
+    if (!ctx) return;
+    
+    equityChart = new Chart(ctx.getContext('2d'), {
+        type: 'line',
+        data: {
+            labels: [],
+            datasets: [{
+                label: 'Equity',
+                data: [],
+                borderColor: '#22c55e',
+                backgroundColor: 'rgba(34, 197, 94, 0.1)',
+                borderWidth: 2,
+                fill: true,
+                tension: 0.4,
+                pointRadius: 0
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            animation: { duration: 0 },
+            plugins: {
+                legend: { display: false }
+            },
+            scales: {
+                x: { display: false },
+                y: {
+                    grid: { color: 'rgba(255, 255, 255, 0.05)' },
+                    ticks: {
+                        color: '#6b7280',
+                        callback: (v) => '$' + v.toLocaleString()
+                    }
+                }
+            }
+        }
+    });
+}
+
+/**
+ * Update equity chart with new balance data
+ */
+function updateEquityChart(balance) {
+    if (!equityChart || !balance) return;
+    
+    const totalBalance = balance.total_usdt || 0;
+    if (totalBalance <= 0) return;
+    
+    equityHistory.push({
+        time: new Date().toLocaleTimeString(),
+        value: totalBalance
+    });
+    
+    // Keep only last 50 points
+    if (equityHistory.length > 50) {
+        equityHistory.shift();
+    }
+    
+    equityChart.data.labels = equityHistory.map(e => e.time);
+    equityChart.data.datasets[0].data = equityHistory.map(e => e.value);
+    equityChart.update('none');
+    
+    // Calculate drawdown
+    const peak = Math.max(...equityHistory.map(e => e.value));
+    const current = totalBalance;
+    const drawdown = peak > 0 ? ((peak - current) / peak) * 100 : 0;
+    
+    const drawdownEl = document.getElementById('perf-drawdown');
+    if (drawdownEl) {
+        drawdownEl.textContent = `-${drawdown.toFixed(2)}%`;
+    }
+}
+
+/**
  * Connect to WebSocket server
  */
 function connectWebSocket() {
@@ -100,10 +282,17 @@ function connectWebSocket() {
         reconnectAttempts = 0;
         updateConnectionStatus('connected');
         addLog('INFO', 'Conectado ao servidor');
+        showNotification('🔗 Conectado', 'Conexão WebSocket estabelecida', 'success');
     };
     
     ws.onmessage = (event) => {
         try {
+            // Calculate latency if this is a pong response
+            if (event.data === 'pong' && lastPingTime > 0) {
+                latencyMs = Date.now() - lastPingTime;
+                updateLatencyDisplay();
+                return;
+            }
             const message = JSON.parse(event.data);
             handleMessage(message);
         } catch (e) {
@@ -143,24 +332,64 @@ function scheduleReconnect() {
 function updateConnectionStatus(status) {
     const dot = document.getElementById('status-dot');
     const text = document.getElementById('status-text');
+    const indicator = document.getElementById('connection-indicator');
     
     switch (status) {
         case 'connected':
             dot.className = 'status-dot status-live pulse-green';
             text.textContent = 'LIVE';
             text.className = 'text-sm text-green-400';
+            if (indicator) {
+                indicator.className = 'connection-indicator connected';
+                indicator.title = 'Conectado';
+            }
             break;
         case 'connecting':
             dot.className = 'status-dot status-offline';
             text.textContent = 'Conectando...';
             text.className = 'text-sm text-yellow-400';
+            if (indicator) {
+                indicator.className = 'connection-indicator reconnecting';
+                indicator.title = 'Reconectando...';
+            }
             break;
         case 'disconnected':
         case 'error':
             dot.className = 'status-dot status-offline pulse-red';
             text.textContent = 'Offline';
             text.className = 'text-sm text-red-400';
+            if (indicator) {
+                indicator.className = 'connection-indicator disconnected';
+                indicator.title = 'Desconectado';
+            }
             break;
+    }
+}
+
+/**
+ * Update latency display
+ */
+function updateLatencyDisplay() {
+    const latencyEl = document.getElementById('latency-display');
+    if (latencyEl) {
+        latencyEl.textContent = `${latencyMs}ms`;
+        if (latencyMs < 100) {
+            latencyEl.className = 'text-green-400';
+        } else if (latencyMs < 300) {
+            latencyEl.className = 'text-yellow-400';
+        } else {
+            latencyEl.className = 'text-red-400';
+        }
+    }
+}
+
+/**
+ * Update last refresh timestamp
+ */
+function updateLastRefresh() {
+    const refreshEl = document.getElementById('last-refresh');
+    if (refreshEl) {
+        refreshEl.textContent = new Date().toLocaleTimeString();
     }
 }
 
@@ -250,13 +479,60 @@ function handleInitialData(data) {
         data.logs.forEach(log => addLogEntry(log));
     }
     
-    // System
+    // System - Start uptime timer
     if (data.system) {
-        document.getElementById('uptime').textContent = `Uptime: ${data.system.uptime}`;
-        if (data.system.testnet) {
+        // Parse the uptime string and start the timer
+        const uptimeStr = data.system.uptime || '0:00:00';
+        botStartTime = parseUptimeToStartTime(uptimeStr);
+        startUptimeTimer();
+        
+        if (data.system.demo_mode) {
             document.getElementById('testnet-badge').classList.remove('hidden');
         }
     }
+    
+    // Update last refresh
+    updateLastRefresh();
+}
+
+/**
+ * Parse uptime string to calculate start time
+ */
+function parseUptimeToStartTime(uptimeStr) {
+    const parts = uptimeStr.split(':').map(Number);
+    let seconds = 0;
+    if (parts.length === 3) {
+        seconds = parts[0] * 3600 + parts[1] * 60 + parts[2];
+    } else if (parts.length === 2) {
+        seconds = parts[0] * 60 + parts[1];
+    }
+    return new Date(Date.now() - seconds * 1000);
+}
+
+/**
+ * Start uptime timer - updates every second
+ */
+function startUptimeTimer() {
+    if (uptimeInterval) {
+        clearInterval(uptimeInterval);
+    }
+    
+    function updateUptime() {
+        if (!botStartTime) return;
+        
+        const now = new Date();
+        const diff = now - botStartTime;
+        
+        const hours = Math.floor(diff / 3600000);
+        const minutes = Math.floor((diff % 3600000) / 60000);
+        const seconds = Math.floor((diff % 60000) / 1000);
+        
+        const formatted = `${hours}:${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+        document.getElementById('uptime').textContent = `Uptime: ${formatted}`;
+    }
+    
+    updateUptime();
+    uptimeInterval = setInterval(updateUptime, 1000);
 }
 
 /**
@@ -267,6 +543,10 @@ function handleRefresh(data) {
     if (data.position) updatePosition(data.position);
     if (data.strategies) updateStrategies(data.strategies);
     if (data.meta_controller) updateMetaController(data.meta_controller);
+    if (data.volume_24h !== undefined) {
+        document.getElementById('volume-24h').textContent = formatCurrency(data.volume_24h);
+    }
+    updateLastRefresh();
 }
 
 /**
@@ -338,6 +618,9 @@ function updateBalance(balance) {
     const unrealizedEl = document.getElementById('unrealized-pnl');
     unrealizedEl.textContent = formatCurrency(unrealizedPnl, true);
     unrealizedEl.className = `text-sm font-medium ${unrealizedPnl >= 0 ? 'text-green-400' : 'text-red-400'}`;
+    
+    // Update equity chart
+    updateEquityChart(balance);
 }
 
 /**
@@ -347,9 +630,15 @@ function updatePosition(position) {
     const noPosition = document.getElementById('no-position');
     const hasPosition = document.getElementById('has-position');
     
+    // Store current position globally
+    currentPosition = position;
+    
     if (!position || !position.has_position) {
         noPosition.classList.remove('hidden');
         hasPosition.classList.add('hidden');
+        entryPrice = 0;
+        stopLossPrice = 0;
+        takeProfitPrice = 0;
         return;
     }
     
@@ -367,18 +656,79 @@ function updatePosition(position) {
     document.getElementById('position-qty').textContent = position.quantity.toFixed(4);
     document.getElementById('entry-price').textContent = formatCurrency(position.entry_price);
     
+    // Store prices for chart lines
+    entryPrice = position.entry_price || 0;
+    stopLossPrice = position.stop_loss || 0;
+    takeProfitPrice = position.take_profit || 0;
+    
     const pnl = position.unrealized_pnl || 0;
     const pnlPercent = position.pnl_percent || 0;
     const pnlEl = document.getElementById('position-pnl');
     pnlEl.textContent = `${formatCurrency(pnl, true)} (${pnlPercent >= 0 ? '+' : ''}${pnlPercent.toFixed(2)}%)`;
     pnlEl.className = `font-medium ${pnl >= 0 ? 'text-green-400' : 'text-red-400'}`;
     
-    if (position.stop_loss) {
-        document.getElementById('stop-loss').textContent = formatCurrency(position.stop_loss);
+    // Update Stop Loss with distance
+    const slEl = document.getElementById('stop-loss');
+    if (position.stop_loss && position.stop_loss > 0) {
+        const slDistance = ((position.stop_loss - currentPriceValue) / currentPriceValue) * 100;
+        slEl.innerHTML = `${formatCurrency(position.stop_loss)} <span class="text-xs">(${slDistance.toFixed(2)}%)</span>`;
+    } else {
+        slEl.textContent = '$0.00';
     }
-    if (position.take_profit) {
-        document.getElementById('take-profit').textContent = formatCurrency(position.take_profit);
+    
+    // Update Take Profit with distance
+    const tpEl = document.getElementById('take-profit');
+    if (position.take_profit && position.take_profit > 0) {
+        const tpDistance = ((position.take_profit - currentPriceValue) / currentPriceValue) * 100;
+        tpEl.innerHTML = `${formatCurrency(position.take_profit)} <span class="text-xs">(+${tpDistance.toFixed(2)}%)</span>`;
+    } else {
+        tpEl.textContent = '$0.00';
     }
+    
+    // Update position progress bar
+    updatePositionProgressBar(position);
+    
+    // Update chart with new price lines
+    if (priceChart) {
+        priceChart.update('none');
+    }
+}
+
+/**
+ * Update position progress bar visualization
+ */
+function updatePositionProgressBar(position) {
+    const progressContainer = document.getElementById('position-progress-container');
+    if (!progressContainer) return;
+    
+    const sl = position.stop_loss || 0;
+    const tp = position.take_profit || 0;
+    const current = currentPriceValue;
+    const entry = position.entry_price || 0;
+    
+    if (sl === 0 || tp === 0 || current === 0) {
+        progressContainer.innerHTML = '<div class="text-center text-gray-500 text-xs">Aguardando SL/TP</div>';
+        return;
+    }
+    
+    // Calculate progress (0% = at SL, 100% = at TP)
+    const range = tp - sl;
+    const progress = ((current - sl) / range) * 100;
+    const clampedProgress = Math.max(0, Math.min(100, progress));
+    
+    progressContainer.innerHTML = `
+        <div class="flex items-center gap-2 text-xs mb-1">
+            <span class="text-red-400">SL</span>
+            <div class="flex-1 h-2 bg-gray-700 rounded-full relative overflow-visible">
+                <div class="absolute inset-0 bg-gradient-to-r from-red-500 via-yellow-500 to-green-500 rounded-full opacity-30"></div>
+                <div class="absolute top-1/2 -translate-y-1/2 w-3 h-3 bg-blue-500 rounded-full border-2 border-white shadow-lg transition-all duration-300" style="left: calc(${clampedProgress}% - 6px);"></div>
+            </div>
+            <span class="text-green-400">TP</span>
+        </div>
+        <div class="text-center text-xs text-gray-500">
+            ${progress < 50 ? '↙️ Próximo do SL' : progress > 50 ? '↗️ Próximo do TP' : '⬆️ No centro'}
+        </div>
+    `;
 }
 
 /**
@@ -494,6 +844,11 @@ function updateMetaController(meta) {
     const decision = meta.decision || 'HOLD';
     textEl.textContent = decision;
     
+    // Track decision in history
+    if (meta.decision && meta.decision !== 'HOLD') {
+        addMetaDecision(meta);
+    }
+    
     switch (decision) {
         case 'BUY':
             iconEl.textContent = '🟢';
@@ -515,6 +870,54 @@ function updateMetaController(meta) {
     document.getElementById('meta-agreeing').textContent = meta.agreeing_count || 0;
     document.getElementById('meta-score').textContent = (meta.score || 0).toFixed(2);
     document.getElementById('meta-decisions').textContent = meta.total_decisions || 0;
+    
+    // Update decision history display
+    updateMetaDecisionHistory();
+}
+
+/**
+ * Add a meta-controller decision to history
+ */
+function addMetaDecision(meta) {
+    const decision = {
+        timestamp: new Date().toLocaleTimeString(),
+        decision: meta.decision,
+        confidence: meta.confidence,
+        score: meta.score,
+        agreeing: meta.agreeing_count
+    };
+    
+    metaDecisionHistory.unshift(decision);
+    
+    // Keep only last 10 decisions
+    if (metaDecisionHistory.length > 10) {
+        metaDecisionHistory.pop();
+    }
+}
+
+/**
+ * Update meta-controller decision history display
+ */
+function updateMetaDecisionHistory() {
+    const container = document.getElementById('meta-decision-history');
+    if (!container) return;
+    
+    if (metaDecisionHistory.length === 0) {
+        container.innerHTML = '<p class="text-gray-500 text-xs text-center py-2">Nenhuma decisão ainda</p>';
+        return;
+    }
+    
+    container.innerHTML = metaDecisionHistory.map(d => {
+        const color = d.decision === 'BUY' ? 'text-green-400' : d.decision === 'SELL' ? 'text-red-400' : 'text-gray-400';
+        const icon = d.decision === 'BUY' ? '🟢' : d.decision === 'SELL' ? '🔴' : '⚪';
+        return `
+            <div class="flex justify-between items-center py-1 px-2 bg-gray-800/50 rounded text-xs">
+                <span class="text-gray-500">${d.timestamp}</span>
+                <span class="${color}">${icon} ${d.decision}</span>
+                <span class="text-gray-500">Score: ${(d.score || 0).toFixed(2)}</span>
+            </div>
+        `;
+    }).join('');
 }
 
 /**
@@ -522,6 +925,16 @@ function updateMetaController(meta) {
  */
 function handleSignal(signal) {
     addLog('INFO', `[${signal.strategy}] ${signal.action}: ${signal.reason || ''}`);
+    
+    // Show notification for important signals
+    if (signal.action === 'BUY' || signal.action === 'SELL') {
+        showNotification(
+            `📊 ${signal.action}`,
+            `${signal.strategy}: ${signal.reason || 'Sinal executado'}`,
+            signal.action === 'BUY' ? 'success' : 'error'
+        );
+        playAlertSound(signal.action);
+    }
 }
 
 /**
@@ -529,6 +942,49 @@ function handleSignal(signal) {
  */
 function updateTrades(trades) {
     const container = document.getElementById('trades-container');
+    
+    // Calculate trade statistics
+    let totalPnl = 0;
+    let wins = 0;
+    let losses = 0;
+    let totalGains = 0;
+    let totalLosses = 0;
+    let bestTrade = { pnl: 0, percent: 0 };
+    let worstTrade = { pnl: 0, percent: 0 };
+    
+    if (trades.history && trades.history.length > 0) {
+        trades.history.forEach(trade => {
+            const pnl = trade.pnl || 0;
+            totalPnl += pnl;
+            
+            if (pnl >= 0) {
+                wins++;
+                totalGains += pnl;
+                if (pnl > bestTrade.pnl) {
+                    bestTrade = { pnl: pnl, percent: trade.pnl_percent || 0 };
+                }
+            } else {
+                losses++;
+                totalLosses += Math.abs(pnl);
+                if (pnl < worstTrade.pnl) {
+                    worstTrade = { pnl: pnl, percent: trade.pnl_percent || 0 };
+                }
+            }
+        });
+    }
+    
+    // Update trade stats
+    tradeStats.totalGains = totalGains;
+    tradeStats.totalLosses = totalLosses;
+    tradeStats.bestTrade = bestTrade;
+    tradeStats.worstTrade = worstTrade;
+    
+    // Calculate win rate
+    const totalTrades = wins + losses;
+    const winRate = totalTrades > 0 ? (wins / totalTrades) * 100 : 0;
+    
+    // Calculate profit factor
+    const profitFactor = totalLosses > 0 ? totalGains / totalLosses : totalGains > 0 ? Infinity : 0;
     
     if (!trades.history || trades.history.length === 0) {
         container.innerHTML = '<p class="text-gray-500 text-center py-4">Nenhum trade ainda</p>';
@@ -548,9 +1004,13 @@ function updateTrades(trades) {
         }).join('');
     }
     
-    document.getElementById('win-rate').textContent = `${(trades.win_rate || 0).toFixed(1)}%`;
-    document.getElementById('total-pnl').textContent = formatCurrency(trades.total_pnl || 0, true);
-    document.getElementById('total-pnl').className = `font-medium ${(trades.total_pnl || 0) >= 0 ? 'text-green-400' : 'text-red-400'}`;
+    // Update stats display
+    document.getElementById('win-rate').textContent = `${winRate.toFixed(1)}%`;
+    document.getElementById('total-pnl').textContent = formatCurrency(totalPnl, true);
+    document.getElementById('total-pnl').className = `font-medium ${totalPnl >= 0 ? 'text-green-400' : 'text-red-400'}`;
+    
+    // Update performance metrics if elements exist
+    updatePerformanceMetrics(winRate, profitFactor, bestTrade, worstTrade, totalTrades);
 }
 
 /**
@@ -639,12 +1099,27 @@ function addLogEntry(log) {
         waiting.remove();
     }
     
-    const levelClass = log.level === 'ERROR' ? 'log-error' : (log.level === 'WARNING' ? 'log-warning' : 'log-info');
+    // Determine styling based on log level and content
+    let levelClass = 'log-info';
+    let bgClass = '';
+    const message = log.message || '';
+    
+    if (log.level === 'ERROR') {
+        levelClass = 'log-error';
+        bgClass = 'bg-red-500/10';
+    } else if (log.level === 'WARNING') {
+        levelClass = 'log-warning';
+        bgClass = 'bg-yellow-500/10';
+    } else if (message.toLowerCase().includes('buy')) {
+        levelClass = 'text-green-400';
+    } else if (message.toLowerCase().includes('sell')) {
+        levelClass = 'text-red-400';
+    }
     
     const html = `
-        <div class="flex gap-2 ${levelClass}">
-            <span class="text-gray-500">${log.time}</span>
-            <span>${log.message}</span>
+        <div class="flex gap-2 ${levelClass} ${bgClass} py-1 px-2 rounded" data-level="${log.level}">
+            <span class="text-gray-500 shrink-0">${log.time}</span>
+            <span class="break-all">${log.message}</span>
         </div>
     `;
     
@@ -657,6 +1132,11 @@ function addLogEntry(log) {
     
     // Auto-scroll to bottom
     container.scrollTop = container.scrollHeight;
+    
+    // Apply current filter
+    if (logFilter !== 'all') {
+        filterLogs(logFilter);
+    }
 }
 
 /**
@@ -949,12 +1429,18 @@ async function loadAssets() {
         tbody.innerHTML = assets.map(asset => {
             const pnlClass = asset.cross_unrealized_pnl >= 0 ? 'text-green-400' : 'text-red-400';
             
+            // Format based on asset type
+            const decimals = asset.asset === 'USDT' ? 2 : 8;
+            const balanceFormatted = formatAssetValue(asset.balance, asset.asset);
+            const availableFormatted = formatAssetValue(asset.available, asset.asset);
+            const pnlFormatted = formatAssetValue(asset.cross_unrealized_pnl, asset.asset);
+            
             return `
                 <tr>
                     <td class="font-medium">${asset.asset}</td>
-                    <td>${asset.balance.toFixed(8)}</td>
-                    <td>${asset.available.toFixed(8)}</td>
-                    <td class="${pnlClass}">${asset.cross_unrealized_pnl >= 0 ? '+' : ''}${asset.cross_unrealized_pnl.toFixed(8)}</td>
+                    <td>${balanceFormatted}</td>
+                    <td>${availableFormatted}</td>
+                    <td class="${pnlClass}">${asset.cross_unrealized_pnl >= 0 ? '+' : ''}${pnlFormatted}</td>
                 </tr>
             `;
         }).join('');
@@ -963,15 +1449,378 @@ async function loadAssets() {
     }
 }
 
+/**
+ * Format asset value based on asset type
+ */
+function formatAssetValue(value, asset) {
+    if (asset === 'USDT') {
+        return value.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+    } else if (asset === 'BTC') {
+        return value.toFixed(8);
+    }
+    return value.toFixed(8);
+}
+
+/**
+ * Update performance metrics display
+ */
+function updatePerformanceMetrics(winRate, profitFactor, bestTrade, worstTrade, totalTrades) {
+    // Update performance cards if they exist
+    const winRateEl = document.getElementById('perf-win-rate');
+    if (winRateEl) winRateEl.textContent = `${winRate.toFixed(1)}%`;
+    
+    const profitFactorEl = document.getElementById('perf-profit-factor');
+    if (profitFactorEl) {
+        profitFactorEl.textContent = profitFactor === Infinity ? '∞' : profitFactor.toFixed(2);
+    }
+    
+    const bestTradeEl = document.getElementById('perf-best-trade');
+    if (bestTradeEl) {
+        bestTradeEl.textContent = formatCurrency(bestTrade.pnl, true);
+        bestTradeEl.className = 'mini-stat-value text-green-400';
+    }
+    
+    const worstTradeEl = document.getElementById('perf-worst-trade');
+    if (worstTradeEl) {
+        worstTradeEl.textContent = formatCurrency(worstTrade.pnl, true);
+        worstTradeEl.className = 'mini-stat-value text-red-400';
+    }
+    
+    // Update total trades
+    const totalTradesEl = document.getElementById('perf-total-trades');
+    if (totalTradesEl) totalTradesEl.textContent = totalTrades;
+    
+    // Calculate trades per hour
+    if (botStartTime && totalTrades > 0) {
+        const hoursRunning = (Date.now() - botStartTime) / 3600000;
+        const tradesPerHour = hoursRunning > 0 ? totalTrades / hoursRunning : 0;
+        const tradesPerHourEl = document.getElementById('perf-trades-per-hour');
+        if (tradesPerHourEl) tradesPerHourEl.textContent = `${tradesPerHour.toFixed(1)}/h`;
+    }
+}
+
+/**
+ * Show notification popup
+ */
+function showNotification(title, message, type = 'info') {
+    const container = document.getElementById('notification-container');
+    if (!container) return;
+    
+    const bgColor = type === 'success' ? 'bg-green-500/90' : 
+                    type === 'error' ? 'bg-red-500/90' : 
+                    type === 'warning' ? 'bg-yellow-500/90' : 'bg-blue-500/90';
+    
+    const notification = document.createElement('div');
+    notification.className = `${bgColor} text-white px-4 py-3 rounded-lg shadow-lg mb-2 animate-fade-in flex items-center gap-3`;
+    notification.innerHTML = `
+        <div>
+            <div class="font-semibold">${title}</div>
+            <div class="text-sm opacity-90">${message}</div>
+        </div>
+        <button class="ml-auto text-white/80 hover:text-white" onclick="this.parentElement.remove()">✕</button>
+    `;
+    
+    container.appendChild(notification);
+    
+    // Auto-remove after 5 seconds
+    setTimeout(() => {
+        if (notification.parentElement) {
+            notification.classList.add('opacity-0', 'transition-opacity', 'duration-300');
+            setTimeout(() => notification.remove(), 300);
+        }
+    }, 5000);
+}
+
+// Shared AudioContext for sound alerts
+let audioContext = null;
+
+/**
+ * Play alert sound
+ */
+function playAlertSound(type = 'default') {
+    if (!soundEnabled) return;
+    
+    try {
+        // Create or reuse AudioContext
+        if (!audioContext) {
+            audioContext = new (window.AudioContext || window.webkitAudioContext)();
+        }
+        
+        // Resume context if suspended (due to autoplay policy)
+        if (audioContext.state === 'suspended') {
+            audioContext.resume();
+        }
+        
+        const oscillator = audioContext.createOscillator();
+        const gainNode = audioContext.createGain();
+        
+        oscillator.connect(gainNode);
+        gainNode.connect(audioContext.destination);
+        
+        // Different sounds for different types
+        if (type === 'BUY') {
+            oscillator.frequency.value = 880; // Higher pitch for buy
+        } else if (type === 'SELL') {
+            oscillator.frequency.value = 440; // Lower pitch for sell
+        } else {
+            oscillator.frequency.value = 660;
+        }
+        
+        oscillator.type = 'sine';
+        gainNode.gain.value = 0.1;
+        
+        oscillator.start();
+        oscillator.stop(audioContext.currentTime + 0.15);
+    } catch (e) {
+        console.log('Audio not supported:', e.message);
+    }
+}
+
+/**
+ * Toggle sound
+ */
+function toggleSound() {
+    soundEnabled = !soundEnabled;
+    const btn = document.getElementById('sound-toggle');
+    if (btn) {
+        btn.textContent = soundEnabled ? '🔊' : '🔇';
+        btn.title = soundEnabled ? 'Som ativado' : 'Som desativado';
+    }
+    try {
+        localStorage.setItem('soundEnabled', soundEnabled);
+    } catch (e) {
+        console.log('localStorage not available');
+    }
+}
+
+/**
+ * Toggle dark/light mode
+ */
+function toggleTheme() {
+    darkMode = !darkMode;
+    document.documentElement.classList.toggle('dark', darkMode);
+    document.documentElement.classList.toggle('light', !darkMode);
+    
+    const btn = document.getElementById('theme-toggle');
+    if (btn) {
+        btn.textContent = darkMode ? '🌙' : '☀️';
+    }
+    
+    // Update body background
+    document.body.style.backgroundColor = darkMode ? '#0f0f0f' : '#f5f5f5';
+    
+    try {
+        localStorage.setItem('darkMode', darkMode);
+    } catch (e) {
+        console.log('localStorage not available');
+    }
+}
+
+/**
+ * Export logs to CSV
+ */
+function exportLogsCSV() {
+    try {
+        const container = document.getElementById('logs-container');
+        const logs = container.querySelectorAll('div');
+        
+        let csv = 'Time,Level,Message\n';
+        logs.forEach(log => {
+            const spans = log.querySelectorAll('span');
+            if (spans.length >= 2) {
+                const time = spans[0].textContent;
+                const message = spans[1].textContent.replace(/,/g, ';').replace(/"/g, '""');
+                const level = log.classList.contains('log-error') ? 'ERROR' : 
+                             log.classList.contains('log-warning') ? 'WARNING' : 'INFO';
+                csv += `${time},${level},"${message}"\n`;
+            }
+        });
+        
+        const blob = new Blob([csv], { type: 'text/csv' });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = `bot-logs-${new Date().toISOString().split('T')[0]}.csv`;
+        a.click();
+        URL.revokeObjectURL(url);
+        
+        showNotification('📥 Exportado', 'Logs exportados com sucesso!', 'success');
+    } catch (e) {
+        console.error('Error exporting logs:', e);
+        showNotification('❌ Erro', 'Falha ao exportar logs', 'error');
+    }
+}
+
+/**
+ * Toggle bot pause state
+ */
+async function toggleBotPause() {
+    try {
+        const response = await fetch('/api/pause', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ paused: !isPaused })
+        });
+        
+        if (response.ok) {
+            isPaused = !isPaused;
+            updatePauseButton();
+            showNotification(
+                isPaused ? '⏸️ Pausado' : '▶️ Retomado',
+                isPaused ? 'Bot pausado' : 'Bot retomado',
+                isPaused ? 'warning' : 'success'
+            );
+        }
+    } catch (error) {
+        console.error('Error toggling pause:', error);
+    }
+}
+
+/**
+ * Update pause button state
+ */
+function updatePauseButton() {
+    const btn = document.getElementById('pause-toggle');
+    if (btn) {
+        btn.textContent = isPaused ? '▶️' : '⏸️';
+        btn.title = isPaused ? 'Retomar Bot' : 'Pausar Bot';
+        btn.className = isPaused ? 
+            'px-3 py-1 bg-green-500/20 text-green-400 rounded-lg hover:bg-green-500/30' :
+            'px-3 py-1 bg-yellow-500/20 text-yellow-400 rounded-lg hover:bg-yellow-500/30';
+    }
+    
+    const statusEl = document.getElementById('bot-status');
+    if (statusEl) {
+        statusEl.textContent = isPaused ? 'Pausado' : 'Executando';
+        statusEl.className = isPaused ? 'text-yellow-400' : 'text-green-400';
+    }
+}
+
+/**
+ * Filter logs by type
+ */
+function filterLogs(filter) {
+    logFilter = filter;
+    const container = document.getElementById('logs-container');
+    const logs = container.querySelectorAll('div');
+    
+    logs.forEach(log => {
+        const message = log.textContent.toLowerCase();
+        let show = true;
+        
+        if (filter !== 'all') {
+            if (filter === 'BUY') show = message.includes('buy');
+            else if (filter === 'SELL') show = message.includes('sell');
+            else if (filter === 'ERROR') show = log.classList.contains('log-error');
+            else if (filter === 'INFO') show = log.classList.contains('log-info');
+        }
+        
+        log.style.display = show ? '' : 'none';
+    });
+    
+    // Update filter buttons
+    document.querySelectorAll('.log-filter-btn').forEach(btn => {
+        btn.classList.toggle('active', btn.dataset.filter === filter);
+    });
+}
+
+/**
+ * Initialize event listeners and load saved preferences
+ */
+function initPreferences() {
+    try {
+        // Load saved preferences
+        const savedSound = localStorage.getItem('soundEnabled');
+        if (savedSound !== null) {
+            soundEnabled = savedSound === 'true';
+        }
+        
+        const savedDarkMode = localStorage.getItem('darkMode');
+        if (savedDarkMode !== null) {
+            darkMode = savedDarkMode === 'true';
+        }
+    } catch (e) {
+        console.log('localStorage not available');
+    }
+    
+    // Apply saved preferences
+    if (!darkMode) {
+        document.documentElement.classList.remove('dark');
+        document.documentElement.classList.add('light');
+        document.body.style.backgroundColor = '#f5f5f5';
+    }
+    
+    // Update UI elements
+    const soundBtn = document.getElementById('sound-toggle');
+    if (soundBtn) soundBtn.textContent = soundEnabled ? '🔊' : '🔇';
+    
+    const themeBtn = document.getElementById('theme-toggle');
+    if (themeBtn) themeBtn.textContent = darkMode ? '🌙' : '☀️';
+}
+
 // Initialize tabs on page load
 document.addEventListener('DOMContentLoaded', () => {
     initChart();
+    initEquityChart();
     initTabs();
+    initPreferences();
     connectWebSocket();
     
     // Load initial tab data
     loadPositions();
+    
+    // Initialize timeframe selector
+    initTimeframeSelector();
+    
+    // Initialize chart type toggle
+    initChartTypeToggle();
+    
+    // Initialize log filter
+    initLogFilter();
 });
+
+/**
+ * Initialize timeframe selector
+ */
+function initTimeframeSelector() {
+    const btns = document.querySelectorAll('.timeframe-btn');
+    btns.forEach(btn => {
+        btn.addEventListener('click', () => {
+            btns.forEach(b => b.classList.remove('active'));
+            btn.classList.add('active');
+            currentTimeframe = btn.dataset.timeframe;
+            // Note: Timeframe change would require backend support
+            showNotification('⏱️ Timeframe', `Alterado para ${currentTimeframe}`, 'info');
+        });
+    });
+}
+
+/**
+ * Initialize chart type toggle
+ */
+function initChartTypeToggle() {
+    const btns = document.querySelectorAll('.chart-type-btn');
+    btns.forEach(btn => {
+        btn.addEventListener('click', () => {
+            btns.forEach(b => b.classList.remove('active'));
+            btn.classList.add('active');
+            chartType = btn.dataset.type;
+            updateChart();
+        });
+    });
+}
+
+/**
+ * Initialize log filter
+ */
+function initLogFilter() {
+    const btns = document.querySelectorAll('.log-filter-btn');
+    btns.forEach(btn => {
+        btn.addEventListener('click', () => {
+            filterLogs(btn.dataset.filter);
+        });
+    });
+}
 
 // Periodic refresh for tabs
 setInterval(() => {
@@ -982,10 +1831,10 @@ setInterval(() => {
     }
 }, 10000);
 
-// Periodic uptime update
+// Periodic ping for latency measurement
 setInterval(() => {
-    // Request status update
     if (ws && ws.readyState === WebSocket.OPEN) {
+        lastPingTime = Date.now();
         ws.send('ping');
     }
-}, 30000);
+}, 5000);
