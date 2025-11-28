@@ -15,6 +15,7 @@ class HealthMonitor:
         self.connector = connector
         self.check_interval = check_interval or int(os.getenv("HEALTH_CHECK_INTERVAL", 60))
         
+        self.start_time = datetime.now()
         self.last_tick_time = datetime.now()
         self.last_health_check = datetime.now()
         self.ticks_received = 0
@@ -22,18 +23,26 @@ class HealthMonitor:
         self.restarts_count = 0
         self.is_healthy = True
         self.running = False
+        self._health_task = None
         
         self.max_tick_gap = int(os.getenv("MAX_TICK_GAP_SECONDS", 30))
         self.max_errors = int(os.getenv("MAX_ERRORS_BEFORE_RESTART", 10))
 
     async def start(self):
         self.running = True
+        self.start_time = datetime.now()
         self.event_bus.subscribe('market_data', self._on_tick)
-        asyncio.create_task(self._health_loop())
+        self._health_task = asyncio.create_task(self._health_loop())
         logger.info(f"Health Monitor iniciado | Intervalo: {self.check_interval}s")
 
     async def stop(self):
         self.running = False
+        if self._health_task:
+            self._health_task.cancel()
+            try:
+                await self._health_task
+            except asyncio.CancelledError:
+                pass
 
     async def _on_tick(self, data):
         self.last_tick_time = datetime.now()
@@ -87,5 +96,5 @@ class HealthMonitor:
             'ticks_received': self.ticks_received,
             'errors_count': self.errors_count,
             'restarts_count': self.restarts_count,
-            'uptime_seconds': (datetime.now() - self.last_health_check).total_seconds()
+            'uptime_seconds': (datetime.now() - self.start_time).total_seconds()
         }
