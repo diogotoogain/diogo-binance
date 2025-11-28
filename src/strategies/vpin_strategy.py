@@ -140,7 +140,7 @@ class VPINStrategy(BaseStrategy):
         # Recalcula VPIN
         self.current_vpin = self._calculate_vpin()
         
-        if self.current_vpin >= self.vpin_threshold_high:
+        if self.current_vpin >= self.vpin_threshold_high and self._can_signal():
             direction = self._detect_direction()
             self.log(f"🚨 VPIN ALTO: {self.current_vpin:.2%} | Direção: {direction}")
 

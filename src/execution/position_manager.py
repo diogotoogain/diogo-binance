@@ -96,7 +96,10 @@ class PositionManager:
         else:
             pnl = (pos.entry_price - exit_price) * pos.quantity
         
-        pnl_percent = (pnl / (pos.entry_price * pos.quantity)) * 100
+        if pos.entry_price > 0 and pos.quantity > 0:
+            pnl_percent = (pnl / (pos.entry_price * pos.quantity)) * 100
+        else:
+            pnl_percent = 0.0
         emoji = "🟢" if pnl > 0 else "🔴"
         logger.info(f"{emoji} POSIÇÃO FECHADA: {pos.side} @ ${exit_price:.2f} | P&L: ${pnl:.2f} ({pnl_percent:+.2f}%)")
         
