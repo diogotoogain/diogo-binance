@@ -1,5 +1,10 @@
 import logging
-from typing import Optional
+from typing import TYPE_CHECKING, Optional
+
+if TYPE_CHECKING:
+    from src.core.meta_controller import MetaController
+    from src.execution.trade_executor import TradeExecutor
+
 from src.core.event_bus import EventBus
 
 # Importa a Tropa de Elite Completa
@@ -43,12 +48,12 @@ class StrategyOrchestrator:
         
         logger.info(f"🧠 Orquestrador iniciado. Tick-Strats: {len(self.strategies)} | Event-Strats: {len(self.liquidation_strategies)} | Orderbook-Strats: {len(self.orderbook_strategies)}")
 
-    def set_meta_controller(self, meta_controller) -> None:
+    def set_meta_controller(self, meta_controller: 'MetaController') -> None:
         """Injeta o MetaController (Oráculo)"""
         self.meta_controller = meta_controller
         logger.info("🧠 MetaController conectado ao Orchestrator")
 
-    def set_executor(self, executor) -> None:
+    def set_executor(self, executor: 'TradeExecutor') -> None:
         """Injeta o TradeExecutor"""
         self.executor = executor
         logger.info("⚡ TradeExecutor conectado ao Orchestrator")

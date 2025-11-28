@@ -109,7 +109,7 @@ class MetaController:
             'confidence': confidence,
             'score': score,
             'strategies': strategies,
-            'reason': f"Consenso: {', '.join(strategies)} ({score:.0%})"
+            'reason': f"Consenso: {', '.join(strategies)} (score: {score:.2f})"
         }
         
         logger.info(f"🧠 DECISÃO #{self.total_decisions}: {action} | Conf: {confidence} | Estratégias: {strategies}")
