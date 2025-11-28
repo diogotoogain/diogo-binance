@@ -12,11 +12,8 @@ const maxReconnectAttempts = 10;
 const reconnectDelay = 3000;
 let currentPriceValue = 0; // Store raw numeric price
 
-// Initialize on page load
-document.addEventListener('DOMContentLoaded', () => {
-    initChart();
-    connectWebSocket();
-});
+// Note: Initialization is handled at the end of the file
+// to ensure all functions are defined before use
 
 /**
  * Initialize Chart.js price chart
@@ -693,6 +690,297 @@ function formatCompact(value) {
     }
     return `$${value.toFixed(0)}`;
 }
+
+/**
+ * Format timestamp to time string
+ */
+function formatTime(timestamp) {
+    if (!timestamp) return '-';
+    const date = new Date(timestamp);
+    return date.toLocaleString();
+}
+
+/**
+ * Initialize tabs functionality
+ */
+function initTabs() {
+    const tabButtons = document.querySelectorAll('.tab-btn');
+    
+    tabButtons.forEach(btn => {
+        btn.addEventListener('click', () => {
+            const tabId = btn.dataset.tab;
+            
+            // Update button states
+            tabButtons.forEach(b => b.classList.remove('active'));
+            btn.classList.add('active');
+            
+            // Update content visibility
+            document.querySelectorAll('.tab-content').forEach(content => {
+                content.classList.remove('active');
+            });
+            document.getElementById(`tab-${tabId}`).classList.add('active');
+            
+            // Load data for the tab if needed
+            loadTabData(tabId);
+        });
+    });
+}
+
+/**
+ * Load data for a specific tab
+ */
+async function loadTabData(tabId) {
+    switch(tabId) {
+        case 'positions':
+            await loadPositions();
+            break;
+        case 'open-orders':
+            await loadOpenOrders();
+            break;
+        case 'order-history':
+            await loadOrderHistory();
+            break;
+        case 'trade-history':
+            await loadTradeHistory();
+            break;
+        case 'transactions':
+            await loadTransactions();
+            break;
+        case 'assets':
+            await loadAssets();
+            break;
+    }
+}
+
+/**
+ * Load positions data
+ */
+async function loadPositions() {
+    try {
+        const response = await fetch('/api/positions');
+        const positions = await response.json();
+        
+        const tbody = document.getElementById('positions-table-body');
+        document.getElementById('positions-count').textContent = positions.length;
+        
+        if (positions.length === 0) {
+            tbody.innerHTML = '<tr><td colspan="7" class="text-center text-gray-500 py-8">No open positions</td></tr>';
+            return;
+        }
+        
+        tbody.innerHTML = positions.map(pos => {
+            const pnlClass = pos.unrealized_pnl >= 0 ? 'text-green-400' : 'text-red-400';
+            const sideClass = pos.side === 'LONG' ? 'text-green-400' : 'text-red-400';
+            return `
+                <tr>
+                    <td class="font-medium">${pos.symbol}</td>
+                    <td class="${sideClass}">${pos.side} ${pos.size}</td>
+                    <td>${formatCurrency(pos.entry_price)}</td>
+                    <td>${formatCurrency(pos.mark_price)}</td>
+                    <td class="text-red-400">${formatCurrency(pos.liquidation_price)}</td>
+                    <td class="${pnlClass}">${formatCurrency(pos.unrealized_pnl, true)}</td>
+                    <td class="${pnlClass}">${pos.roe_percent >= 0 ? '+' : ''}${pos.roe_percent.toFixed(2)}%</td>
+                </tr>
+            `;
+        }).join('');
+    } catch (error) {
+        console.error('Error loading positions:', error);
+    }
+}
+
+/**
+ * Load open orders data
+ */
+async function loadOpenOrders() {
+    try {
+        const response = await fetch('/api/open-orders');
+        const orders = await response.json();
+        
+        const tbody = document.getElementById('open-orders-table-body');
+        document.getElementById('orders-count').textContent = orders.length;
+        
+        if (orders.length === 0) {
+            tbody.innerHTML = '<tr><td colspan="7" class="text-center text-gray-500 py-8">No open orders</td></tr>';
+            return;
+        }
+        
+        tbody.innerHTML = orders.map(order => {
+            const sideClass = order.side === 'BUY' ? 'text-green-400' : 'text-red-400';
+            const price = order.stop_price > 0 ? order.stop_price : order.price;
+            return `
+                <tr>
+                    <td class="text-gray-500">${formatTime(order.time)}</td>
+                    <td class="font-medium">${order.symbol}</td>
+                    <td>${order.type}</td>
+                    <td class="${sideClass}">${order.side}</td>
+                    <td>${formatCurrency(price)}</td>
+                    <td>${order.quantity}</td>
+                    <td><span class="px-2 py-1 bg-yellow-500/20 text-yellow-400 rounded text-xs">${order.status}</span></td>
+                </tr>
+            `;
+        }).join('');
+    } catch (error) {
+        console.error('Error loading open orders:', error);
+    }
+}
+
+/**
+ * Load order history data
+ */
+async function loadOrderHistory() {
+    try {
+        const response = await fetch('/api/order-history');
+        const orders = await response.json();
+        
+        const tbody = document.getElementById('order-history-table-body');
+        
+        if (orders.length === 0) {
+            tbody.innerHTML = '<tr><td colspan="7" class="text-center text-gray-500 py-8">No order history</td></tr>';
+            return;
+        }
+        
+        tbody.innerHTML = orders.slice(0, 50).map(order => {
+            const sideClass = order.side === 'BUY' ? 'text-green-400' : 'text-red-400';
+            let statusClass = 'bg-gray-500/20 text-gray-400';
+            if (order.status === 'FILLED') statusClass = 'bg-green-500/20 text-green-400';
+            if (order.status === 'CANCELED') statusClass = 'bg-red-500/20 text-red-400';
+            
+            return `
+                <tr>
+                    <td class="text-gray-500">${formatTime(order.update_time)}</td>
+                    <td class="font-medium">${order.symbol}</td>
+                    <td>${order.type}</td>
+                    <td class="${sideClass}">${order.side}</td>
+                    <td>${formatCurrency(order.avg_price)}</td>
+                    <td>${order.executed_qty}/${order.quantity}</td>
+                    <td><span class="px-2 py-1 ${statusClass} rounded text-xs">${order.status}</span></td>
+                </tr>
+            `;
+        }).join('');
+    } catch (error) {
+        console.error('Error loading order history:', error);
+    }
+}
+
+/**
+ * Load trade history data
+ */
+async function loadTradeHistory() {
+    try {
+        const response = await fetch('/api/trade-history');
+        const trades = await response.json();
+        
+        const tbody = document.getElementById('trade-history-table-body');
+        
+        if (trades.length === 0) {
+            tbody.innerHTML = '<tr><td colspan="7" class="text-center text-gray-500 py-8">No trade history</td></tr>';
+            return;
+        }
+        
+        tbody.innerHTML = trades.slice(0, 50).map(trade => {
+            const sideClass = trade.side === 'BUY' ? 'text-green-400' : 'text-red-400';
+            const pnlClass = trade.realized_pnl >= 0 ? 'text-green-400' : 'text-red-400';
+            
+            return `
+                <tr>
+                    <td class="text-gray-500">${formatTime(trade.time)}</td>
+                    <td class="font-medium">${trade.symbol}</td>
+                    <td class="${sideClass}">${trade.side}</td>
+                    <td>${formatCurrency(trade.price)}</td>
+                    <td>${trade.qty}</td>
+                    <td class="${pnlClass}">${formatCurrency(trade.realized_pnl, true)}</td>
+                    <td class="text-gray-500">${trade.commission.toFixed(6)} ${trade.commission_asset}</td>
+                </tr>
+            `;
+        }).join('');
+    } catch (error) {
+        console.error('Error loading trade history:', error);
+    }
+}
+
+/**
+ * Load transactions data
+ */
+async function loadTransactions() {
+    try {
+        const response = await fetch('/api/transactions');
+        const transactions = await response.json();
+        
+        const tbody = document.getElementById('transactions-table-body');
+        
+        if (transactions.length === 0) {
+            tbody.innerHTML = '<tr><td colspan="5" class="text-center text-gray-500 py-8">No transactions</td></tr>';
+            return;
+        }
+        
+        tbody.innerHTML = transactions.slice(0, 50).map(tx => {
+            const incomeClass = tx.income >= 0 ? 'text-green-400' : 'text-red-400';
+            
+            return `
+                <tr>
+                    <td class="text-gray-500">${formatTime(tx.time)}</td>
+                    <td class="font-medium">${tx.symbol || '-'}</td>
+                    <td>${tx.type}</td>
+                    <td class="${incomeClass}">${tx.income >= 0 ? '+' : ''}${tx.income.toFixed(8)}</td>
+                    <td>${tx.asset}</td>
+                </tr>
+            `;
+        }).join('');
+    } catch (error) {
+        console.error('Error loading transactions:', error);
+    }
+}
+
+/**
+ * Load assets data
+ */
+async function loadAssets() {
+    try {
+        const response = await fetch('/api/assets');
+        const assets = await response.json();
+        
+        const tbody = document.getElementById('assets-table-body');
+        
+        if (assets.length === 0) {
+            tbody.innerHTML = '<tr><td colspan="4" class="text-center text-gray-500 py-8">No assets</td></tr>';
+            return;
+        }
+        
+        tbody.innerHTML = assets.map(asset => {
+            const pnlClass = asset.cross_unrealized_pnl >= 0 ? 'text-green-400' : 'text-red-400';
+            
+            return `
+                <tr>
+                    <td class="font-medium">${asset.asset}</td>
+                    <td>${asset.balance.toFixed(8)}</td>
+                    <td>${asset.available.toFixed(8)}</td>
+                    <td class="${pnlClass}">${asset.cross_unrealized_pnl >= 0 ? '+' : ''}${asset.cross_unrealized_pnl.toFixed(8)}</td>
+                </tr>
+            `;
+        }).join('');
+    } catch (error) {
+        console.error('Error loading assets:', error);
+    }
+}
+
+// Initialize tabs on page load
+document.addEventListener('DOMContentLoaded', () => {
+    initChart();
+    initTabs();
+    connectWebSocket();
+    
+    // Load initial tab data
+    loadPositions();
+});
+
+// Periodic refresh for tabs
+setInterval(() => {
+    // Refresh the active tab data
+    const activeTab = document.querySelector('.tab-btn.active');
+    if (activeTab) {
+        loadTabData(activeTab.dataset.tab);
+    }
+}, 10000);
 
 // Periodic uptime update
 setInterval(() => {

@@ -108,6 +108,42 @@ class WebDashboard:
         async def get_position():
             return await self._fetch_position()
         
+        # New Binance-style endpoints
+        @self.app.get("/api/positions")
+        async def get_positions():
+            """Busca posições abertas (symbol, size, entry_price, mark_price, pnl, roe%)"""
+            return await self._fetch_positions()
+        
+        @self.app.get("/api/open-orders")
+        async def get_open_orders():
+            """Busca ordens abertas (SL, TP pendentes)"""
+            return await self._fetch_open_orders()
+        
+        @self.app.get("/api/order-history")
+        async def get_order_history():
+            """Busca histórico de ordens"""
+            return await self._fetch_order_history()
+        
+        @self.app.get("/api/trade-history")
+        async def get_trade_history():
+            """Busca histórico de trades executados"""
+            return await self._fetch_trade_history()
+        
+        @self.app.get("/api/transactions")
+        async def get_transactions():
+            """Busca histórico de transações"""
+            return await self._fetch_transactions()
+        
+        @self.app.get("/api/assets")
+        async def get_assets():
+            """Busca saldo da carteira (USDT, BTC, etc)"""
+            return await self._fetch_assets()
+        
+        @self.app.get("/api/account")
+        async def get_account():
+            """Busca resumo da conta (margin balance, wallet balance, unrealized pnl)"""
+            return await self._fetch_account_summary()
+        
         @self.app.websocket("/ws")
         async def websocket_endpoint(websocket: WebSocket):
             await self._handle_websocket(websocket)
@@ -265,6 +301,193 @@ class WebDashboard:
             logger.error(f"Error fetching position: {e}")
         
         return self.position
+    
+    async def _fetch_positions(self) -> List[dict]:
+        """Busca todas as posições abertas no formato Binance."""
+        if not self.connector or not self.connector.client:
+            return []
+        
+        try:
+            positions = await self.connector.client.futures_position_information(symbol='BTCUSDT')
+            result = []
+            for pos in positions:
+                qty = float(pos.get('positionAmt', 0))
+                if qty != 0:
+                    entry_price = float(pos.get('entryPrice', 0))
+                    mark_price = float(pos.get('markPrice', 0))
+                    unrealized_pnl = float(pos.get('unRealizedProfit', 0))
+                    
+                    # Calcular ROE%
+                    roe_percent = 0.0
+                    if entry_price > 0 and qty != 0:
+                        notional = entry_price * abs(qty)
+                        if notional > 0:
+                            roe_percent = (unrealized_pnl / notional) * 100
+                    
+                    result.append({
+                        'symbol': pos.get('symbol'),
+                        'side': 'LONG' if qty > 0 else 'SHORT',
+                        'size': abs(qty),
+                        'entry_price': entry_price,
+                        'mark_price': mark_price,
+                        'liquidation_price': float(pos.get('liquidationPrice', 0)),
+                        'unrealized_pnl': unrealized_pnl,
+                        'roe_percent': roe_percent,
+                        'leverage': int(pos.get('leverage', 1)),
+                        'margin_type': pos.get('marginType', 'cross')
+                    })
+            return result
+        except Exception as e:
+            logger.error(f"Error fetching positions: {e}")
+            return []
+    
+    async def _fetch_open_orders(self) -> List[dict]:
+        """Busca ordens abertas (SL, TP pendentes)."""
+        if not self.connector or not self.connector.client:
+            return []
+        
+        try:
+            orders = await self.connector.client.futures_get_open_orders(symbol='BTCUSDT')
+            result = []
+            for order in orders:
+                result.append({
+                    'order_id': order.get('orderId'),
+                    'symbol': order.get('symbol'),
+                    'side': order.get('side'),
+                    'type': order.get('type'),
+                    'price': float(order.get('price', 0)),
+                    'stop_price': float(order.get('stopPrice', 0)),
+                    'quantity': float(order.get('origQty', 0)),
+                    'status': order.get('status'),
+                    'time': order.get('time')
+                })
+            return result
+        except Exception as e:
+            logger.error(f"Error fetching open orders: {e}")
+            return []
+    
+    async def _fetch_order_history(self, limit: int = 50) -> List[dict]:
+        """Busca histórico de ordens."""
+        if not self.connector or not self.connector.client:
+            return []
+        
+        try:
+            orders = await self.connector.client.futures_get_all_orders(symbol='BTCUSDT', limit=limit)
+            result = []
+            for order in orders:
+                result.append({
+                    'order_id': order.get('orderId'),
+                    'symbol': order.get('symbol'),
+                    'side': order.get('side'),
+                    'type': order.get('type'),
+                    'price': float(order.get('price', 0)),
+                    'avg_price': float(order.get('avgPrice', 0)),
+                    'quantity': float(order.get('origQty', 0)),
+                    'executed_qty': float(order.get('executedQty', 0)),
+                    'status': order.get('status'),
+                    'time': order.get('time'),
+                    'update_time': order.get('updateTime')
+                })
+            return sorted(result, key=lambda x: x.get('update_time', 0), reverse=True)
+        except Exception as e:
+            logger.error(f"Error fetching order history: {e}")
+            return []
+    
+    async def _fetch_trade_history(self, limit: int = 50) -> List[dict]:
+        """Busca histórico de trades executados."""
+        if not self.connector or not self.connector.client:
+            return []
+        
+        try:
+            trades = await self.connector.client.futures_account_trades(symbol='BTCUSDT', limit=limit)
+            result = []
+            for trade in trades:
+                result.append({
+                    'trade_id': trade.get('id'),
+                    'order_id': trade.get('orderId'),
+                    'symbol': trade.get('symbol'),
+                    'side': trade.get('side'),
+                    'price': float(trade.get('price', 0)),
+                    'qty': float(trade.get('qty', 0)),
+                    'realized_pnl': float(trade.get('realizedPnl', 0)),
+                    'commission': float(trade.get('commission', 0)),
+                    'commission_asset': trade.get('commissionAsset'),
+                    'time': trade.get('time'),
+                    'buyer': trade.get('buyer', False),
+                    'maker': trade.get('maker', False)
+                })
+            return sorted(result, key=lambda x: x.get('time', 0), reverse=True)
+        except Exception as e:
+            logger.error(f"Error fetching trade history: {e}")
+            return []
+    
+    async def _fetch_transactions(self, limit: int = 50) -> List[dict]:
+        """Busca histórico de transações."""
+        if not self.connector or not self.connector.client:
+            return []
+        
+        try:
+            transactions = await self.connector.client.futures_income_history(symbol='BTCUSDT', limit=limit)
+            result = []
+            for tx in transactions:
+                result.append({
+                    'symbol': tx.get('symbol'),
+                    'type': tx.get('incomeType'),
+                    'income': float(tx.get('income', 0)),
+                    'asset': tx.get('asset'),
+                    'time': tx.get('time'),
+                    'info': tx.get('info', '')
+                })
+            return sorted(result, key=lambda x: x.get('time', 0), reverse=True)
+        except Exception as e:
+            logger.error(f"Error fetching transactions: {e}")
+            return []
+    
+    async def _fetch_assets(self) -> List[dict]:
+        """Busca saldos da carteira."""
+        if not self.connector or not self.connector.client:
+            return []
+        
+        try:
+            balances = await self.connector.client.futures_account_balance()
+            result = []
+            for bal in balances:
+                balance = float(bal.get('balance', 0))
+                if balance > 0:
+                    result.append({
+                        'asset': bal.get('asset'),
+                        'balance': balance,
+                        'available': float(bal.get('availableBalance', 0)),
+                        'cross_wallet': float(bal.get('crossWalletBalance', 0)),
+                        'cross_unrealized_pnl': float(bal.get('crossUnPnl', 0))
+                    })
+            return result
+        except Exception as e:
+            logger.error(f"Error fetching assets: {e}")
+            return []
+    
+    async def _fetch_account_summary(self) -> dict:
+        """Busca resumo da conta."""
+        if not self.connector or not self.connector.client:
+            return {}
+        
+        try:
+            account = await self.connector.client.futures_account()
+            return {
+                'total_wallet_balance': float(account.get('totalWalletBalance', 0)),
+                'total_margin_balance': float(account.get('totalMarginBalance', 0)),
+                'total_unrealized_profit': float(account.get('totalUnrealizedProfit', 0)),
+                'available_balance': float(account.get('availableBalance', 0)),
+                'max_withdraw_amount': float(account.get('maxWithdrawAmount', 0)),
+                'total_position_initial_margin': float(account.get('totalPositionInitialMargin', 0)),
+                'total_open_order_initial_margin': float(account.get('totalOpenOrderInitialMargin', 0)),
+                'can_trade': account.get('canTrade', False),
+                'can_deposit': account.get('canDeposit', False),
+                'can_withdraw': account.get('canWithdraw', False)
+            }
+        except Exception as e:
+            logger.error(f"Error fetching account summary: {e}")
+            return {}
     
     async def _on_market_data(self, data: dict):
         try:

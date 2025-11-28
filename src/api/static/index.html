@@ -77,6 +77,50 @@
             from { opacity: 0; transform: translateY(10px); }
             to { opacity: 1; transform: translateY(0); }
         }
+        /* Binance-style tabs */
+        .tab-btn {
+            padding: 0.75rem 1.5rem;
+            color: #9ca3af;
+            border-bottom: 2px solid transparent;
+            transition: all 0.2s;
+            cursor: pointer;
+            font-size: 0.875rem;
+            font-weight: 500;
+        }
+        .tab-btn:hover {
+            color: #f3f4f6;
+        }
+        .tab-btn.active {
+            color: #fcd34d;
+            border-bottom-color: #fcd34d;
+        }
+        .tab-content {
+            display: none;
+        }
+        .tab-content.active {
+            display: block;
+        }
+        /* Table styles */
+        .data-table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+        .data-table th {
+            text-align: left;
+            padding: 0.75rem;
+            color: #9ca3af;
+            font-size: 0.75rem;
+            text-transform: uppercase;
+            border-bottom: 1px solid #2a2a2a;
+        }
+        .data-table td {
+            padding: 0.75rem;
+            border-bottom: 1px solid #1f1f1f;
+            font-size: 0.875rem;
+        }
+        .data-table tr:hover {
+            background: rgba(255,255,255,0.02);
+        }
     </style>
 </head>
 <body class="min-h-screen text-gray-100 p-4 md:p-6">
@@ -187,6 +231,141 @@
                         </div>
                     </div>
                 </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Binance-style Tabs Section -->
+    <div class="card rounded-xl mb-6">
+        <!-- Tab Headers -->
+        <div class="flex border-b border-gray-800 overflow-x-auto">
+            <button class="tab-btn active" data-tab="positions">
+                Positions <span id="positions-count" class="ml-1 px-1.5 py-0.5 bg-gray-700 rounded text-xs">0</span>
+            </button>
+            <button class="tab-btn" data-tab="open-orders">
+                Open Orders <span id="orders-count" class="ml-1 px-1.5 py-0.5 bg-gray-700 rounded text-xs">0</span>
+            </button>
+            <button class="tab-btn" data-tab="order-history">Order History</button>
+            <button class="tab-btn" data-tab="trade-history">Trade History</button>
+            <button class="tab-btn" data-tab="transactions">Transaction History</button>
+            <button class="tab-btn" data-tab="assets">Assets</button>
+        </div>
+        
+        <!-- Tab Contents -->
+        <div class="p-4">
+            <!-- Positions Tab -->
+            <div id="tab-positions" class="tab-content active">
+                <table class="data-table">
+                    <thead>
+                        <tr>
+                            <th>Symbol</th>
+                            <th>Size</th>
+                            <th>Entry Price</th>
+                            <th>Mark Price</th>
+                            <th>Liq. Price</th>
+                            <th>Unrealized PNL</th>
+                            <th>ROE%</th>
+                        </tr>
+                    </thead>
+                    <tbody id="positions-table-body">
+                        <tr><td colspan="7" class="text-center text-gray-500 py-8">No open positions</td></tr>
+                    </tbody>
+                </table>
+            </div>
+            
+            <!-- Open Orders Tab -->
+            <div id="tab-open-orders" class="tab-content">
+                <table class="data-table">
+                    <thead>
+                        <tr>
+                            <th>Time</th>
+                            <th>Symbol</th>
+                            <th>Type</th>
+                            <th>Side</th>
+                            <th>Price</th>
+                            <th>Quantity</th>
+                            <th>Status</th>
+                        </tr>
+                    </thead>
+                    <tbody id="open-orders-table-body">
+                        <tr><td colspan="7" class="text-center text-gray-500 py-8">No open orders</td></tr>
+                    </tbody>
+                </table>
+            </div>
+            
+            <!-- Order History Tab -->
+            <div id="tab-order-history" class="tab-content">
+                <table class="data-table">
+                    <thead>
+                        <tr>
+                            <th>Time</th>
+                            <th>Symbol</th>
+                            <th>Type</th>
+                            <th>Side</th>
+                            <th>Avg Price</th>
+                            <th>Filled</th>
+                            <th>Status</th>
+                        </tr>
+                    </thead>
+                    <tbody id="order-history-table-body">
+                        <tr><td colspan="7" class="text-center text-gray-500 py-8">Loading...</td></tr>
+                    </tbody>
+                </table>
+            </div>
+            
+            <!-- Trade History Tab -->
+            <div id="tab-trade-history" class="tab-content">
+                <table class="data-table">
+                    <thead>
+                        <tr>
+                            <th>Time</th>
+                            <th>Symbol</th>
+                            <th>Side</th>
+                            <th>Price</th>
+                            <th>Quantity</th>
+                            <th>Realized PNL</th>
+                            <th>Fee</th>
+                        </tr>
+                    </thead>
+                    <tbody id="trade-history-table-body">
+                        <tr><td colspan="7" class="text-center text-gray-500 py-8">Loading...</td></tr>
+                    </tbody>
+                </table>
+            </div>
+            
+            <!-- Transactions Tab -->
+            <div id="tab-transactions" class="tab-content">
+                <table class="data-table">
+                    <thead>
+                        <tr>
+                            <th>Time</th>
+                            <th>Symbol</th>
+                            <th>Type</th>
+                            <th>Amount</th>
+                            <th>Asset</th>
+                        </tr>
+                    </thead>
+                    <tbody id="transactions-table-body">
+                        <tr><td colspan="5" class="text-center text-gray-500 py-8">Loading...</td></tr>
+                    </tbody>
+                </table>
+            </div>
+            
+            <!-- Assets Tab -->
+            <div id="tab-assets" class="tab-content">
+                <table class="data-table">
+                    <thead>
+                        <tr>
+                            <th>Asset</th>
+                            <th>Wallet Balance</th>
+                            <th>Available Balance</th>
+                            <th>Unrealized PNL</th>
+                        </tr>
+                    </thead>
+                    <tbody id="assets-table-body">
+                        <tr><td colspan="4" class="text-center text-gray-500 py-8">Loading...</td></tr>
+                    </tbody>
+                </table>
             </div>
         </div>
     </div>
