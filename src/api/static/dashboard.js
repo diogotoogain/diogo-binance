@@ -10,6 +10,7 @@ let priceData = [];
 let reconnectAttempts = 0;
 const maxReconnectAttempts = 10;
 const reconnectDelay = 3000;
+let currentPriceValue = 0; // Store raw numeric price
 
 // Initialize on page load
 document.addEventListener('DOMContentLoaded', () => {
@@ -203,7 +204,8 @@ function handleMessage(message) {
 function handleInitialData(data) {
     // Price
     if (data.price) {
-        document.getElementById('current-price').textContent = formatCurrency(data.price.current);
+        currentPriceValue = data.price.current || 0;
+        document.getElementById('current-price').textContent = formatCurrency(currentPriceValue);
         updatePriceChange(data.price.change_24h);
         document.getElementById('volume-24h').textContent = formatCurrency(data.price.volume_24h || 0);
         
@@ -274,7 +276,8 @@ function handleRefresh(data) {
  * Update price display
  */
 function updatePrice(data) {
-    document.getElementById('current-price').textContent = formatCurrency(data.current);
+    currentPriceValue = data.current || 0;
+    document.getElementById('current-price').textContent = formatCurrency(currentPriceValue);
     updatePriceChange(data.change_24h);
     
     // Add to chart data
@@ -450,12 +453,11 @@ function updateStrategies(strategies) {
         const vwap = strategies.RollingVWAP.current_vwap || 0;
         document.querySelector('.vwap-value').textContent = formatCurrency(vwap);
         
-        // Compare with current price
-        const currentPrice = parseFloat(document.getElementById('current-price').textContent.replace(/[$,]/g, '')) || 0;
+        // Compare with current price using stored value
         const vwapIndicator = document.querySelector('.vwap-indicator');
         
-        if (currentPrice > 0 && vwap > 0) {
-            const diff = ((currentPrice - vwap) / vwap) * 100;
+        if (currentPriceValue > 0 && vwap > 0) {
+            const diff = ((currentPriceValue - vwap) / vwap) * 100;
             if (diff > 0.5) {
                 vwapIndicator.textContent = `Acima (+${diff.toFixed(2)}%)`;
                 vwapIndicator.className = 'vwap-indicator text-green-400';

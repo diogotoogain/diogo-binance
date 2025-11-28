@@ -75,6 +75,10 @@ class WebDashboard:
         # WebSocket clients
         self.active_connections: List[WebSocket] = []
         
+        # Server reference for proper shutdown
+        self._server: Optional[uvicorn.Server] = None
+        self._refresh_task: Optional[asyncio.Task] = None
+        
         # FastAPI app
         self.app = FastAPI(title="SNAME-MR Dashboard")
         self._setup_routes()
@@ -268,7 +272,7 @@ class WebDashboard:
                         "mark_price": float(pos.get('markPrice', 0)),
                         "liquidation_price": float(pos.get('liquidationPrice', 0)),
                         "unrealized_pnl": unrealized_pnl,
-                        "pnl_percent": (unrealized_pnl / (entry_price * abs(qty)) * 100) if entry_price and qty else 0,
+                        "pnl_percent": (unrealized_pnl / (entry_price * abs(qty)) * 100) if entry_price > 0 and abs(qty) > 0 else 0,
                         "leverage": int(pos.get('leverage', 1))
                     }
                     return self.position
@@ -372,8 +376,9 @@ class WebDashboard:
             self.total_liquidation_volume += liquidation["amount_usd"]
             
             # Add to logs
+            amount = liquidation["amount_usd"]
             emoji = "🔴" if liquidation["side"] == "SELL" else "🟢"
-            self._add_log("WARNING", f"💀 Liquidação {liquidation['side']}: ${liquidation['amount_usd']:,.0f} {emoji}")
+            self._add_log("WARNING", f"💀 Liquidação {liquidation['side']}: ${amount:,.0f} {emoji}")
             
             # Broadcast liquidation
             await self._broadcast({
@@ -407,7 +412,7 @@ class WebDashboard:
         asyncio.create_task(self._fetch_position())
         
         # Start periodic balance/position refresh
-        asyncio.create_task(self._periodic_refresh())
+        self._refresh_task = asyncio.create_task(self._periodic_refresh())
         
         # Start uvicorn server
         config = uvicorn.Config(
@@ -416,13 +421,13 @@ class WebDashboard:
             port=self.port,
             log_level="warning"
         )
-        server = uvicorn.Server(config)
+        self._server = uvicorn.Server(config)
         
         logger.info(f"🌐 Dashboard starting on http://localhost:{self.port}")
         self._add_log("INFO", f"Dashboard iniciado na porta {self.port}")
         
         # Run server in background
-        asyncio.create_task(server.serve())
+        asyncio.create_task(self._server.serve())
     
     async def _periodic_refresh(self):
         """Periodically refresh balance and position data."""
@@ -467,6 +472,19 @@ class WebDashboard:
     async def stop(self):
         """Stop the dashboard server."""
         logger.info("🛑 Dashboard stopping...")
+        
+        # Cancel periodic refresh task
+        if self._refresh_task:
+            self._refresh_task.cancel()
+            try:
+                await self._refresh_task
+            except asyncio.CancelledError:
+                pass
+        
+        # Stop uvicorn server
+        if self._server:
+            self._server.should_exit = True
+        
         # Close all WebSocket connections
         for connection in self.active_connections:
             try:
