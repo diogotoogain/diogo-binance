@@ -62,7 +62,7 @@ class Backtester:
 
     def _open_position(self, signal: dict, price: float, timestamp):
         side = 'LONG' if signal['action'] == 'BUY' else 'SHORT'
-        qty = (self.balance * 0.01) / (price * 0.01)  # 1% risk
+        qty = (self.balance * 0.01) / price  # 1% of balance
         
         if side == 'LONG':
             sl = price * 0.99
@@ -116,9 +116,11 @@ class Backtester:
         total_pnl = sum(t.pnl for t in self.trades)
         win_rate = len(wins) / len(self.trades) * 100
         
-        avg_win = sum(t.pnl for t in wins) / len(wins) if wins else 0
-        avg_loss = sum(t.pnl for t in losses) / len(losses) if losses else 0
-        profit_factor = abs(avg_win / avg_loss) if avg_loss != 0 else 0
+        total_wins = sum(t.pnl for t in wins)
+        total_losses = sum(t.pnl for t in losses)
+        avg_win = total_wins / len(wins) if wins else 0
+        avg_loss = total_losses / len(losses) if losses else 0
+        profit_factor = abs(total_wins / total_losses) if total_losses != 0 else 0
         
         return {
             'total_trades': len(self.trades),
