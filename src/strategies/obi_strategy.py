@@ -61,7 +61,6 @@ class OBIStrategy(BaseStrategy):
 
         # Processa bids (níveis mais altos = mais perto do preço)
         for i, bid in enumerate(bids[:self.depth_levels]):
-            price = float(bid[0])
             qty = float(bid[1])
             weight = math.exp(-self.decay_lambda * i)
             weighted_bids += qty * weight
@@ -69,7 +68,6 @@ class OBIStrategy(BaseStrategy):
 
         # Processa asks (níveis mais baixos = mais perto do preço)
         for i, ask in enumerate(asks[:self.depth_levels]):
-            price = float(ask[0])
             qty = float(ask[1])
             weight = math.exp(-self.decay_lambda * i)
             weighted_asks += qty * weight
