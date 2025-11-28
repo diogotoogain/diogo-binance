@@ -54,3 +54,29 @@ class TestRiskManager:
         self.rm.reset_daily()
         assert self.rm.daily_pnl == 0
         assert self.rm.trades_today == 0
+
+    def test_position_size_limited_to_5_percent_of_balance(self):
+        """Test that position size is limited to 5% of balance in USD."""
+        # With balance of $10,000 and BTC at $50,000
+        # Max USD value = $10,000 * 0.05 = $500
+        # Max BTC from USD = $500 / $50,000 = 0.01 BTC
+        size = self.rm.calculate_position_size(
+            balance=10000,
+            entry_price=50000,
+            stop_loss_price=49000  # 2% stop loss, would normally allow larger size
+        )
+        # Maximum should be 0.01 BTC (5% of balance / price)
+        max_expected = (10000 * 0.05) / 50000  # 0.01 BTC
+        assert size <= max_expected
+        assert size == 0.01  # Should be exactly 5% limit
+
+    def test_position_size_zero_entry_price(self):
+        """Test that zero entry price doesn't cause division by zero."""
+        # Should return 0 when entry_price is 0
+        size = self.rm.calculate_position_size(
+            balance=10000,
+            entry_price=0,  # Edge case
+            stop_loss_price=0
+        )
+        # With zero price, max_btc_from_usd would be 0
+        assert size == 0

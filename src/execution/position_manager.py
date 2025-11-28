@@ -96,7 +96,13 @@ class PositionManager:
         else:
             pnl = (pos.entry_price - exit_price) * pos.quantity
         
-        pnl_percent = (pnl / (pos.entry_price * pos.quantity)) * 100
+        # FIX: Verificar antes de dividir para evitar division by zero
+        if pos.entry_price > 0 and pos.quantity > 0:
+            pnl_percent = (pnl / (pos.entry_price * pos.quantity)) * 100
+        else:
+            pnl_percent = 0.0
+            logger.warning(f"⚠️ Entry price ou quantity inválido: entry={pos.entry_price}, qty={pos.quantity}")
+        
         emoji = "🟢" if pnl > 0 else "🔴"
         logger.info(f"{emoji} POSIÇÃO FECHADA: {pos.side} @ ${exit_price:.2f} | P&L: ${pnl:.2f} ({pnl_percent:+.2f}%)")
         
@@ -133,6 +139,32 @@ class PositionManager:
             if current_price >= pos.stop_loss: return 'STOP_LOSS'
             if current_price <= pos.take_profit: return 'TAKE_PROFIT'
         return None
+
+    def sync_position(self, symbol: str, side: str, entry_price: float, quantity: float,
+                       unrealized_pnl: float = 0.0, stop_loss: float = None, take_profit: float = None):
+        """
+        Sincroniza posição local com dados reais da Binance.
+        Usado para atualizar o estado sem abrir nova posição.
+        """
+        if stop_loss is None or take_profit is None:
+            stop_loss, take_profit = self.calculate_sl_tp(entry_price, 'BUY' if side == 'LONG' else 'SELL')
+        
+        self.current_position = Position(
+            symbol=symbol, side=side, entry_price=entry_price,
+            quantity=quantity, stop_loss=stop_loss, take_profit=take_profit,
+            entry_time=datetime.now()
+        )
+        
+        self.highest_price = entry_price
+        self.lowest_price = entry_price
+        
+        logger.info(f"🔄 POSIÇÃO SINCRONIZADA: {side} {quantity} {symbol} @ ${entry_price:.2f} | PnL: ${unrealized_pnl:.2f}")
+
+    def clear_position(self):
+        """Limpa posição local (usado quando Binance reporta sem posição)."""
+        if self.has_position():
+            logger.info("🔄 Posição local limpa (sincronizada com Binance)")
+        self.current_position = None
 
     def get_status(self) -> dict:
         if not self.has_position():

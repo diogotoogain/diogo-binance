@@ -59,3 +59,61 @@ class TestPositionManager:
         self.pm.open_position('BTCUSDT', 'BUY', 50000, 0.1, 49500, 51000)
         result = self.pm.should_close(51100)
         assert result == 'TAKE_PROFIT'
+
+    def test_close_position_no_division_by_zero(self):
+        """Test that closing position with zero entry price does not cause division by zero."""
+        # Manually set a position with zero entry price (edge case)
+        from src.execution.position_manager import Position
+        from datetime import datetime
+        self.pm.current_position = Position(
+            symbol='BTCUSDT',
+            side='LONG',
+            entry_price=0.0,  # Invalid but should not crash
+            quantity=0.1,
+            stop_loss=0.0,
+            take_profit=0.0,
+            entry_time=datetime.now()
+        )
+        # Should not raise an exception
+        pnl = self.pm.close_position(50000)
+        assert pnl == 50000 * 0.1  # PNL calculation still works
+        assert self.pm.has_position() is False
+
+    def test_close_position_zero_quantity_no_crash(self):
+        """Test that closing position with zero quantity does not crash."""
+        from src.execution.position_manager import Position
+        from datetime import datetime
+        self.pm.current_position = Position(
+            symbol='BTCUSDT',
+            side='LONG',
+            entry_price=50000,
+            quantity=0.0,  # Invalid but should not crash
+            stop_loss=49500,
+            take_profit=51000,
+            entry_time=datetime.now()
+        )
+        # Should not raise an exception
+        pnl = self.pm.close_position(51000)
+        assert pnl == 0  # No quantity means no PNL
+        assert self.pm.has_position() is False
+
+    def test_sync_position(self):
+        """Test the sync_position method."""
+        self.pm.sync_position(
+            symbol='BTCUSDT',
+            side='LONG',
+            entry_price=50000,
+            quantity=0.1,
+            unrealized_pnl=100
+        )
+        assert self.pm.has_position() is True
+        assert self.pm.current_position.side == 'LONG'
+        assert self.pm.current_position.entry_price == 50000
+        assert self.pm.current_position.quantity == 0.1
+
+    def test_clear_position(self):
+        """Test the clear_position method."""
+        self.pm.open_position('BTCUSDT', 'BUY', 50000, 0.1)
+        assert self.pm.has_position() is True
+        self.pm.clear_position()
+        assert self.pm.has_position() is False

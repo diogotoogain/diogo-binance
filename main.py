@@ -39,34 +39,28 @@ async def main():
     orchestrator = StrategyOrchestrator(event_bus)
     await orchestrator.start()
 
-    # 4. Dashboard
-    dashboard = TerminalDashboard(event_bus)
-    await dashboard.start()
-
-    # 5. Trade Logger
+    # 4. Trade Logger
     event_bus.subscribe('trade_signal', trade_logger.on_signal)
 
-    # 6. Bus
+    # 5. Bus
     asyncio.create_task(event_bus.start())
 
-    # 7. Conectar
-    
-    # 4. Meta-Controller (Oráculo)
+    # 6. Meta-Controller (Oráculo)
     meta_controller = MetaController()
     orchestrator.set_meta_controller(meta_controller)
     
-    # 5. Conectar à Binance
+    # 7. Conectar à Binance
     api_key = os.getenv("BINANCE_API_KEY")
     secret = os.getenv("BINANCE_SECRET_KEY")
     demo_mode = os.getenv("USE_DEMO", "false").lower() == "true"
     connector = BinanceConnector(api_key, secret, event_bus, demo_mode=demo_mode)
     await connector.connect()
     
-    # 6. Risk & Position Managers
+    # 8. Risk & Position Managers
     risk_manager = RiskManager()
     position_manager = PositionManager()
     
-    # 7. Trade Executor
+    # 9. Trade Executor
     executor = TradeExecutor(
         client=connector.client,
         position_manager=position_manager,
@@ -75,13 +69,22 @@ async def main():
     await executor.initialize()
     orchestrator.set_executor(executor)
     
-    # 8. Iniciar Orchestrator
+    # 10. Iniciar Orchestrator
     await orchestrator.start()
 
-    # 9. Bus
+    # 11. Bus (redundante, mas mantido para compatibilidade)
     asyncio.create_task(event_bus.start())
     
-    # 10. Web Dashboard (porta 8080)
+    # 12. Dashboard Terminal (agora com acesso ao connector e managers)
+    dashboard = TerminalDashboard(
+        event_bus=event_bus,
+        connector=connector,
+        position_manager=position_manager,
+        risk_manager=risk_manager
+    )
+    await dashboard.start()
+    
+    # 13. Web Dashboard (porta 8080)
     web_dashboard = WebDashboard(
         event_bus=event_bus,
         connector=connector,
@@ -91,7 +94,7 @@ async def main():
     )
     await web_dashboard.start()
 
-    # 11. Ligar TUDO (Ticks + Liquidações)
+    # 14. Ligar TUDO (Ticks + Liquidações)
     stream_task = asyncio.create_task(connector.start_streams("BTCUSDT"))
 
     print("\n💀 CAÇADOR DE LIQUIDEZ ATIVO... Monitorando Ticks e Quebras...\n")
