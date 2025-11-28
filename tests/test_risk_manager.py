@@ -35,12 +35,12 @@ class TestRiskManager:
     def test_can_open_position_ok(self):
         self.rm.set_initial_balance(10000)
         can_open, msg = self.rm.can_open_position(0)
-        assert can_open == True
+        assert can_open is True
         assert msg == "OK"
 
     def test_can_open_position_max_reached(self):
         can_open, msg = self.rm.can_open_position(1)
-        assert can_open == False
+        assert can_open is False
 
     def test_daily_stop_loss(self):
         self.rm.set_initial_balance(10000)
