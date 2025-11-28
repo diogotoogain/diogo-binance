@@ -12,13 +12,12 @@ class VPINStrategy(BaseStrategy):
     - VPIN baixo (< 0.3) = Mercado calmo = Não operar
     
     A matemática:
-    VPIN = Σ|V_buy - V_sell| / (n × V)
+    VPIN = Σ|V_buy - V_sell| / Σ(V_buy + V_sell)
     
     Onde:
-    - V = Volume de cada bucket em USD
     - V_buy = Volume de compra agressiva (is_buyer_maker = False)
     - V_sell = Volume de venda agressiva (is_buyer_maker = True)
-    - n = Número de buckets na janela
+    - Σ = Soma sobre todos os buckets na janela
     """
     
     def __init__(
