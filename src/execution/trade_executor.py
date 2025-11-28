@@ -7,6 +7,7 @@ import logging
 import os
 from typing import Optional
 from dotenv import load_dotenv
+from src.notifications.webhook_notifier import WebhookNotifier
 
 load_dotenv()
 logger = logging.getLogger("TradeExecutor")
@@ -19,7 +20,8 @@ class TradeExecutor:
         risk_manager,
         symbol: str = None,
         min_confidence: str = None,
-        execution_enabled: bool = None
+        execution_enabled: bool = None,
+        notifier: WebhookNotifier = None
     ):
         self.client = client
         self.position_manager = position_manager
@@ -28,6 +30,7 @@ class TradeExecutor:
         self.symbol = symbol or os.getenv("SYMBOL", "BTCUSDT")
         self.min_confidence = min_confidence or os.getenv("MIN_CONFIDENCE", "HIGH")
         self.execution_enabled = execution_enabled if execution_enabled is not None else os.getenv("EXECUTION_ENABLED", "true").lower() == "true"
+        self.notifier = notifier or WebhookNotifier()
         
         self.total_trades = 0
         self.winning_trades = 0
@@ -104,6 +107,7 @@ class TradeExecutor:
             await self.client.futures_create_order(symbol=self.symbol, side=sl_side, type='TAKE_PROFIT_MARKET', stopPrice=round(tp, 2), closePosition=True)
             
             self.total_trades += 1
+            await self.notifier.notify_trade_open(side, self.symbol, fill, qty, sl, tp)
             return True
         except Exception as e:
             logger.error(f"❌ Erro: {e}")
@@ -114,12 +118,14 @@ class TradeExecutor:
             return False
         try:
             pos = self.position_manager.current_position
+            entry = pos.entry_price
             await self.client.futures_cancel_all_open_orders(symbol=self.symbol)
             order = await self.client.futures_create_order(symbol=self.symbol, side='SELL' if pos.is_long else 'BUY', type='MARKET', quantity=pos.quantity)
             fill = float(order.get('avgPrice', price))
             pnl = self.position_manager.close_position(fill)
             self.risk_manager.update_daily_pnl(pnl)
             if pnl > 0: self.winning_trades += 1
+            await self.notifier.notify_trade_close(self.symbol, entry, fill, pnl, reason)
             return True
         except Exception as e:
             logger.error(f"❌ Erro: {e}")
