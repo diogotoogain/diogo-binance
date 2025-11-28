@@ -27,7 +27,8 @@ class BinanceConnector:
         symbol_lower = symbol.lower()
         streams = [
             f"{symbol_lower}@aggTrade",    
-            f"{symbol_lower}@forceOrder"   
+            f"{symbol_lower}@forceOrder",
+            f"{symbol_lower}@depth@100ms",  # Order Book a cada 100ms
         ]
         
         # LOOP DE VIDA INFINITA
@@ -67,6 +68,15 @@ class BinanceConnector:
                                         'timestamp': payload['T']
                                     }
                                     await self.event_bus.publish('liquidation_data', data_liquidacao)
+
+                                elif 'depth' in stream_name:
+                                    data_orderbook = {
+                                        'event_type': 'orderbook',
+                                        'bids': payload.get('b', []),
+                                        'asks': payload.get('a', []),
+                                        'timestamp': payload.get('E', 0)
+                                    }
+                                    await self.event_bus.publish('orderbook_data', data_orderbook)
                                     
                         except Exception as e:
                             # Se der erro de Overflow (fila cheia), ele cai aqui
