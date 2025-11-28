@@ -16,12 +16,14 @@ class BinanceConnector:
 
     async def connect(self):
         if self.demo_mode:
-            logger.info("🔌 Conectando à Binance Demo (API Real + Header X-MBX-DEMO)...")
-            # Demo Trading uses REAL API (fapi.binance.com) with special header
-            self.client = await AsyncClient.create(self.api_key, self.api_secret, testnet=False)
-            # Add the demo mode header to all requests
-            if hasattr(self.client, 'session') and self.client.session:
-                self.client.session.headers.update({'X-MBX-DEMO': 'true'})
+            logger.info("🔌 Conectando à Binance Demo Trading...")
+            # Demo Trading usa demo=True - a biblioteca cuida das URLs corretas
+            self.client = await AsyncClient.create(
+                self.api_key, 
+                self.api_secret, 
+                testnet=False,
+                demo=True  # ISSO FAZ A MÁGICA - USA demo-fapi.binance.com
+            )
         else:
             logger.info("🔌 Conectando à Binance Produção...")
             self.client = await AsyncClient.create(self.api_key, self.api_secret, testnet=False)
@@ -37,7 +39,7 @@ class BinanceConnector:
         streams = [
             f"{symbol_lower}@aggTrade",    
             f"{symbol_lower}@forceOrder",
-            f"{symbol_lower}@depth@100ms",  # Order Book a cada 100ms
+            f"{symbol_lower}@depth@100ms",
         ]
         
         # LOOP DE VIDA INFINITA
@@ -88,12 +90,10 @@ class BinanceConnector:
                                     await self.event_bus.publish('orderbook_data', data_orderbook)
                                     
                         except Exception as e:
-                            # Se der erro de Overflow (fila cheia), ele cai aqui
                             logger.warning(f"⚠️ Engasgo no Stream (Buffer cheio?): {e}")
-                            break # Sai do loop interno para reiniciar a conexão limpa
+                            break
                             
             except Exception as e:
-                # Se a conexão cair de vez
                 logger.error(f"❌ Erro Crítico na Conexão: {e}. Tentando voltar em 5s...")
                 await asyncio.sleep(5)
 
