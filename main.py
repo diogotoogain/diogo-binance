@@ -58,7 +58,8 @@ async def main():
     # 5. Conectar à Binance
     api_key = os.getenv("BINANCE_API_KEY")
     secret = os.getenv("BINANCE_SECRET_KEY")
-    connector = BinanceConnector(api_key, secret, event_bus, testnet=True)
+    demo_mode = os.getenv("USE_DEMO", "false").lower() == "true"
+    connector = BinanceConnector(api_key, secret, event_bus, demo_mode=demo_mode)
     await connector.connect()
     
     # 6. Risk & Position Managers
