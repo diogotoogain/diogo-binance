@@ -5,6 +5,7 @@ from src.core.event_bus import EventBus
 from src.strategies.sentiment_strategy import SentimentStrategy
 from src.strategies.smart_strategy import SmartStrategy
 from src.strategies.liquidation_strategy import LiquidationStrategy
+from src.strategies.vpin_strategy import VPINStrategy
 
 logger = logging.getLogger("Orchestrator")
 
@@ -17,6 +18,7 @@ class StrategyOrchestrator:
         # --- EQUIPE DE TICKS ---
         self.strategies.append(SentimentStrategy())
         self.strategies.append(SmartStrategy())
+        self.strategies.append(VPINStrategy())
         
         # --- EQUIPE DE LIQUIDAÇÃO ---
         # Aqui está o Caçador que faltava!
