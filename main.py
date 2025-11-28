@@ -12,6 +12,7 @@ from src.core.dashboard import TerminalDashboard
 from src.utils.trade_logger import TradeLogger
 from src.core.meta_controller import MetaController
 from src.execution import RiskManager, PositionManager, TradeExecutor
+from src.api.dashboard_api import WebDashboard
 
 logging.basicConfig(
     level=logging.INFO,
@@ -78,18 +79,29 @@ async def main():
 
     # 9. Bus
     asyncio.create_task(event_bus.start())
+    
+    # 10. Web Dashboard (porta 8080)
+    web_dashboard = WebDashboard(
+        event_bus=event_bus,
+        connector=connector,
+        orchestrator=orchestrator,
+        meta_controller=meta_controller,
+        port=8080
+    )
+    await web_dashboard.start()
 
-    # 8. Ligar TUDO (Ticks + Liquidações)
-    # 10. Ligar TUDO (Ticks + Liquidações)
+    # 11. Ligar TUDO (Ticks + Liquidações)
     stream_task = asyncio.create_task(connector.start_streams("BTCUSDT"))
 
     print("\n💀 CAÇADOR DE LIQUIDEZ ATIVO... Monitorando Ticks e Quebras...\n")
+    print("🌐 Dashboard Web: http://localhost:8080\n")
 
     try:
         await stream_task
     except asyncio.CancelledError:
         logger.info("Desligando...")
     finally:
+        await web_dashboard.stop()
         await dashboard.stop()
         await connector.close()
         await event_bus.stop()
