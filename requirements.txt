@@ -1,0 +1,20 @@
+# Core Async
+asyncio
+aiohttp
+
+# Binance & Data
+python-binance
+ccxt
+pandas
+numpy
+
+# Database (Async)
+sqlalchemy[asyncio]
+asyncpg
+
+# Environment
+python-dotenv
+
+# Web/API
+fastapi
+uvicorn[standard]

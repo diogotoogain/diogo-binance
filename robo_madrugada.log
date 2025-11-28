@@ -1,0 +1,516 @@
+00:21:38 [Maestro] INFO: --- 🌙 OPERAÇÃO MADRUGADA INICIADA ---
+00:21:38 [DatabaseManager] INFO: 🗄️  Tabelas verificadas/criadas.
+00:21:38 [EventBus] INFO: 👂 Novo assinante registrado no tópico: market_data
+00:21:38 [EventBus] INFO: 👂 Novo assinante registrado no tópico: trade_signal
+00:21:38 [DatabaseManager] INFO: 💾 DatabaseManager ouvindo Ticks e Sinais.
+00:21:38 [Orchestrator] INFO: 🧠 Orquestrador iniciado. Equipe ativa: ['FluxoBrabo', 'PreditorVWAP']
+00:21:38 [EventBus] INFO: 👂 Novo assinante registrado no tópico: market_data
+00:21:38 [Orchestrator] INFO: 🧠 Cérebro (Multi-Estratégia) conectado.
+00:21:38 [BinanceConnector] INFO: 🔌 Conectando à Binance (Testnet=True)...
+00:21:38 [EventBus] INFO: 🧠 Event Bus iniciado e ouvindo...
+00:21:39 [BinanceConnector] INFO: ✅ Binance Conectada.
+00:21:39 [BinanceConnector] INFO: 🌊 Iniciando stream de TICKS REAIS para BTCUSDT...
+00:23:15 [Strategy-FluxoBrabo] INFO: [FluxoBrabo] ❄️ FLUXO VENDEDOR! (-10)
+00:23:15 [Orchestrator] INFO: 🚨 SINAL >>> FluxoBrabo: SELL | Motivo: Fluxo_Agressao_Venda
+00:23:15 [Orchestrator] INFO: 🚨 SINAL >>> PreditorVWAP: BUY | Motivo: Oversold_VWAP
+00:23:15 [Orchestrator] INFO: 🚨 SINAL >>> PreditorVWAP: BUY | Motivo: Oversold_VWAP
+00:23:15 [Orchestrator] INFO: 🚨 SINAL >>> PreditorVWAP: BUY | Motivo: Oversold_VWAP
+00:23:15 [Strategy-FluxoBrabo] INFO: [FluxoBrabo] 🔥 FLUXO COMPRADOR! (+10)
+00:23:15 [Orchestrator] INFO: 🚨 SINAL >>> FluxoBrabo: BUY | Motivo: Fluxo_Agressao_Compra
+00:23:15 [DatabaseManager] INFO: 💾 SINAL SALVO NO COFRE: BUY por PreditorVWAP
+00:23:15 [DatabaseManager] INFO: 💾 SINAL SALVO NO COFRE: BUY por PreditorVWAP
+00:23:15 [DatabaseManager] INFO: 💾 SINAL SALVO NO COFRE: SELL por FluxoBrabo
+00:23:15 [DatabaseManager] INFO: 💾 SINAL SALVO NO COFRE: BUY por FluxoBrabo
+00:23:15 [DatabaseManager] INFO: 💾 SINAL SALVO NO COFRE: BUY por PreditorVWAP
+00:23:15 [Strategy-FluxoBrabo] INFO: [FluxoBrabo] 🔥 FLUXO COMPRADOR! (+10)
+00:23:15 [Orchestrator] INFO: 🚨 SINAL >>> FluxoBrabo: BUY | Motivo: Fluxo_Agressao_Compra
+00:23:15 [DatabaseManager] INFO: 💾 SINAL SALVO NO COFRE: BUY por FluxoBrabo
+00:24:40 [Strategy-FluxoBrabo] INFO: [FluxoBrabo] ❄️ FLUXO VENDEDOR! (-10)
+00:24:40 [Orchestrator] INFO: 🚨 SINAL >>> FluxoBrabo: SELL | Motivo: Fluxo_Agressao_Venda
+00:24:40 [DatabaseManager] INFO: 💾 SINAL SALVO NO COFRE: SELL por FluxoBrabo
+00:24:40 [Strategy-FluxoBrabo] INFO: [FluxoBrabo] ❄️ FLUXO VENDEDOR! (-10)
+00:24:40 [Orchestrator] INFO: 🚨 SINAL >>> FluxoBrabo: SELL | Motivo: Fluxo_Agressao_Venda
+00:24:40 [DatabaseManager] INFO: 💾 SINAL SALVO NO COFRE: SELL por FluxoBrabo
+00:24:40 [Strategy-FluxoBrabo] INFO: [FluxoBrabo] ❄️ FLUXO VENDEDOR! (-10)
+00:24:40 [Orchestrator] INFO: 🚨 SINAL >>> FluxoBrabo: SELL | Motivo: Fluxo_Agressao_Venda
+00:24:40 [DatabaseManager] INFO: 💾 SINAL SALVO NO COFRE: SELL por FluxoBrabo
+00:25:56 [Strategy-FluxoBrabo] INFO: [FluxoBrabo] ❄️ FLUXO VENDEDOR! (-10)
+00:25:56 [Orchestrator] INFO: 🚨 SINAL >>> FluxoBrabo: SELL | Motivo: Fluxo_Agressao_Venda
+00:25:56 [DatabaseManager] INFO: 💾 SINAL SALVO NO COFRE: SELL por FluxoBrabo
+00:30:19 [Orchestrator] INFO: 🚨 SINAL >>> PreditorVWAP: SELL | Motivo: Overbought_VWAP
+00:30:19 [Orchestrator] INFO: 🚨 SINAL >>> PreditorVWAP: SELL | Motivo: Overbought_VWAP
+00:30:19 [Orchestrator] INFO: 🚨 SINAL >>> PreditorVWAP: SELL | Motivo: Overbought_VWAP
+00:30:19 [Orchestrator] INFO: 🚨 SINAL >>> PreditorVWAP: SELL | Motivo: Overbought_VWAP
+00:30:19 [Strategy-FluxoBrabo] INFO: [FluxoBrabo] ❄️ FLUXO VENDEDOR! (-10)
+00:30:19 [Orchestrator] INFO: 🚨 SINAL >>> FluxoBrabo: SELL | Motivo: Fluxo_Agressao_Venda
+00:30:19 [Orchestrator] INFO: 🚨 SINAL >>> PreditorVWAP: SELL | Motivo: Overbought_VWAP
+00:30:19 [Orchestrator] INFO: 🚨 SINAL >>> PreditorVWAP: SELL | Motivo: Overbought_VWAP
+00:30:19 [Orchestrator] INFO: 🚨 SINAL >>> PreditorVWAP: SELL | Motivo: Overbought_VWAP
+00:30:19 [Orchestrator] INFO: 🚨 SINAL >>> PreditorVWAP: SELL | Motivo: Overbought_VWAP
+00:30:19 [Orchestrator] INFO: 🚨 SINAL >>> PreditorVWAP: SELL | Motivo: Overbought_VWAP
+00:30:19 [DatabaseManager] INFO: 💾 SINAL SALVO NO COFRE: SELL por PreditorVWAP
+00:30:19 [DatabaseManager] INFO: 💾 SINAL SALVO NO COFRE: SELL por PreditorVWAP
+00:30:19 [DatabaseManager] INFO: 💾 SINAL SALVO NO COFRE: SELL por PreditorVWAP
+00:30:19 [DatabaseManager] INFO: 💾 SINAL SALVO NO COFRE: SELL por PreditorVWAP
+00:30:19 [Orchestrator] INFO: 🚨 SINAL >>> PreditorVWAP: SELL | Motivo: Overbought_VWAP
+00:30:19 [DatabaseManager] INFO: 💾 SINAL SALVO NO COFRE: SELL por PreditorVWAP
+00:30:19 [DatabaseManager] INFO: 💾 SINAL SALVO NO COFRE: SELL por PreditorVWAP
+00:30:19 [DatabaseManager] INFO: 💾 SINAL SALVO NO COFRE: SELL por PreditorVWAP
+00:30:19 [DatabaseManager] INFO: 💾 SINAL SALVO NO COFRE: SELL por FluxoBrabo
+00:30:19 [DatabaseManager] INFO: 💾 SINAL SALVO NO COFRE: SELL por PreditorVWAP
+00:30:19 [DatabaseManager] INFO: 💾 SINAL SALVO NO COFRE: SELL por PreditorVWAP
+00:30:19 [DatabaseManager] INFO: 💾 SINAL SALVO NO COFRE: SELL por PreditorVWAP
+00:30:19 [Orchestrator] INFO: 🚨 SINAL >>> PreditorVWAP: SELL | Motivo: Overbought_VWAP
+00:30:19 [DatabaseManager] INFO: 💾 SINAL SALVO NO COFRE: SELL por PreditorVWAP
+00:30:20 [Orchestrator] INFO: 🚨 SINAL >>> PreditorVWAP: SELL | Motivo: Overbought_VWAP
+00:30:20 [DatabaseManager] INFO: 💾 SINAL SALVO NO COFRE: SELL por PreditorVWAP
+00:30:20 [Orchestrator] INFO: 🚨 SINAL >>> PreditorVWAP: SELL | Motivo: Overbought_VWAP
+00:30:20 [DatabaseManager] INFO: 💾 SINAL SALVO NO COFRE: SELL por PreditorVWAP
+00:30:20 [Orchestrator] INFO: 🚨 SINAL >>> PreditorVWAP: SELL | Motivo: Overbought_VWAP
+00:30:20 [DatabaseManager] INFO: 💾 SINAL SALVO NO COFRE: SELL por PreditorVWAP
+00:30:20 [Strategy-FluxoBrabo] INFO: [FluxoBrabo] ❄️ FLUXO VENDEDOR! (-10)
+00:30:20 [Orchestrator] INFO: 🚨 SINAL >>> FluxoBrabo: SELL | Motivo: Fluxo_Agressao_Venda
+00:30:20 [DatabaseManager] INFO: 💾 SINAL SALVO NO COFRE: SELL por FluxoBrabo
+00:30:43 [Strategy-FluxoBrabo] INFO: [FluxoBrabo] ❄️ FLUXO VENDEDOR! (-10)
+00:30:43 [Orchestrator] INFO: 🚨 SINAL >>> FluxoBrabo: SELL | Motivo: Fluxo_Agressao_Venda
+00:30:43 [DatabaseManager] INFO: 💾 SINAL SALVO NO COFRE: SELL por FluxoBrabo
+00:30:43 [Strategy-FluxoBrabo] INFO: [FluxoBrabo] ❄️ FLUXO VENDEDOR! (-10)
+00:30:43 [Orchestrator] INFO: 🚨 SINAL >>> FluxoBrabo: SELL | Motivo: Fluxo_Agressao_Venda
+00:30:43 [DatabaseManager] INFO: 💾 SINAL SALVO NO COFRE: SELL por FluxoBrabo
+00:30:51 [Strategy-FluxoBrabo] INFO: [FluxoBrabo] ❄️ FLUXO VENDEDOR! (-10)
+00:30:51 [Orchestrator] INFO: 🚨 SINAL >>> FluxoBrabo: SELL | Motivo: Fluxo_Agressao_Venda
+00:30:51 [Strategy-FluxoBrabo] INFO: [FluxoBrabo] ❄️ FLUXO VENDEDOR! (-10)
+00:30:51 [Orchestrator] INFO: 🚨 SINAL >>> FluxoBrabo: SELL | Motivo: Fluxo_Agressao_Venda
+00:30:51 [DatabaseManager] INFO: 💾 SINAL SALVO NO COFRE: SELL por FluxoBrabo
+00:30:52 [DatabaseManager] INFO: 💾 SINAL SALVO NO COFRE: SELL por FluxoBrabo
+00:30:52 [Strategy-FluxoBrabo] INFO: [FluxoBrabo] ❄️ FLUXO VENDEDOR! (-10)
+00:30:52 [Orchestrator] INFO: 🚨 SINAL >>> FluxoBrabo: SELL | Motivo: Fluxo_Agressao_Venda
+00:30:52 [DatabaseManager] INFO: 💾 SINAL SALVO NO COFRE: SELL por FluxoBrabo
+00:31:16 [Orchestrator] INFO: 🚨 SINAL >>> PreditorVWAP: SELL | Motivo: Overbought_VWAP
+00:31:16 [DatabaseManager] INFO: 💾 SINAL SALVO NO COFRE: SELL por PreditorVWAP
+00:31:16 [Orchestrator] INFO: 🚨 SINAL >>> PreditorVWAP: SELL | Motivo: Overbought_VWAP
+00:31:16 [DatabaseManager] INFO: 💾 SINAL SALVO NO COFRE: SELL por PreditorVWAP
+00:31:16 [Orchestrator] INFO: 🚨 SINAL >>> PreditorVWAP: SELL | Motivo: Overbought_VWAP
+00:31:16 [DatabaseManager] INFO: 💾 SINAL SALVO NO COFRE: SELL por PreditorVWAP
+00:31:16 [Strategy-FluxoBrabo] INFO: [FluxoBrabo] ❄️ FLUXO VENDEDOR! (-10)
+00:31:16 [Orchestrator] INFO: 🚨 SINAL >>> FluxoBrabo: SELL | Motivo: Fluxo_Agressao_Venda
+00:31:16 [Orchestrator] INFO: 🚨 SINAL >>> PreditorVWAP: SELL | Motivo: Overbought_VWAP
+00:31:16 [Orchestrator] INFO: 🚨 SINAL >>> PreditorVWAP: SELL | Motivo: Overbought_VWAP
+00:31:16 [DatabaseManager] INFO: 💾 SINAL SALVO NO COFRE: SELL por FluxoBrabo
+00:31:16 [DatabaseManager] INFO: 💾 SINAL SALVO NO COFRE: SELL por PreditorVWAP
+00:31:16 [DatabaseManager] INFO: 💾 SINAL SALVO NO COFRE: SELL por PreditorVWAP
+00:31:16 [Orchestrator] INFO: 🚨 SINAL >>> PreditorVWAP: SELL | Motivo: Overbought_VWAP
+00:31:16 [DatabaseManager] INFO: 💾 SINAL SALVO NO COFRE: SELL por PreditorVWAP
+00:31:16 [Orchestrator] INFO: 🚨 SINAL >>> PreditorVWAP: SELL | Motivo: Overbought_VWAP
+00:31:16 [DatabaseManager] INFO: 💾 SINAL SALVO NO COFRE: SELL por PreditorVWAP
+00:31:16 [Orchestrator] INFO: 🚨 SINAL >>> PreditorVWAP: SELL | Motivo: Overbought_VWAP
+00:31:16 [DatabaseManager] INFO: 💾 SINAL SALVO NO COFRE: SELL por PreditorVWAP
+00:31:16 [Orchestrator] INFO: 🚨 SINAL >>> PreditorVWAP: SELL | Motivo: Overbought_VWAP
+00:31:16 [DatabaseManager] INFO: 💾 SINAL SALVO NO COFRE: SELL por PreditorVWAP
+00:31:16 [Orchestrator] INFO: 🚨 SINAL >>> PreditorVWAP: SELL | Motivo: Overbought_VWAP
+00:31:16 [DatabaseManager] INFO: 💾 SINAL SALVO NO COFRE: SELL por PreditorVWAP
+00:31:16 [Orchestrator] INFO: 🚨 SINAL >>> PreditorVWAP: SELL | Motivo: Overbought_VWAP
+00:31:16 [DatabaseManager] INFO: 💾 SINAL SALVO NO COFRE: SELL por PreditorVWAP
+00:31:16 [Orchestrator] INFO: 🚨 SINAL >>> PreditorVWAP: SELL | Motivo: Overbought_VWAP
+00:31:16 [DatabaseManager] INFO: 💾 SINAL SALVO NO COFRE: SELL por PreditorVWAP
+00:31:16 [Orchestrator] INFO: 🚨 SINAL >>> PreditorVWAP: SELL | Motivo: Overbought_VWAP
+00:31:16 [DatabaseManager] INFO: 💾 SINAL SALVO NO COFRE: SELL por PreditorVWAP
+00:31:16 [Strategy-FluxoBrabo] INFO: [FluxoBrabo] ❄️ FLUXO VENDEDOR! (-10)
+00:31:16 [Orchestrator] INFO: 🚨 SINAL >>> FluxoBrabo: SELL | Motivo: Fluxo_Agressao_Venda
+00:31:16 [Orchestrator] INFO: 🚨 SINAL >>> PreditorVWAP: SELL | Motivo: Overbought_VWAP
+00:31:16 [DatabaseManager] INFO: 💾 SINAL SALVO NO COFRE: SELL por FluxoBrabo
+00:31:16 [DatabaseManager] INFO: 💾 SINAL SALVO NO COFRE: SELL por PreditorVWAP
+00:31:16 [Orchestrator] INFO: 🚨 SINAL >>> PreditorVWAP: SELL | Motivo: Overbought_VWAP
+00:31:16 [DatabaseManager] INFO: 💾 SINAL SALVO NO COFRE: SELL por PreditorVWAP
+00:31:16 [Orchestrator] INFO: 🚨 SINAL >>> PreditorVWAP: SELL | Motivo: Overbought_VWAP
+00:31:16 [DatabaseManager] INFO: 💾 SINAL SALVO NO COFRE: SELL por PreditorVWAP
+00:31:16 [Orchestrator] INFO: 🚨 SINAL >>> PreditorVWAP: SELL | Motivo: Overbought_VWAP
+00:31:16 [DatabaseManager] INFO: 💾 SINAL SALVO NO COFRE: SELL por PreditorVWAP
+00:31:16 [Orchestrator] INFO: 🚨 SINAL >>> PreditorVWAP: SELL | Motivo: Overbought_VWAP
+00:31:16 [DatabaseManager] INFO: 💾 SINAL SALVO NO COFRE: SELL por PreditorVWAP
+00:31:16 [Orchestrator] INFO: 🚨 SINAL >>> PreditorVWAP: SELL | Motivo: Overbought_VWAP
+00:31:16 [DatabaseManager] INFO: 💾 SINAL SALVO NO COFRE: SELL por PreditorVWAP
+00:31:16 [Orchestrator] INFO: 🚨 SINAL >>> PreditorVWAP: SELL | Motivo: Overbought_VWAP
+00:31:16 [DatabaseManager] INFO: 💾 SINAL SALVO NO COFRE: SELL por PreditorVWAP
+00:31:16 [Orchestrator] INFO: 🚨 SINAL >>> PreditorVWAP: SELL | Motivo: Overbought_VWAP
+00:31:16 [DatabaseManager] INFO: 💾 SINAL SALVO NO COFRE: SELL por PreditorVWAP
+00:31:17 [Orchestrator] INFO: 🚨 SINAL >>> PreditorVWAP: SELL | Motivo: Overbought_VWAP
+00:31:17 [DatabaseManager] INFO: 💾 SINAL SALVO NO COFRE: SELL por PreditorVWAP
+00:31:18 [Orchestrator] INFO: 🚨 SINAL >>> PreditorVWAP: SELL | Motivo: Overbought_VWAP
+00:31:18 [DatabaseManager] INFO: 💾 SINAL SALVO NO COFRE: SELL por PreditorVWAP
+00:31:18 [Orchestrator] INFO: 🚨 SINAL >>> PreditorVWAP: SELL | Motivo: Overbought_VWAP
+00:31:18 [DatabaseManager] INFO: 💾 SINAL SALVO NO COFRE: SELL por PreditorVWAP
+00:31:18 [Orchestrator] INFO: 🚨 SINAL >>> PreditorVWAP: SELL | Motivo: Overbought_VWAP
+00:31:18 [DatabaseManager] INFO: 💾 SINAL SALVO NO COFRE: SELL por PreditorVWAP
+00:31:19 [Strategy-FluxoBrabo] INFO: [FluxoBrabo] ❄️ FLUXO VENDEDOR! (-10)
+00:31:19 [Orchestrator] INFO: 🚨 SINAL >>> FluxoBrabo: SELL | Motivo: Fluxo_Agressao_Venda
+00:31:19 [DatabaseManager] INFO: 💾 SINAL SALVO NO COFRE: SELL por FluxoBrabo
+00:32:07 [Orchestrator] INFO: 🚨 SINAL >>> PreditorVWAP: SELL | Motivo: Overbought_VWAP
+00:32:07 [Orchestrator] INFO: 🚨 SINAL >>> PreditorVWAP: SELL | Motivo: Overbought_VWAP
+00:32:07 [Orchestrator] INFO: 🚨 SINAL >>> PreditorVWAP: SELL | Motivo: Overbought_VWAP
+00:32:07 [Orchestrator] INFO: 🚨 SINAL >>> PreditorVWAP: SELL | Motivo: Overbought_VWAP
+00:32:07 [Orchestrator] INFO: 🚨 SINAL >>> PreditorVWAP: SELL | Motivo: Overbought_VWAP
+00:32:07 [Orchestrator] INFO: 🚨 SINAL >>> PreditorVWAP: SELL | Motivo: Overbought_VWAP
+00:32:07 [Orchestrator] INFO: 🚨 SINAL >>> PreditorVWAP: SELL | Motivo: Overbought_VWAP
+00:32:07 [Orchestrator] INFO: 🚨 SINAL >>> PreditorVWAP: SELL | Motivo: Overbought_VWAP
+00:32:07 [Orchestrator] INFO: 🚨 SINAL >>> PreditorVWAP: SELL | Motivo: Overbought_VWAP
+00:32:07 [Orchestrator] INFO: 🚨 SINAL >>> PreditorVWAP: SELL | Motivo: Overbought_VWAP
+00:32:07 [Orchestrator] INFO: 🚨 SINAL >>> PreditorVWAP: SELL | Motivo: Overbought_VWAP
+00:32:07 [Orchestrator] INFO: 🚨 SINAL >>> PreditorVWAP: SELL | Motivo: Overbought_VWAP
+00:32:07 [Orchestrator] INFO: 🚨 SINAL >>> PreditorVWAP: SELL | Motivo: Overbought_VWAP
+00:32:07 [Orchestrator] INFO: 🚨 SINAL >>> PreditorVWAP: SELL | Motivo: Overbought_VWAP
+00:32:07 [Orchestrator] INFO: 🚨 SINAL >>> PreditorVWAP: SELL | Motivo: Overbought_VWAP
+00:32:07 [Orchestrator] INFO: 🚨 SINAL >>> PreditorVWAP: SELL | Motivo: Overbought_VWAP
+00:32:07 [Orchestrator] INFO: 🚨 SINAL >>> PreditorVWAP: SELL | Motivo: Overbought_VWAP
+00:32:07 [DatabaseManager] INFO: 💾 SINAL SALVO NO COFRE: SELL por PreditorVWAP
+00:32:07 [Orchestrator] INFO: 🚨 SINAL >>> PreditorVWAP: SELL | Motivo: Overbought_VWAP
+00:32:07 [DatabaseManager] INFO: 💾 SINAL SALVO NO COFRE: SELL por PreditorVWAP
+00:32:07 [DatabaseManager] INFO: 💾 SINAL SALVO NO COFRE: SELL por PreditorVWAP
+00:32:07 [DatabaseManager] INFO: 💾 SINAL SALVO NO COFRE: SELL por PreditorVWAP
+00:32:07 [DatabaseManager] INFO: 💾 SINAL SALVO NO COFRE: SELL por PreditorVWAP
+00:32:07 [DatabaseManager] INFO: 💾 SINAL SALVO NO COFRE: SELL por PreditorVWAP
+00:32:07 [DatabaseManager] INFO: 💾 SINAL SALVO NO COFRE: SELL por PreditorVWAP
+00:32:07 [DatabaseManager] INFO: 💾 SINAL SALVO NO COFRE: SELL por PreditorVWAP
+00:32:07 [DatabaseManager] INFO: 💾 SINAL SALVO NO COFRE: SELL por PreditorVWAP
+00:32:07 [DatabaseManager] INFO: 💾 SINAL SALVO NO COFRE: SELL por PreditorVWAP
+00:32:07 [DatabaseManager] INFO: 💾 SINAL SALVO NO COFRE: SELL por PreditorVWAP
+00:32:07 [DatabaseManager] INFO: 💾 SINAL SALVO NO COFRE: SELL por PreditorVWAP
+00:32:07 [DatabaseManager] INFO: 💾 SINAL SALVO NO COFRE: SELL por PreditorVWAP
+00:32:07 [DatabaseManager] INFO: 💾 SINAL SALVO NO COFRE: SELL por PreditorVWAP
+00:32:07 [DatabaseManager] INFO: 💾 SINAL SALVO NO COFRE: SELL por PreditorVWAP
+00:32:07 [DatabaseManager] INFO: 💾 SINAL SALVO NO COFRE: SELL por PreditorVWAP
+00:32:07 [DatabaseManager] INFO: 💾 SINAL SALVO NO COFRE: SELL por PreditorVWAP
+00:32:07 [DatabaseManager] INFO: 💾 SINAL SALVO NO COFRE: SELL por PreditorVWAP
+00:32:07 [Strategy-FluxoBrabo] INFO: [FluxoBrabo] ❄️ FLUXO VENDEDOR! (-10)
+00:32:07 [Orchestrator] INFO: 🚨 SINAL >>> FluxoBrabo: SELL | Motivo: Fluxo_Agressao_Venda
+00:32:07 [Orchestrator] INFO: 🚨 SINAL >>> PreditorVWAP: SELL | Motivo: Overbought_VWAP
+00:32:07 [DatabaseManager] INFO: 💾 SINAL SALVO NO COFRE: SELL por PreditorVWAP
+00:32:07 [DatabaseManager] INFO: 💾 SINAL SALVO NO COFRE: SELL por FluxoBrabo
+00:32:07 [Orchestrator] INFO: 🚨 SINAL >>> PreditorVWAP: SELL | Motivo: Overbought_VWAP
+00:32:07 [DatabaseManager] INFO: 💾 SINAL SALVO NO COFRE: SELL por PreditorVWAP
+00:32:07 [Orchestrator] INFO: 🚨 SINAL >>> PreditorVWAP: SELL | Motivo: Overbought_VWAP
+00:32:07 [DatabaseManager] INFO: 💾 SINAL SALVO NO COFRE: SELL por PreditorVWAP
+00:32:07 [Orchestrator] INFO: 🚨 SINAL >>> PreditorVWAP: SELL | Motivo: Overbought_VWAP
+00:32:07 [DatabaseManager] INFO: 💾 SINAL SALVO NO COFRE: SELL por PreditorVWAP
+00:32:07 [Orchestrator] INFO: 🚨 SINAL >>> PreditorVWAP: SELL | Motivo: Overbought_VWAP
+00:32:07 [DatabaseManager] INFO: 💾 SINAL SALVO NO COFRE: SELL por PreditorVWAP
+00:32:07 [Orchestrator] INFO: 🚨 SINAL >>> PreditorVWAP: SELL | Motivo: Overbought_VWAP
+00:32:07 [DatabaseManager] INFO: 💾 SINAL SALVO NO COFRE: SELL por PreditorVWAP
+00:32:07 [Orchestrator] INFO: 🚨 SINAL >>> PreditorVWAP: SELL | Motivo: Overbought_VWAP
+00:32:07 [DatabaseManager] INFO: 💾 SINAL SALVO NO COFRE: SELL por PreditorVWAP
+00:32:07 [Orchestrator] INFO: 🚨 SINAL >>> PreditorVWAP: SELL | Motivo: Overbought_VWAP
+00:32:07 [DatabaseManager] INFO: 💾 SINAL SALVO NO COFRE: SELL por PreditorVWAP
+00:32:07 [Orchestrator] INFO: 🚨 SINAL >>> PreditorVWAP: SELL | Motivo: Overbought_VWAP
+00:32:07 [DatabaseManager] INFO: 💾 SINAL SALVO NO COFRE: SELL por PreditorVWAP
+00:32:07 [Orchestrator] INFO: 🚨 SINAL >>> PreditorVWAP: SELL | Motivo: Overbought_VWAP
+00:32:07 [DatabaseManager] INFO: 💾 SINAL SALVO NO COFRE: SELL por PreditorVWAP
+00:32:07 [Strategy-FluxoBrabo] INFO: [FluxoBrabo] ❄️ FLUXO VENDEDOR! (-10)
+00:32:07 [Orchestrator] INFO: 🚨 SINAL >>> FluxoBrabo: SELL | Motivo: Fluxo_Agressao_Venda
+00:32:07 [Orchestrator] INFO: 🚨 SINAL >>> PreditorVWAP: SELL | Motivo: Overbought_VWAP
+00:32:07 [DatabaseManager] INFO: 💾 SINAL SALVO NO COFRE: SELL por FluxoBrabo
+00:32:07 [DatabaseManager] INFO: 💾 SINAL SALVO NO COFRE: SELL por PreditorVWAP
+00:32:09 [Orchestrator] INFO: 🚨 SINAL >>> PreditorVWAP: SELL | Motivo: Overbought_VWAP
+00:32:09 [DatabaseManager] INFO: 💾 SINAL SALVO NO COFRE: SELL por PreditorVWAP
+00:32:09 [Orchestrator] INFO: 🚨 SINAL >>> PreditorVWAP: SELL | Motivo: Overbought_VWAP
+00:32:09 [DatabaseManager] INFO: 💾 SINAL SALVO NO COFRE: SELL por PreditorVWAP
+00:32:10 [Orchestrator] INFO: 🚨 SINAL >>> PreditorVWAP: SELL | Motivo: Overbought_VWAP
+00:32:10 [DatabaseManager] INFO: 💾 SINAL SALVO NO COFRE: SELL por PreditorVWAP
+00:33:15 [Orchestrator] INFO: 🚨 SINAL >>> PreditorVWAP: SELL | Motivo: Overbought_VWAP
+00:33:15 [Orchestrator] INFO: 🚨 SINAL >>> PreditorVWAP: SELL | Motivo: Overbought_VWAP
+00:33:15 [Orchestrator] INFO: 🚨 SINAL >>> PreditorVWAP: SELL | Motivo: Overbought_VWAP
+00:33:15 [Orchestrator] INFO: 🚨 SINAL >>> PreditorVWAP: SELL | Motivo: Overbought_VWAP
+00:33:15 [Orchestrator] INFO: 🚨 SINAL >>> PreditorVWAP: SELL | Motivo: Overbought_VWAP
+00:33:15 [Orchestrator] INFO: 🚨 SINAL >>> PreditorVWAP: SELL | Motivo: Overbought_VWAP
+00:33:15 [Orchestrator] INFO: 🚨 SINAL >>> PreditorVWAP: SELL | Motivo: Overbought_VWAP
+00:33:15 [Orchestrator] INFO: 🚨 SINAL >>> PreditorVWAP: SELL | Motivo: Overbought_VWAP
+00:33:15 [Orchestrator] INFO: 🚨 SINAL >>> PreditorVWAP: SELL | Motivo: Overbought_VWAP
+00:33:15 [DatabaseManager] INFO: 💾 SINAL SALVO NO COFRE: SELL por PreditorVWAP
+00:33:15 [DatabaseManager] INFO: 💾 SINAL SALVO NO COFRE: SELL por PreditorVWAP
+00:33:15 [DatabaseManager] INFO: 💾 SINAL SALVO NO COFRE: SELL por PreditorVWAP
+00:33:15 [Orchestrator] INFO: 🚨 SINAL >>> PreditorVWAP: SELL | Motivo: Overbought_VWAP
+00:33:15 [DatabaseManager] INFO: 💾 SINAL SALVO NO COFRE: SELL por PreditorVWAP
+00:33:15 [Orchestrator] INFO: 🚨 SINAL >>> PreditorVWAP: SELL | Motivo: Overbought_VWAP
+00:33:15 [Orchestrator] INFO: 🚨 SINAL >>> PreditorVWAP: SELL | Motivo: Overbought_VWAP
+00:33:15 [DatabaseManager] INFO: 💾 SINAL SALVO NO COFRE: SELL por PreditorVWAP
+00:33:15 [DatabaseManager] INFO: 💾 SINAL SALVO NO COFRE: SELL por PreditorVWAP
+00:33:15 [Orchestrator] INFO: 🚨 SINAL >>> PreditorVWAP: SELL | Motivo: Overbought_VWAP
+00:33:15 [DatabaseManager] INFO: 💾 SINAL SALVO NO COFRE: SELL por PreditorVWAP
+00:33:15 [DatabaseManager] INFO: 💾 SINAL SALVO NO COFRE: SELL por PreditorVWAP
+00:33:15 [DatabaseManager] INFO: 💾 SINAL SALVO NO COFRE: SELL por PreditorVWAP
+00:33:15 [DatabaseManager] INFO: 💾 SINAL SALVO NO COFRE: SELL por PreditorVWAP
+00:33:15 [DatabaseManager] INFO: 💾 SINAL SALVO NO COFRE: SELL por PreditorVWAP
+00:33:15 [DatabaseManager] INFO: 💾 SINAL SALVO NO COFRE: SELL por PreditorVWAP
+00:33:15 [DatabaseManager] INFO: 💾 SINAL SALVO NO COFRE: SELL por PreditorVWAP
+00:33:15 [Strategy-FluxoBrabo] INFO: [FluxoBrabo] ❄️ FLUXO VENDEDOR! (-10)
+00:33:15 [Orchestrator] INFO: 🚨 SINAL >>> FluxoBrabo: SELL | Motivo: Fluxo_Agressao_Venda
+00:33:15 [DatabaseManager] INFO: 💾 SINAL SALVO NO COFRE: SELL por FluxoBrabo
+00:33:15 [Strategy-FluxoBrabo] INFO: [FluxoBrabo] ❄️ FLUXO VENDEDOR! (-10)
+00:33:15 [Orchestrator] INFO: 🚨 SINAL >>> FluxoBrabo: SELL | Motivo: Fluxo_Agressao_Venda
+00:33:15 [DatabaseManager] INFO: 💾 SINAL SALVO NO COFRE: SELL por FluxoBrabo
+00:33:51 [Orchestrator] INFO: 🚨 SINAL >>> PreditorVWAP: SELL | Motivo: Overbought_VWAP
+00:33:51 [DatabaseManager] INFO: 💾 SINAL SALVO NO COFRE: SELL por PreditorVWAP
+00:33:52 [Orchestrator] INFO: 🚨 SINAL >>> PreditorVWAP: SELL | Motivo: Overbought_VWAP
+00:33:52 [DatabaseManager] INFO: 💾 SINAL SALVO NO COFRE: SELL por PreditorVWAP
+00:33:52 [Orchestrator] INFO: 🚨 SINAL >>> PreditorVWAP: SELL | Motivo: Overbought_VWAP
+00:33:52 [DatabaseManager] INFO: 💾 SINAL SALVO NO COFRE: SELL por PreditorVWAP
+00:33:53 [Orchestrator] INFO: 🚨 SINAL >>> PreditorVWAP: SELL | Motivo: Overbought_VWAP
+00:33:53 [DatabaseManager] INFO: 💾 SINAL SALVO NO COFRE: SELL por PreditorVWAP
+00:33:53 [Orchestrator] INFO: 🚨 SINAL >>> PreditorVWAP: SELL | Motivo: Overbought_VWAP
+00:33:53 [DatabaseManager] INFO: 💾 SINAL SALVO NO COFRE: SELL por PreditorVWAP
+00:33:54 [Orchestrator] INFO: 🚨 SINAL >>> PreditorVWAP: SELL | Motivo: Overbought_VWAP
+00:33:54 [DatabaseManager] INFO: 💾 SINAL SALVO NO COFRE: SELL por PreditorVWAP
+00:33:54 [Orchestrator] INFO: 🚨 SINAL >>> PreditorVWAP: SELL | Motivo: Overbought_VWAP
+00:33:54 [DatabaseManager] INFO: 💾 SINAL SALVO NO COFRE: SELL por PreditorVWAP
+00:33:55 [Orchestrator] INFO: 🚨 SINAL >>> PreditorVWAP: SELL | Motivo: Overbought_VWAP
+00:33:55 [DatabaseManager] INFO: 💾 SINAL SALVO NO COFRE: SELL por PreditorVWAP
+00:34:07 [Orchestrator] INFO: 🚨 SINAL >>> PreditorVWAP: SELL | Motivo: Overbought_VWAP
+00:34:07 [DatabaseManager] INFO: 💾 SINAL SALVO NO COFRE: SELL por PreditorVWAP
+00:36:38 [Strategy-FluxoBrabo] INFO: [FluxoBrabo] 🔥 FLUXO COMPRADOR! (+10)
+00:36:38 [Orchestrator] INFO: 🚨 SINAL >>> FluxoBrabo: BUY | Motivo: Fluxo_Agressao_Compra
+00:36:38 [DatabaseManager] INFO: 💾 SINAL SALVO NO COFRE: BUY por FluxoBrabo
+00:36:39 [Strategy-FluxoBrabo] INFO: [FluxoBrabo] 🔥 FLUXO COMPRADOR! (+10)
+00:36:39 [Orchestrator] INFO: 🚨 SINAL >>> FluxoBrabo: BUY | Motivo: Fluxo_Agressao_Compra
+00:36:39 [DatabaseManager] INFO: 💾 SINAL SALVO NO COFRE: BUY por FluxoBrabo
+00:37:13 [Strategy-FluxoBrabo] INFO: [FluxoBrabo] 🔥 FLUXO COMPRADOR! (+10)
+00:37:13 [Orchestrator] INFO: 🚨 SINAL >>> FluxoBrabo: BUY | Motivo: Fluxo_Agressao_Compra
+00:37:13 [DatabaseManager] INFO: 💾 SINAL SALVO NO COFRE: BUY por FluxoBrabo
+00:37:13 [Strategy-FluxoBrabo] INFO: [FluxoBrabo] 🔥 FLUXO COMPRADOR! (+10)
+00:37:13 [Orchestrator] INFO: 🚨 SINAL >>> FluxoBrabo: BUY | Motivo: Fluxo_Agressao_Compra
+00:37:13 [DatabaseManager] INFO: 💾 SINAL SALVO NO COFRE: BUY por FluxoBrabo
+00:38:54 [Strategy-FluxoBrabo] INFO: [FluxoBrabo] ❄️ FLUXO VENDEDOR! (-10)
+00:38:54 [Orchestrator] INFO: 🚨 SINAL >>> FluxoBrabo: SELL | Motivo: Fluxo_Agressao_Venda
+00:38:54 [DatabaseManager] INFO: 💾 SINAL SALVO NO COFRE: SELL por FluxoBrabo
+00:38:54 [Strategy-FluxoBrabo] INFO: [FluxoBrabo] ❄️ FLUXO VENDEDOR! (-10)
+00:38:54 [Orchestrator] INFO: 🚨 SINAL >>> FluxoBrabo: SELL | Motivo: Fluxo_Agressao_Venda
+00:38:54 [DatabaseManager] INFO: 💾 SINAL SALVO NO COFRE: SELL por FluxoBrabo
+00:38:55 [Strategy-FluxoBrabo] INFO: [FluxoBrabo] ❄️ FLUXO VENDEDOR! (-10)
+00:38:55 [Orchestrator] INFO: 🚨 SINAL >>> FluxoBrabo: SELL | Motivo: Fluxo_Agressao_Venda
+00:38:55 [DatabaseManager] INFO: 💾 SINAL SALVO NO COFRE: SELL por FluxoBrabo
+00:39:01 [Strategy-FluxoBrabo] INFO: [FluxoBrabo] ❄️ FLUXO VENDEDOR! (-10)
+00:39:01 [Orchestrator] INFO: 🚨 SINAL >>> FluxoBrabo: SELL | Motivo: Fluxo_Agressao_Venda
+00:39:01 [DatabaseManager] INFO: 💾 SINAL SALVO NO COFRE: SELL por FluxoBrabo
+00:42:12 [Orchestrator] INFO: 🚨 SINAL >>> PreditorVWAP: BUY | Motivo: Oversold_VWAP
+00:42:12 [DatabaseManager] INFO: 💾 SINAL SALVO NO COFRE: BUY por PreditorVWAP
+00:42:12 [Orchestrator] INFO: 🚨 SINAL >>> PreditorVWAP: BUY | Motivo: Oversold_VWAP
+00:42:12 [DatabaseManager] INFO: 💾 SINAL SALVO NO COFRE: BUY por PreditorVWAP
+00:42:12 [Orchestrator] INFO: 🚨 SINAL >>> PreditorVWAP: BUY | Motivo: Oversold_VWAP
+00:42:12 [DatabaseManager] INFO: 💾 SINAL SALVO NO COFRE: BUY por PreditorVWAP
+00:42:14 [Orchestrator] INFO: 🚨 SINAL >>> PreditorVWAP: BUY | Motivo: Oversold_VWAP
+00:42:14 [DatabaseManager] INFO: 💾 SINAL SALVO NO COFRE: BUY por PreditorVWAP
+00:42:17 [Orchestrator] INFO: 🚨 SINAL >>> PreditorVWAP: BUY | Motivo: Oversold_VWAP
+00:42:17 [DatabaseManager] INFO: 💾 SINAL SALVO NO COFRE: BUY por PreditorVWAP
+00:42:22 [Orchestrator] INFO: 🚨 SINAL >>> PreditorVWAP: BUY | Motivo: Oversold_VWAP
+00:42:22 [DatabaseManager] INFO: 💾 SINAL SALVO NO COFRE: BUY por PreditorVWAP
+00:42:24 [Orchestrator] INFO: 🚨 SINAL >>> PreditorVWAP: BUY | Motivo: Oversold_VWAP
+00:42:24 [Orchestrator] INFO: 🚨 SINAL >>> PreditorVWAP: BUY | Motivo: Oversold_VWAP
+00:42:24 [DatabaseManager] INFO: 💾 SINAL SALVO NO COFRE: BUY por PreditorVWAP
+00:42:24 [DatabaseManager] INFO: 💾 SINAL SALVO NO COFRE: BUY por PreditorVWAP
+00:42:27 [Orchestrator] INFO: 🚨 SINAL >>> PreditorVWAP: BUY | Motivo: Oversold_VWAP
+00:42:27 [DatabaseManager] INFO: 💾 SINAL SALVO NO COFRE: BUY por PreditorVWAP
+00:43:00 [Orchestrator] INFO: 🚨 SINAL >>> PreditorVWAP: BUY | Motivo: Oversold_VWAP
+00:43:00 [DatabaseManager] INFO: 💾 SINAL SALVO NO COFRE: BUY por PreditorVWAP
+00:43:12 [Orchestrator] INFO: 🚨 SINAL >>> PreditorVWAP: BUY | Motivo: Oversold_VWAP
+00:43:12 [DatabaseManager] INFO: 💾 SINAL SALVO NO COFRE: BUY por PreditorVWAP
+00:43:14 [Orchestrator] INFO: 🚨 SINAL >>> PreditorVWAP: BUY | Motivo: Oversold_VWAP
+00:43:14 [DatabaseManager] INFO: 💾 SINAL SALVO NO COFRE: BUY por PreditorVWAP
+00:43:14 [Orchestrator] INFO: 🚨 SINAL >>> PreditorVWAP: BUY | Motivo: Oversold_VWAP
+00:43:14 [DatabaseManager] INFO: 💾 SINAL SALVO NO COFRE: BUY por PreditorVWAP
+00:43:32 [Orchestrator] INFO: 🚨 SINAL >>> PreditorVWAP: BUY | Motivo: Oversold_VWAP
+00:43:32 [Orchestrator] INFO: 🚨 SINAL >>> PreditorVWAP: BUY | Motivo: Oversold_VWAP
+00:43:32 [DatabaseManager] INFO: 💾 SINAL SALVO NO COFRE: BUY por PreditorVWAP
+00:43:32 [DatabaseManager] INFO: 💾 SINAL SALVO NO COFRE: BUY por PreditorVWAP
+00:44:05 [Orchestrator] INFO: 🚨 SINAL >>> PreditorVWAP: BUY | Motivo: Oversold_VWAP
+00:44:05 [DatabaseManager] INFO: 💾 SINAL SALVO NO COFRE: BUY por PreditorVWAP
+00:44:05 [Orchestrator] INFO: 🚨 SINAL >>> PreditorVWAP: BUY | Motivo: Oversold_VWAP
+00:44:05 [Orchestrator] INFO: 🚨 SINAL >>> PreditorVWAP: BUY | Motivo: Oversold_VWAP
+00:44:05 [Orchestrator] INFO: 🚨 SINAL >>> PreditorVWAP: BUY | Motivo: Oversold_VWAP
+00:44:05 [DatabaseManager] INFO: 💾 SINAL SALVO NO COFRE: BUY por PreditorVWAP
+00:44:05 [DatabaseManager] INFO: 💾 SINAL SALVO NO COFRE: BUY por PreditorVWAP
+00:44:05 [DatabaseManager] INFO: 💾 SINAL SALVO NO COFRE: BUY por PreditorVWAP
+00:44:05 [Orchestrator] INFO: 🚨 SINAL >>> PreditorVWAP: BUY | Motivo: Oversold_VWAP
+00:44:05 [Orchestrator] INFO: 🚨 SINAL >>> PreditorVWAP: BUY | Motivo: Oversold_VWAP
+00:44:05 [DatabaseManager] INFO: 💾 SINAL SALVO NO COFRE: BUY por PreditorVWAP
+00:44:05 [DatabaseManager] INFO: 💾 SINAL SALVO NO COFRE: BUY por PreditorVWAP
+00:44:05 [Orchestrator] INFO: 🚨 SINAL >>> PreditorVWAP: BUY | Motivo: Oversold_VWAP
+00:44:05 [DatabaseManager] INFO: 💾 SINAL SALVO NO COFRE: BUY por PreditorVWAP
+00:44:05 [Orchestrator] INFO: 🚨 SINAL >>> PreditorVWAP: BUY | Motivo: Oversold_VWAP
+00:44:05 [DatabaseManager] INFO: 💾 SINAL SALVO NO COFRE: BUY por PreditorVWAP
+00:44:06 [Strategy-FluxoBrabo] INFO: [FluxoBrabo] 🔥 FLUXO COMPRADOR! (+10)
+00:44:06 [Orchestrator] INFO: 🚨 SINAL >>> FluxoBrabo: BUY | Motivo: Fluxo_Agressao_Compra
+00:44:06 [Orchestrator] INFO: 🚨 SINAL >>> PreditorVWAP: BUY | Motivo: Oversold_VWAP
+00:44:06 [Orchestrator] INFO: 🚨 SINAL >>> PreditorVWAP: BUY | Motivo: Oversold_VWAP
+00:44:06 [DatabaseManager] INFO: 💾 SINAL SALVO NO COFRE: BUY por FluxoBrabo
+00:44:06 [DatabaseManager] INFO: 💾 SINAL SALVO NO COFRE: BUY por PreditorVWAP
+00:44:06 [DatabaseManager] INFO: 💾 SINAL SALVO NO COFRE: BUY por PreditorVWAP
+00:44:06 [Orchestrator] INFO: 🚨 SINAL >>> PreditorVWAP: BUY | Motivo: Oversold_VWAP
+00:44:06 [Orchestrator] INFO: 🚨 SINAL >>> PreditorVWAP: BUY | Motivo: Oversold_VWAP
+00:44:06 [DatabaseManager] INFO: 💾 SINAL SALVO NO COFRE: BUY por PreditorVWAP
+00:44:06 [DatabaseManager] INFO: 💾 SINAL SALVO NO COFRE: BUY por PreditorVWAP
+00:44:06 [Orchestrator] INFO: 🚨 SINAL >>> PreditorVWAP: BUY | Motivo: Oversold_VWAP
+00:44:06 [DatabaseManager] INFO: 💾 SINAL SALVO NO COFRE: BUY por PreditorVWAP
+00:44:06 [Orchestrator] INFO: 🚨 SINAL >>> PreditorVWAP: BUY | Motivo: Oversold_VWAP
+00:44:06 [Orchestrator] INFO: 🚨 SINAL >>> PreditorVWAP: BUY | Motivo: Oversold_VWAP
+00:44:06 [DatabaseManager] INFO: 💾 SINAL SALVO NO COFRE: BUY por PreditorVWAP
+00:44:06 [DatabaseManager] INFO: 💾 SINAL SALVO NO COFRE: BUY por PreditorVWAP
+00:44:06 [Orchestrator] INFO: 🚨 SINAL >>> PreditorVWAP: BUY | Motivo: Oversold_VWAP
+00:44:06 [Orchestrator] INFO: 🚨 SINAL >>> PreditorVWAP: BUY | Motivo: Oversold_VWAP
+00:44:06 [DatabaseManager] INFO: 💾 SINAL SALVO NO COFRE: BUY por PreditorVWAP
+00:44:06 [DatabaseManager] INFO: 💾 SINAL SALVO NO COFRE: BUY por PreditorVWAP
+00:44:06 [Orchestrator] INFO: 🚨 SINAL >>> PreditorVWAP: BUY | Motivo: Oversold_VWAP
+00:44:06 [DatabaseManager] INFO: 💾 SINAL SALVO NO COFRE: BUY por PreditorVWAP
+00:44:06 [Strategy-FluxoBrabo] INFO: [FluxoBrabo] 🔥 FLUXO COMPRADOR! (+10)
+00:44:06 [Orchestrator] INFO: 🚨 SINAL >>> FluxoBrabo: BUY | Motivo: Fluxo_Agressao_Compra
+00:44:06 [Orchestrator] INFO: 🚨 SINAL >>> PreditorVWAP: BUY | Motivo: Oversold_VWAP
+00:44:06 [DatabaseManager] INFO: 💾 SINAL SALVO NO COFRE: BUY por FluxoBrabo
+00:44:06 [DatabaseManager] INFO: 💾 SINAL SALVO NO COFRE: BUY por PreditorVWAP
+00:44:06 [Orchestrator] INFO: 🚨 SINAL >>> PreditorVWAP: BUY | Motivo: Oversold_VWAP
+00:44:06 [DatabaseManager] INFO: 💾 SINAL SALVO NO COFRE: BUY por PreditorVWAP
+00:44:06 [Orchestrator] INFO: 🚨 SINAL >>> PreditorVWAP: BUY | Motivo: Oversold_VWAP
+00:44:06 [DatabaseManager] INFO: 💾 SINAL SALVO NO COFRE: BUY por PreditorVWAP
+00:44:06 [Orchestrator] INFO: 🚨 SINAL >>> PreditorVWAP: BUY | Motivo: Oversold_VWAP
+00:44:06 [DatabaseManager] INFO: 💾 SINAL SALVO NO COFRE: BUY por PreditorVWAP
+00:44:12 [Strategy-FluxoBrabo] INFO: [FluxoBrabo] 🔥 FLUXO COMPRADOR! (+10)
+00:44:12 [Orchestrator] INFO: 🚨 SINAL >>> FluxoBrabo: BUY | Motivo: Fluxo_Agressao_Compra
+00:44:12 [DatabaseManager] INFO: 💾 SINAL SALVO NO COFRE: BUY por FluxoBrabo
+00:46:12 [Strategy-FluxoBrabo] INFO: [FluxoBrabo] 🔥 FLUXO COMPRADOR! (+10)
+00:46:12 [Orchestrator] INFO: 🚨 SINAL >>> FluxoBrabo: BUY | Motivo: Fluxo_Agressao_Compra
+00:46:12 [DatabaseManager] INFO: 💾 SINAL SALVO NO COFRE: BUY por FluxoBrabo
+00:52:36 [Strategy-FluxoBrabo] INFO: [FluxoBrabo] ❄️ FLUXO VENDEDOR! (-10)
+00:52:36 [Orchestrator] INFO: 🚨 SINAL >>> FluxoBrabo: SELL | Motivo: Fluxo_Agressao_Venda
+00:52:36 [DatabaseManager] INFO: 💾 SINAL SALVO NO COFRE: SELL por FluxoBrabo
+00:53:15 [Strategy-FluxoBrabo] INFO: [FluxoBrabo] ❄️ FLUXO VENDEDOR! (-10)
+00:53:15 [Orchestrator] INFO: 🚨 SINAL >>> FluxoBrabo: SELL | Motivo: Fluxo_Agressao_Venda
+00:53:15 [DatabaseManager] INFO: 💾 SINAL SALVO NO COFRE: SELL por FluxoBrabo
+00:53:15 [Strategy-FluxoBrabo] INFO: [FluxoBrabo] ❄️ FLUXO VENDEDOR! (-10)
+00:53:15 [Orchestrator] INFO: 🚨 SINAL >>> FluxoBrabo: SELL | Motivo: Fluxo_Agressao_Venda
+00:53:15 [DatabaseManager] INFO: 💾 SINAL SALVO NO COFRE: SELL por FluxoBrabo
+00:53:15 [Strategy-FluxoBrabo] INFO: [FluxoBrabo] ❄️ FLUXO VENDEDOR! (-10)
+00:53:15 [Orchestrator] INFO: 🚨 SINAL >>> FluxoBrabo: SELL | Motivo: Fluxo_Agressao_Venda
+00:53:15 [DatabaseManager] INFO: 💾 SINAL SALVO NO COFRE: SELL por FluxoBrabo
+00:54:25 [Strategy-FluxoBrabo] INFO: [FluxoBrabo] ❄️ FLUXO VENDEDOR! (-10)
+00:54:25 [Orchestrator] INFO: 🚨 SINAL >>> FluxoBrabo: SELL | Motivo: Fluxo_Agressao_Venda
+00:54:25 [DatabaseManager] INFO: 💾 SINAL SALVO NO COFRE: SELL por FluxoBrabo
+00:58:29 [Strategy-FluxoBrabo] INFO: [FluxoBrabo] 🔥 FLUXO COMPRADOR! (+10)
+00:58:29 [Orchestrator] INFO: 🚨 SINAL >>> FluxoBrabo: BUY | Motivo: Fluxo_Agressao_Compra
+00:58:29 [DatabaseManager] INFO: 💾 SINAL SALVO NO COFRE: BUY por FluxoBrabo
+01:01:03 [Maestro] INFO: Desligando...
+01:01:03 [EventBus] INFO: 🛑 Event Bus parando...
+01:14:38 [Maestro] INFO: --- 🚀 SNAME-MR V2: INGESTÃO MULTI-STREAM ---
+01:14:38 [DatabaseManager] INFO: 🗄️  Tabelas verificadas/criadas (Incluindo Liquidações).
+01:14:38 [EventBus] INFO: 👂 Novo assinante registrado no tópico: market_data
+01:14:38 [EventBus] INFO: 👂 Novo assinante registrado no tópico: liquidation_data
+01:14:38 [EventBus] INFO: 👂 Novo assinante registrado no tópico: trade_signal
+01:14:38 [DatabaseManager] INFO: 💾 DatabaseManager ouvindo Ticks, Liquidações e Sinais.
+01:14:38 [Orchestrator] INFO: 🧠 Orquestrador iniciado. Equipe ativa: ['FluxoBrabo', 'PreditorVWAP']
+01:14:38 [EventBus] INFO: 👂 Novo assinante registrado no tópico: market_data
+01:14:38 [Orchestrator] INFO: 🧠 Cérebro (Multi-Estratégia) conectado.
+01:14:38 [BinanceConnector] INFO: 🔌 Conectando à Binance (Testnet=True)...
+01:14:38 [EventBus] INFO: 🧠 Event Bus iniciado e ouvindo...
+01:14:39 [BinanceConnector] INFO: ✅ Binance Conectada.
+01:14:39 [BinanceConnector] INFO: 🌊 Stream AggTrade iniciado para BTCUSDT
+01:14:39 [EventBus] INFO: 🛑 Event Bus parando...
+01:18:22 [Maestro] INFO: --- 🚀 SNAME-MR V2: INGESTÃO MULTI-STREAM ---
+01:18:22 [DatabaseManager] INFO: 🗄️  Tabelas verificadas/criadas (Incluindo Liquidações).
+01:18:22 [EventBus] INFO: 👂 Novo assinante registrado no tópico: market_data
+01:18:22 [EventBus] INFO: 👂 Novo assinante registrado no tópico: liquidation_data
+01:18:22 [EventBus] INFO: 👂 Novo assinante registrado no tópico: trade_signal
+01:18:22 [DatabaseManager] INFO: 💾 DatabaseManager ouvindo Ticks, Liquidações e Sinais.
+01:18:22 [Orchestrator] INFO: 🧠 Orquestrador iniciado. Equipe ativa: ['FluxoBrabo', 'PreditorVWAP']
+01:18:22 [EventBus] INFO: 👂 Novo assinante registrado no tópico: market_data
+01:18:22 [Orchestrator] INFO: 🧠 Cérebro (Multi-Estratégia) conectado.
+01:18:22 [BinanceConnector] INFO: 🔌 Conectando à Binance (Testnet=True)...
+01:18:22 [EventBus] INFO: 🧠 Event Bus iniciado e ouvindo...
+01:18:23 [BinanceConnector] INFO: ✅ Binance Conectada.
+01:18:23 [BinanceConnector] INFO: 🌊 Iniciando MULTIPLEX STREAM para: ['btcusdt@aggTrade', 'btcusdt@forceOrder']
+01:19:55 [Orchestrator] INFO: 🚨 SINAL >>> PreditorVWAP: BUY | Motivo: Oversold_VWAP
+01:20:03 [Orchestrator] INFO: 🚨 SINAL >>> PreditorVWAP: BUY | Motivo: Oversold_VWAP
+01:20:03 [Orchestrator] INFO: 🚨 SINAL >>> PreditorVWAP: BUY | Motivo: Oversold_VWAP
+01:20:04 [Strategy-FluxoBrabo] INFO: [FluxoBrabo] 🔥 FLUXO COMPRADOR! (+10)
+01:20:04 [Orchestrator] INFO: 🚨 SINAL >>> FluxoBrabo: BUY | Motivo: Fluxo_Agressao_Compra
+01:20:04 [Strategy-FluxoBrabo] INFO: [FluxoBrabo] 🔥 FLUXO COMPRADOR! (+10)
+01:20:04 [Orchestrator] INFO: 🚨 SINAL >>> FluxoBrabo: BUY | Motivo: Fluxo_Agressao_Compra
+01:22:40 [Strategy-FluxoBrabo] INFO: [FluxoBrabo] 🔥 FLUXO COMPRADOR! (+10)
+01:22:40 [Orchestrator] INFO: 🚨 SINAL >>> FluxoBrabo: BUY | Motivo: Fluxo_Agressao_Compra
+01:23:50 [Orchestrator] INFO: 🚨 SINAL >>> PreditorVWAP: SELL | Motivo: Overbought_VWAP
+01:26:17 [Strategy-FluxoBrabo] INFO: [FluxoBrabo] 🔥 FLUXO COMPRADOR! (+10)
+01:26:17 [Orchestrator] INFO: 🚨 SINAL >>> FluxoBrabo: BUY | Motivo: Fluxo_Agressao_Compra
+01:26:22 [Orchestrator] INFO: 🚨 SINAL >>> PreditorVWAP: SELL | Motivo: Overbought_VWAP
+01:26:22 [Orchestrator] INFO: 🚨 SINAL >>> PreditorVWAP: SELL | Motivo: Overbought_VWAP
+01:26:22 [Orchestrator] INFO: 🚨 SINAL >>> PreditorVWAP: SELL | Motivo: Overbought_VWAP
+01:26:22 [Orchestrator] INFO: 🚨 SINAL >>> PreditorVWAP: SELL | Motivo: Overbought_VWAP
+01:26:22 [Orchestrator] INFO: 🚨 SINAL >>> PreditorVWAP: SELL | Motivo: Overbought_VWAP
+01:26:22 [Orchestrator] INFO: 🚨 SINAL >>> PreditorVWAP: SELL | Motivo: Overbought_VWAP
+01:26:22 [Orchestrator] INFO: 🚨 SINAL >>> PreditorVWAP: SELL | Motivo: Overbought_VWAP
+01:26:22 [Orchestrator] INFO: 🚨 SINAL >>> PreditorVWAP: SELL | Motivo: Overbought_VWAP
+01:26:22 [Orchestrator] INFO: 🚨 SINAL >>> PreditorVWAP: SELL | Motivo: Overbought_VWAP
+01:26:22 [Orchestrator] INFO: 🚨 SINAL >>> PreditorVWAP: SELL | Motivo: Overbought_VWAP
+01:26:22 [Orchestrator] INFO: 🚨 SINAL >>> PreditorVWAP: SELL | Motivo: Overbought_VWAP
+01:26:22 [Orchestrator] INFO: 🚨 SINAL >>> PreditorVWAP: SELL | Motivo: Overbought_VWAP
+01:26:22 [Orchestrator] INFO: 🚨 SINAL >>> PreditorVWAP: SELL | Motivo: Overbought_VWAP
+01:26:22 [Orchestrator] INFO: 🚨 SINAL >>> PreditorVWAP: SELL | Motivo: Overbought_VWAP
+01:26:22 [Orchestrator] INFO: 🚨 SINAL >>> PreditorVWAP: SELL | Motivo: Overbought_VWAP
+01:26:22 [Orchestrator] INFO: 🚨 SINAL >>> PreditorVWAP: SELL | Motivo: Overbought_VWAP
+01:26:22 [Strategy-FluxoBrabo] INFO: [FluxoBrabo] ❄️ FLUXO VENDEDOR! (-10)
+01:26:22 [Orchestrator] INFO: 🚨 SINAL >>> FluxoBrabo: SELL | Motivo: Fluxo_Agressao_Venda
+01:26:22 [Orchestrator] INFO: 🚨 SINAL >>> PreditorVWAP: SELL | Motivo: Overbought_VWAP
+01:26:22 [Orchestrator] INFO: 🚨 SINAL >>> PreditorVWAP: SELL | Motivo: Overbought_VWAP
+01:26:22 [Orchestrator] INFO: 🚨 SINAL >>> PreditorVWAP: SELL | Motivo: Overbought_VWAP
+01:26:22 [Orchestrator] INFO: 🚨 SINAL >>> PreditorVWAP: SELL | Motivo: Overbought_VWAP
+01:26:22 [Orchestrator] INFO: 🚨 SINAL >>> PreditorVWAP: SELL | Motivo: Overbought_VWAP
+01:26:22 [Orchestrator] INFO: 🚨 SINAL >>> PreditorVWAP: SELL | Motivo: Overbought_VWAP
+01:26:22 [Orchestrator] INFO: 🚨 SINAL >>> PreditorVWAP: SELL | Motivo: Overbought_VWAP
+01:26:22 [Orchestrator] INFO: 🚨 SINAL >>> PreditorVWAP: SELL | Motivo: Overbought_VWAP
+01:26:22 [Orchestrator] INFO: 🚨 SINAL >>> PreditorVWAP: SELL | Motivo: Overbought_VWAP
+01:26:22 [Orchestrator] INFO: 🚨 SINAL >>> PreditorVWAP: SELL | Motivo: Overbought_VWAP
+01:26:23 [Strategy-FluxoBrabo] INFO: [FluxoBrabo] ❄️ FLUXO VENDEDOR! (-10)
+01:26:23 [Orchestrator] INFO: 🚨 SINAL >>> FluxoBrabo: SELL | Motivo: Fluxo_Agressao_Venda
+01:26:23 [Orchestrator] INFO: 🚨 SINAL >>> PreditorVWAP: SELL | Motivo: Overbought_VWAP
+01:26:23 [Orchestrator] INFO: 🚨 SINAL >>> PreditorVWAP: SELL | Motivo: Overbought_VWAP
+01:26:24 [Orchestrator] INFO: 🚨 SINAL >>> PreditorVWAP: SELL | Motivo: Overbought_VWAP
+01:26:24 [Orchestrator] INFO: 🚨 SINAL >>> PreditorVWAP: SELL | Motivo: Overbought_VWAP
+01:26:37 [Orchestrator] INFO: 🚨 SINAL >>> PreditorVWAP: SELL | Motivo: Overbought_VWAP
+01:26:42 [Orchestrator] INFO: 🚨 SINAL >>> PreditorVWAP: SELL | Motivo: Overbought_VWAP
+01:26:52 [Maestro] INFO: Desligando...
+01:26:52 [EventBus] INFO: 🛑 Event Bus parando...
+01:29:18 [Maestro] INFO: --- 🚀 SNAME-MR V2: INGESTÃO MULTI-STREAM ---
+01:29:18 [DatabaseManager] INFO: 🗄️  Tabelas verificadas/criadas (Incluindo Liquidações).
+01:29:18 [EventBus] INFO: 👂 Novo assinante registrado no tópico: market_data
+01:29:18 [EventBus] INFO: 👂 Novo assinante registrado no tópico: liquidation_data
+01:29:18 [EventBus] INFO: 👂 Novo assinante registrado no tópico: trade_signal
+01:29:18 [DatabaseManager] INFO: 💾 DatabaseManager ouvindo Ticks, Liquidações e Sinais.
+01:29:18 [Orchestrator] INFO: 🧠 Orquestrador iniciado. Tick-Strats: 2 | Event-Strats: 1
+01:29:18 [EventBus] INFO: 👂 Novo assinante registrado no tópico: market_data
+01:29:18 [EventBus] INFO: 👂 Novo assinante registrado no tópico: liquidation_data
+01:29:18 [Orchestrator] INFO: 🧠 Cérebro conectado aos fluxos de Mercado e Liquidação.
+01:29:18 [BinanceConnector] INFO: 🔌 Conectando à Binance (Testnet=True)...
+01:29:18 [EventBus] INFO: 🧠 Event Bus iniciado e ouvindo...
+01:29:19 [BinanceConnector] INFO: ✅ Binance Conectada.
+01:29:19 [BinanceConnector] INFO: 🌊 Iniciando MULTIPLEX STREAM para: ['btcusdt@aggTrade', 'btcusdt@forceOrder']
+01:30:52 [Orchestrator] INFO: 🚨 SINAL >>> PreditorVWAP: BUY | Motivo: Oversold_VWAP
+01:31:02 [Orchestrator] INFO: 🚨 SINAL >>> PreditorVWAP: BUY | Motivo: Oversold_VWAP
+01:31:04 [Orchestrator] INFO: 🚨 SINAL >>> PreditorVWAP: BUY | Motivo: Oversold_VWAP
+01:31:04 [Orchestrator] INFO: 🚨 SINAL >>> PreditorVWAP: BUY | Motivo: Oversold_VWAP
+01:31:05 [Orchestrator] INFO: 🚨 SINAL >>> PreditorVWAP: BUY | Motivo: Oversold_VWAP
+01:31:16 [Strategy-FluxoBrabo] INFO: [FluxoBrabo] ❄️ FLUXO VENDEDOR! (-10)
+01:31:16 [Orchestrator] INFO: 🚨 SINAL >>> FluxoBrabo: SELL | Motivo: Fluxo_Agressao_Venda
+01:31:16 [Strategy-FluxoBrabo] INFO: [FluxoBrabo] ❄️ FLUXO VENDEDOR! (-10)
+01:31:16 [Orchestrator] INFO: 🚨 SINAL >>> FluxoBrabo: SELL | Motivo: Fluxo_Agressao_Venda
+01:32:24 [binance.ws.reconnecting_websocket] ERROR: Unknown exception: BinanceWebsocketQueueOverflow (Message queue size 100 exceeded maximum 100)
+01:32:24 [Orchestrator] INFO: 🚨 SINAL >>> PreditorVWAP: SELL | Motivo: Overbought_VWAP
+01:32:24 [EventBus] INFO: 🛑 Event Bus parando...
+01:46:18 [Maestro] INFO: --- 🚀 SNAME-MR V2: INGESTÃO MULTI-STREAM ---
+01:46:18 [DatabaseManager] INFO: 🗄️  Tabelas verificadas/criadas (Incluindo Liquidações).
+01:46:18 [EventBus] INFO: 👂 Novo assinante registrado no tópico: market_data
+01:46:18 [EventBus] INFO: 👂 Novo assinante registrado no tópico: liquidation_data
+01:46:18 [EventBus] INFO: 👂 Novo assinante registrado no tópico: trade_signal
+01:46:18 [DatabaseManager] INFO: 💾 DatabaseManager ouvindo Ticks, Liquidações e Sinais.
+01:46:18 [Orchestrator] INFO: 🧠 Orquestrador iniciado. Tick-Strats: 2 | Event-Strats: 1
+01:46:18 [EventBus] INFO: 👂 Novo assinante registrado no tópico: market_data
+01:46:18 [EventBus] INFO: 👂 Novo assinante registrado no tópico: liquidation_data
+01:46:18 [Orchestrator] INFO: 🧠 Cérebro conectado aos fluxos de Mercado e Liquidação.
+01:46:18 [BinanceConnector] INFO: 🔌 Conectando à Binance (Testnet=True)...
+01:46:18 [EventBus] INFO: 🧠 Event Bus iniciado e ouvindo...
+01:46:19 [BinanceConnector] INFO: ✅ Binance Conectada.
+01:46:19 [BinanceConnector] INFO: 🌊 (Re)Iniciando MULTIPLEX STREAM...
+01:46:34 [Maestro] INFO: Desligando...
+01:46:34 [EventBus] INFO: 🛑 Event Bus parando...
