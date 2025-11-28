@@ -144,8 +144,8 @@ class TestPositionManager:
     def test_close_position_with_suspicious_price(self):
         """Test that closing position with suspicious price (>50% deviation) is rejected."""
         self.pm.open_position('BTCUSDT', 'BUY', 50000, 0.1)
-        # Set last valid price
-        self.pm.last_valid_price = 50000
+        # Set last valid price using the proper method
+        self.pm.update_last_valid_price(50000)
         # Try to close with a price that is 60% different
         pnl = self.pm.close_position(20000)  # 60% lower
         assert pnl is None  # Rejected

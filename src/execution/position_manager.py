@@ -111,9 +111,10 @@ class PositionManager:
             return None
         
         # Validar que o preço está dentro de um range razoável (±50% do último preço conhecido)
-        if self.last_valid_price and abs(exit_price - self.last_valid_price) / self.last_valid_price > 0.5:
-            logger.error(f"❌ PREÇO SUSPEITO: {exit_price} vs último válido {self.last_valid_price}. Abortando!")
-            return None
+        if self.last_valid_price and self.last_valid_price > 0:
+            if abs(exit_price - self.last_valid_price) / self.last_valid_price > 0.5:
+                logger.error(f"❌ PREÇO SUSPEITO: {exit_price} vs último válido {self.last_valid_price}. Abortando!")
+                return None
         
         pos = self.current_position
         
