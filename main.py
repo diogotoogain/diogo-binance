@@ -8,6 +8,8 @@ from src.core.event_bus import EventBus
 from src.data.database_manager import DatabaseManager
 from src.data.binance_connector import BinanceConnector
 from src.core.strategy_orchestrator import StrategyOrchestrator
+from src.core.dashboard import TerminalDashboard
+from src.utils.trade_logger import TradeLogger
 
 logging.basicConfig(
     level=logging.INFO,
@@ -24,6 +26,7 @@ async def main():
     # 1. Infra
     event_bus = EventBus()
     db_manager = DatabaseManager()
+    trade_logger = TradeLogger()
     
     # 2. Banco
     await db_manager.init_models()
@@ -33,16 +36,23 @@ async def main():
     orchestrator = StrategyOrchestrator(event_bus)
     await orchestrator.start()
 
-    # 4. Bus
+    # 4. Dashboard
+    dashboard = TerminalDashboard(event_bus)
+    await dashboard.start()
+
+    # 5. Trade Logger
+    event_bus.subscribe('trade_signal', trade_logger.on_signal)
+
+    # 6. Bus
     asyncio.create_task(event_bus.start())
 
-    # 5. Conectar
+    # 7. Conectar
     api_key = os.getenv("BINANCE_API_KEY")
     secret = os.getenv("BINANCE_SECRET_KEY")
     connector = BinanceConnector(api_key, secret, event_bus, testnet=True)
     await connector.connect()
 
-    # 6. Ligar TUDO (Ticks + Liquidações)
+    # 8. Ligar TUDO (Ticks + Liquidações)
     stream_task = asyncio.create_task(connector.start_streams("BTCUSDT"))
 
     print("\n💀 CAÇADOR DE LIQUIDEZ ATIVO... Monitorando Ticks e Quebras...\n")
@@ -52,6 +62,7 @@ async def main():
     except asyncio.CancelledError:
         logger.info("Desligando...")
     finally:
+        await dashboard.stop()
         await connector.close()
         await event_bus.stop()
 
