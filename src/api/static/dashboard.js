@@ -43,79 +43,86 @@ let entryPrice = 0;
 let stopLossPrice = 0;
 let takeProfitPrice = 0;
 
+// Horizontal line annotation plugin - registered once
+const horizontalLinePlugin = {
+    id: 'horizontalLines',
+    afterDraw: (chart) => {
+        if (!currentPosition || !currentPosition.has_position) return;
+        
+        const ctx = chart.ctx;
+        const yAxis = chart.scales.y;
+        const chartArea = chart.chartArea;
+        
+        // Draw entry price line (yellow)
+        if (entryPrice > 0) {
+            const yEntry = yAxis.getPixelForValue(entryPrice);
+            if (yEntry >= chartArea.top && yEntry <= chartArea.bottom) {
+                ctx.save();
+                ctx.beginPath();
+                ctx.moveTo(chartArea.left, yEntry);
+                ctx.lineTo(chartArea.right, yEntry);
+                ctx.lineWidth = 2;
+                ctx.strokeStyle = '#fcd34d';
+                ctx.setLineDash([5, 5]);
+                ctx.stroke();
+                ctx.fillStyle = '#fcd34d';
+                ctx.font = '10px Inter';
+                ctx.fillText(`Entry: $${entryPrice.toLocaleString()}`, chartArea.right - 120, yEntry - 5);
+                ctx.restore();
+            }
+        }
+        
+        // Draw stop loss line (red)
+        if (stopLossPrice > 0) {
+            const ySL = yAxis.getPixelForValue(stopLossPrice);
+            if (ySL >= chartArea.top && ySL <= chartArea.bottom) {
+                ctx.save();
+                ctx.beginPath();
+                ctx.moveTo(chartArea.left, ySL);
+                ctx.lineTo(chartArea.right, ySL);
+                ctx.lineWidth = 2;
+                ctx.strokeStyle = '#ef4444';
+                ctx.setLineDash([5, 5]);
+                ctx.stroke();
+                ctx.fillStyle = '#ef4444';
+                ctx.font = '10px Inter';
+                ctx.fillText(`SL: $${stopLossPrice.toLocaleString()}`, chartArea.right - 100, ySL - 5);
+                ctx.restore();
+            }
+        }
+        
+        // Draw take profit line (green)
+        if (takeProfitPrice > 0) {
+            const yTP = yAxis.getPixelForValue(takeProfitPrice);
+            if (yTP >= chartArea.top && yTP <= chartArea.bottom) {
+                ctx.save();
+                ctx.beginPath();
+                ctx.moveTo(chartArea.left, yTP);
+                ctx.lineTo(chartArea.right, yTP);
+                ctx.lineWidth = 2;
+                ctx.strokeStyle = '#22c55e';
+                ctx.setLineDash([5, 5]);
+                ctx.stroke();
+                ctx.fillStyle = '#22c55e';
+                ctx.font = '10px Inter';
+                ctx.fillText(`TP: $${takeProfitPrice.toLocaleString()}`, chartArea.right - 100, yTP - 5);
+                ctx.restore();
+            }
+        }
+    }
+};
+
+// Register plugin once
+let pluginRegistered = false;
+
 function initChart() {
     const ctx = document.getElementById('priceChart').getContext('2d');
     
-    // Horizontal line annotation plugin
-    const horizontalLinePlugin = {
-        id: 'horizontalLines',
-        afterDraw: (chart) => {
-            if (!currentPosition || !currentPosition.has_position) return;
-            
-            const ctx = chart.ctx;
-            const yAxis = chart.scales.y;
-            const chartArea = chart.chartArea;
-            
-            // Draw entry price line (yellow)
-            if (entryPrice > 0) {
-                const yEntry = yAxis.getPixelForValue(entryPrice);
-                if (yEntry >= chartArea.top && yEntry <= chartArea.bottom) {
-                    ctx.save();
-                    ctx.beginPath();
-                    ctx.moveTo(chartArea.left, yEntry);
-                    ctx.lineTo(chartArea.right, yEntry);
-                    ctx.lineWidth = 2;
-                    ctx.strokeStyle = '#fcd34d';
-                    ctx.setLineDash([5, 5]);
-                    ctx.stroke();
-                    ctx.fillStyle = '#fcd34d';
-                    ctx.font = '10px Inter';
-                    ctx.fillText(`Entry: $${entryPrice.toLocaleString()}`, chartArea.right - 120, yEntry - 5);
-                    ctx.restore();
-                }
-            }
-            
-            // Draw stop loss line (red)
-            if (stopLossPrice > 0) {
-                const ySL = yAxis.getPixelForValue(stopLossPrice);
-                if (ySL >= chartArea.top && ySL <= chartArea.bottom) {
-                    ctx.save();
-                    ctx.beginPath();
-                    ctx.moveTo(chartArea.left, ySL);
-                    ctx.lineTo(chartArea.right, ySL);
-                    ctx.lineWidth = 2;
-                    ctx.strokeStyle = '#ef4444';
-                    ctx.setLineDash([5, 5]);
-                    ctx.stroke();
-                    ctx.fillStyle = '#ef4444';
-                    ctx.font = '10px Inter';
-                    ctx.fillText(`SL: $${stopLossPrice.toLocaleString()}`, chartArea.right - 100, ySL - 5);
-                    ctx.restore();
-                }
-            }
-            
-            // Draw take profit line (green)
-            if (takeProfitPrice > 0) {
-                const yTP = yAxis.getPixelForValue(takeProfitPrice);
-                if (yTP >= chartArea.top && yTP <= chartArea.bottom) {
-                    ctx.save();
-                    ctx.beginPath();
-                    ctx.moveTo(chartArea.left, yTP);
-                    ctx.lineTo(chartArea.right, yTP);
-                    ctx.lineWidth = 2;
-                    ctx.strokeStyle = '#22c55e';
-                    ctx.setLineDash([5, 5]);
-                    ctx.stroke();
-                    ctx.fillStyle = '#22c55e';
-                    ctx.font = '10px Inter';
-                    ctx.fillText(`TP: $${takeProfitPrice.toLocaleString()}`, chartArea.right - 100, yTP - 5);
-                    ctx.restore();
-                }
-            }
-        }
-    };
-    
-    Chart.register(horizontalLinePlugin);
+    // Register plugin only once
+    if (!pluginRegistered) {
+        Chart.register(horizontalLinePlugin);
+        pluginRegistered = true;
+    }
     
     priceChart = new Chart(ctx, {
         type: 'line',
@@ -178,6 +185,85 @@ function initChart() {
             }
         }
     });
+}
+
+/**
+ * Initialize equity chart
+ */
+let equityChart = null;
+
+function initEquityChart() {
+    const ctx = document.getElementById('equityChart');
+    if (!ctx) return;
+    
+    equityChart = new Chart(ctx.getContext('2d'), {
+        type: 'line',
+        data: {
+            labels: [],
+            datasets: [{
+                label: 'Equity',
+                data: [],
+                borderColor: '#22c55e',
+                backgroundColor: 'rgba(34, 197, 94, 0.1)',
+                borderWidth: 2,
+                fill: true,
+                tension: 0.4,
+                pointRadius: 0
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            animation: { duration: 0 },
+            plugins: {
+                legend: { display: false }
+            },
+            scales: {
+                x: { display: false },
+                y: {
+                    grid: { color: 'rgba(255, 255, 255, 0.05)' },
+                    ticks: {
+                        color: '#6b7280',
+                        callback: (v) => '$' + v.toLocaleString()
+                    }
+                }
+            }
+        }
+    });
+}
+
+/**
+ * Update equity chart with new balance data
+ */
+function updateEquityChart(balance) {
+    if (!equityChart || !balance) return;
+    
+    const totalBalance = balance.total_usdt || 0;
+    if (totalBalance <= 0) return;
+    
+    equityHistory.push({
+        time: new Date().toLocaleTimeString(),
+        value: totalBalance
+    });
+    
+    // Keep only last 50 points
+    if (equityHistory.length > 50) {
+        equityHistory.shift();
+    }
+    
+    equityChart.data.labels = equityHistory.map(e => e.time);
+    equityChart.data.datasets[0].data = equityHistory.map(e => e.value);
+    equityChart.update('none');
+    
+    // Calculate drawdown
+    const peak = Math.max(...equityHistory.map(e => e.value));
+    const current = totalBalance;
+    const drawdown = peak > 0 ? ((peak - current) / peak) * 100 : 0;
+    
+    const drawdownEl = document.getElementById('perf-drawdown');
+    if (drawdownEl) {
+        drawdownEl.textContent = `-${drawdown.toFixed(2)}%`;
+    }
 }
 
 /**
@@ -532,6 +618,9 @@ function updateBalance(balance) {
     const unrealizedEl = document.getElementById('unrealized-pnl');
     unrealizedEl.textContent = formatCurrency(unrealizedPnl, true);
     unrealizedEl.className = `text-sm font-medium ${unrealizedPnl >= 0 ? 'text-green-400' : 'text-red-400'}`;
+    
+    // Update equity chart
+    updateEquityChart(balance);
 }
 
 /**
@@ -1388,14 +1477,18 @@ function updatePerformanceMetrics(winRate, profitFactor, bestTrade, worstTrade, 
     const bestTradeEl = document.getElementById('perf-best-trade');
     if (bestTradeEl) {
         bestTradeEl.textContent = formatCurrency(bestTrade.pnl, true);
-        bestTradeEl.className = 'text-lg font-bold text-green-400';
+        bestTradeEl.className = 'mini-stat-value text-green-400';
     }
     
     const worstTradeEl = document.getElementById('perf-worst-trade');
     if (worstTradeEl) {
         worstTradeEl.textContent = formatCurrency(worstTrade.pnl, true);
-        worstTradeEl.className = 'text-lg font-bold text-red-400';
+        worstTradeEl.className = 'mini-stat-value text-red-400';
     }
+    
+    // Update total trades
+    const totalTradesEl = document.getElementById('perf-total-trades');
+    if (totalTradesEl) totalTradesEl.textContent = totalTrades;
     
     // Calculate trades per hour
     if (botStartTime && totalTrades > 0) {
@@ -1438,6 +1531,9 @@ function showNotification(title, message, type = 'info') {
     }, 5000);
 }
 
+// Shared AudioContext for sound alerts
+let audioContext = null;
+
 /**
  * Play alert sound
  */
@@ -1445,7 +1541,16 @@ function playAlertSound(type = 'default') {
     if (!soundEnabled) return;
     
     try {
-        const audioContext = new (window.AudioContext || window.webkitAudioContext)();
+        // Create or reuse AudioContext
+        if (!audioContext) {
+            audioContext = new (window.AudioContext || window.webkitAudioContext)();
+        }
+        
+        // Resume context if suspended (due to autoplay policy)
+        if (audioContext.state === 'suspended') {
+            audioContext.resume();
+        }
+        
         const oscillator = audioContext.createOscillator();
         const gainNode = audioContext.createGain();
         
@@ -1467,7 +1572,7 @@ function playAlertSound(type = 'default') {
         oscillator.start();
         oscillator.stop(audioContext.currentTime + 0.15);
     } catch (e) {
-        console.log('Audio not supported');
+        console.log('Audio not supported:', e.message);
     }
 }
 
@@ -1481,7 +1586,11 @@ function toggleSound() {
         btn.textContent = soundEnabled ? '🔊' : '🔇';
         btn.title = soundEnabled ? 'Som ativado' : 'Som desativado';
     }
-    localStorage.setItem('soundEnabled', soundEnabled);
+    try {
+        localStorage.setItem('soundEnabled', soundEnabled);
+    } catch (e) {
+        console.log('localStorage not available');
+    }
 }
 
 /**
@@ -1500,37 +1609,46 @@ function toggleTheme() {
     // Update body background
     document.body.style.backgroundColor = darkMode ? '#0f0f0f' : '#f5f5f5';
     
-    localStorage.setItem('darkMode', darkMode);
+    try {
+        localStorage.setItem('darkMode', darkMode);
+    } catch (e) {
+        console.log('localStorage not available');
+    }
 }
 
 /**
  * Export logs to CSV
  */
 function exportLogsCSV() {
-    const container = document.getElementById('logs-container');
-    const logs = container.querySelectorAll('div');
-    
-    let csv = 'Time,Level,Message\n';
-    logs.forEach(log => {
-        const spans = log.querySelectorAll('span');
-        if (spans.length >= 2) {
-            const time = spans[0].textContent;
-            const message = spans[1].textContent.replace(/,/g, ';');
-            const level = log.classList.contains('log-error') ? 'ERROR' : 
-                         log.classList.contains('log-warning') ? 'WARNING' : 'INFO';
-            csv += `${time},${level},"${message}"\n`;
-        }
-    });
-    
-    const blob = new Blob([csv], { type: 'text/csv' });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement('a');
-    a.href = url;
-    a.download = `bot-logs-${new Date().toISOString().split('T')[0]}.csv`;
-    a.click();
-    URL.revokeObjectURL(url);
-    
-    showNotification('📥 Exportado', 'Logs exportados com sucesso!', 'success');
+    try {
+        const container = document.getElementById('logs-container');
+        const logs = container.querySelectorAll('div');
+        
+        let csv = 'Time,Level,Message\n';
+        logs.forEach(log => {
+            const spans = log.querySelectorAll('span');
+            if (spans.length >= 2) {
+                const time = spans[0].textContent;
+                const message = spans[1].textContent.replace(/,/g, ';').replace(/"/g, '""');
+                const level = log.classList.contains('log-error') ? 'ERROR' : 
+                             log.classList.contains('log-warning') ? 'WARNING' : 'INFO';
+                csv += `${time},${level},"${message}"\n`;
+            }
+        });
+        
+        const blob = new Blob([csv], { type: 'text/csv' });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = `bot-logs-${new Date().toISOString().split('T')[0]}.csv`;
+        a.click();
+        URL.revokeObjectURL(url);
+        
+        showNotification('📥 Exportado', 'Logs exportados com sucesso!', 'success');
+    } catch (e) {
+        console.error('Error exporting logs:', e);
+        showNotification('❌ Erro', 'Falha ao exportar logs', 'error');
+    }
 }
 
 /**
@@ -1610,15 +1728,19 @@ function filterLogs(filter) {
  * Initialize event listeners and load saved preferences
  */
 function initPreferences() {
-    // Load saved preferences
-    const savedSound = localStorage.getItem('soundEnabled');
-    if (savedSound !== null) {
-        soundEnabled = savedSound === 'true';
-    }
-    
-    const savedDarkMode = localStorage.getItem('darkMode');
-    if (savedDarkMode !== null) {
-        darkMode = savedDarkMode === 'true';
+    try {
+        // Load saved preferences
+        const savedSound = localStorage.getItem('soundEnabled');
+        if (savedSound !== null) {
+            soundEnabled = savedSound === 'true';
+        }
+        
+        const savedDarkMode = localStorage.getItem('darkMode');
+        if (savedDarkMode !== null) {
+            darkMode = savedDarkMode === 'true';
+        }
+    } catch (e) {
+        console.log('localStorage not available');
     }
     
     // Apply saved preferences
@@ -1639,6 +1761,7 @@ function initPreferences() {
 // Initialize tabs on page load
 document.addEventListener('DOMContentLoaded', () => {
     initChart();
+    initEquityChart();
     initTabs();
     initPreferences();
     connectWebSocket();
