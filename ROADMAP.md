@@ -1,7 +1,7 @@
 # 🚀 SNAME-MR: ROADMAP DO PROJETO
 
-> **Sistema de Negociação Adaptativo Multi-Estratégia com Meta-Gestão de Risco**
-> 
+> **Sistema de Negociação Adaptativo Multi-Estratégia com Meta-Gestão de Risco**  
+>  
 > *"A melhor estratégia do mundo não é UMA estratégia, é um PORTFÓLIO de estratégias descorrelacionadas que transforma você em 'a casa' - o cassino que sempre tem vantagem estatística."*
 
 ---
@@ -20,9 +20,9 @@
 - [x] Sistema de logging
 
 ### ✅ Estratégias Implementadas
-- [x] **VPINStrategy** - Detecta fluxo tóxico de traders informados
-  - Buckets por volume (não por tempo)
-  - Parametrizável: bucket_size, n_buckets, thresholds, cooldown
+- [x] **VPINStrategy** - Detecta fluxo tóxico de traders informados  
+  - Buckets por volume (não por tempo)  
+  - Parametrizável: bucket_size, n_buckets, thresholds, cooldown  
   - Detecta direção do smart money
 
 ### 🔄 Em Progresso (PR #3)
@@ -46,6 +46,65 @@
 - [ ] HRP (Hierarchical Risk Parity)
 - [ ] World Models (GANs) para simulação
 - [ ] Backtesting Engine realista
+
+---
+
+## 🐳 INFRAESTRUTURA
+
+### Docker Compose
+O sistema usa Docker para isolar e persistir os dados:
+
+```yaml
+services:
+  db:
+    image: postgres:15-alpine
+    container_name: sname_db
+    ports: "5432:5432"
+    volumes: postgres_data:/var/lib/postgresql/data
+```
+
+### Onde cada coisa está:
+
+| Componente | Localização | Persistência |
+|------------|-------------|--------------|
+| **Código Python** | `~/Documents/diogo-binance/` | Git + GitHub |
+| **Banco PostgreSQL** | Docker container `sname_db` | Volume `postgres_data` ✅ |
+| **Dados (ticks, liquidações, sinais)** | Tabelas no PostgreSQL | Volume Docker ✅ |
+| **Logs** | Terminal (stdout) | ❌ Não persistido ainda |
+| **Configurações** | `.env` (local) | Git ignorado |
+
+### Comandos Úteis Docker:
+
+```bash
+# Iniciar o banco de dados
+docker-compose up -d
+
+# Ver containers rodando
+docker ps
+
+# Ver logs do PostgreSQL
+docker logs sname_db
+
+# Conectar no banco
+docker exec -it sname_db psql -U admin -d sname_mr_db
+
+# Ver quantos dados tem
+docker exec -it sname_db psql -U admin -d sname_mr_db -c "SELECT COUNT(*) FROM ticks;"
+
+# Parar tudo (dados NÃO se perdem)
+docker-compose down
+
+# CUIDADO: Apagar tudo incluindo dados
+docker-compose down -v
+```
+
+### Tabelas no Banco:
+
+| Tabela | O que guarda |
+|--------|--------------|
+| `ticks` | Todos os trades recebidos |
+| `liquidations` | Liquidações forçadas |
+| `signals` | Sinais gerados pelas estratégias |
 
 ---
 
@@ -124,7 +183,8 @@
 - **Linguagem:** Python 3.x
 - **Async:** asyncio + aiohttp
 - **WebSocket:** python-binance
-- **Banco:** PostgreSQL
+- **Banco:** PostgreSQL 15 (Docker)
+- **Container:** Docker Compose
 - **Estrutura:** Event-Driven Architecture
 
 ### Stack Futuro (Performance)
@@ -194,6 +254,52 @@
 | 2025-11-28 | Infraestrutura base completa |
 | 2025-11-28 | VPINStrategy implementada (PR #2) |
 | 2025-11-28 | 4 novas estratégias em desenvolvimento (PR #3) |
+| 2025-11-28 | Adicionada documentação de infraestrutura Docker |
+
+---
+
+## 🚀 COMO RODAR O PROJETO
+
+### Pré-requisitos:
+- Python 3.10+
+- Docker Desktop
+- Git
+
+### Passo a passo:
+
+```bash
+# 1. Clonar o repositório
+git clone https://github.com/diogotoogain/diogo-binance.git
+cd diogo-binance
+
+# 2. Subir o banco de dados
+docker-compose up -d
+
+# 3. Criar ambiente virtual Python
+python -m venv venv
+source venv/bin/activate  # Mac/Linux
+
+# 4. Instalar dependências
+pip install -r requirements.txt
+
+# 5. Configurar variáveis de ambiente
+cp .env.example .env
+# Editar .env com suas chaves da Binance
+
+# 6. Rodar o robô
+python main.py
+```
+
+### Para parar:
+```bash
+# Parar o robô: Ctrl+C no terminal
+
+# Parar o banco (dados persistem)
+docker-compose down
+
+# Parar e APAGAR dados (cuidado!)
+docker-compose down -v
+```
 
 ---
 
