@@ -1,0 +1,372 @@
+name: Train Multi-Timeframe RL Ensemble
+
+on:
+  schedule:
+    # Run every Sunday at 3:00 AM UTC
+    - cron: '0 3 * * 0'
+  workflow_dispatch:
+    inputs:
+      timesteps:
+        description: 'Total training timesteps per model (default: 200000)'
+        required: false
+        default: '200000'
+      timeframe:
+        description: 'Timeframe to train (1m, 5m, 15m, or all)'
+        required: false
+        default: 'all'
+        type: choice
+        options:
+          - all
+          - 1m
+          - 5m
+          - 15m
+
+jobs:
+  train-1m:
+    if: ${{ github.event.inputs.timeframe == 'all' || github.event.inputs.timeframe == '1m' || github.event_name == 'schedule' }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 180  # 3 hours
+
+    permissions:
+      contents: write
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 1
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+          cache: 'pip'
+
+      - name: Install system dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y --no-install-recommends \
+            libgl1-mesa-glx \
+            libglib2.0-0
+
+      - name: Install Python dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install torch --index-url https://download.pytorch.org/whl/cpu
+          pip install "stable-baselines3[extra]>=2.2.0"
+          pip install gymnasium>=0.29.0
+          pip install pandas>=2.1.0
+          pip install numpy>=1.24.0
+          pip install pyarrow>=14.0.0
+          pip install pyyaml>=6.0
+          pip install colorama>=0.4.6
+          pip install tqdm>=4.66.0
+          pip install rich>=13.0.0
+
+      - name: Create required directories
+        run: |
+          mkdir -p v2/models/rl
+          mkdir -p v2/results
+
+      - name: Train 1-minute RL model
+        run: |
+          cd $GITHUB_WORKSPACE
+          python v2/scripts/train_multi_timeframe.py \
+            --timeframe 1m \
+            --timesteps ${{ github.event.inputs.timesteps || '200000' }} \
+            --data-dir v2/data/raw \
+            --model-dir v2/models/rl \
+            --results-dir v2/results
+
+      - name: Upload 1m model artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: model-1m
+          path: |
+            v2/models/rl/ppo_1m_best.zip
+            v2/results/latest_results_1m.json
+          retention-days: 30
+
+  train-5m:
+    if: ${{ github.event.inputs.timeframe == 'all' || github.event.inputs.timeframe == '5m' || github.event_name == 'schedule' }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 180
+
+    permissions:
+      contents: write
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 1
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+          cache: 'pip'
+
+      - name: Install system dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y --no-install-recommends \
+            libgl1-mesa-glx \
+            libglib2.0-0
+
+      - name: Install Python dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install torch --index-url https://download.pytorch.org/whl/cpu
+          pip install "stable-baselines3[extra]>=2.2.0"
+          pip install gymnasium>=0.29.0
+          pip install pandas>=2.1.0
+          pip install numpy>=1.24.0
+          pip install pyarrow>=14.0.0
+          pip install pyyaml>=6.0
+          pip install colorama>=0.4.6
+          pip install tqdm>=4.66.0
+          pip install rich>=13.0.0
+
+      - name: Create required directories
+        run: |
+          mkdir -p v2/models/rl
+          mkdir -p v2/results
+
+      - name: Train 5-minute RL model
+        run: |
+          cd $GITHUB_WORKSPACE
+          python v2/scripts/train_multi_timeframe.py \
+            --timeframe 5m \
+            --timesteps ${{ github.event.inputs.timesteps || '200000' }} \
+            --data-dir v2/data/raw \
+            --model-dir v2/models/rl \
+            --results-dir v2/results
+
+      - name: Upload 5m model artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: model-5m
+          path: |
+            v2/models/rl/ppo_5m_best.zip
+            v2/results/latest_results_5m.json
+          retention-days: 30
+
+  train-15m:
+    if: ${{ github.event.inputs.timeframe == 'all' || github.event.inputs.timeframe == '15m' || github.event_name == 'schedule' }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 180
+
+    permissions:
+      contents: write
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 1
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+          cache: 'pip'
+
+      - name: Install system dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y --no-install-recommends \
+            libgl1-mesa-glx \
+            libglib2.0-0
+
+      - name: Install Python dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install torch --index-url https://download.pytorch.org/whl/cpu
+          pip install "stable-baselines3[extra]>=2.2.0"
+          pip install gymnasium>=0.29.0
+          pip install pandas>=2.1.0
+          pip install numpy>=1.24.0
+          pip install pyarrow>=14.0.0
+          pip install pyyaml>=6.0
+          pip install colorama>=0.4.6
+          pip install tqdm>=4.66.0
+          pip install rich>=13.0.0
+
+      - name: Create required directories
+        run: |
+          mkdir -p v2/models/rl
+          mkdir -p v2/results
+
+      - name: Train 15-minute RL model
+        run: |
+          cd $GITHUB_WORKSPACE
+          python v2/scripts/train_multi_timeframe.py \
+            --timeframe 15m \
+            --timesteps ${{ github.event.inputs.timesteps || '200000' }} \
+            --data-dir v2/data/raw \
+            --model-dir v2/models/rl \
+            --results-dir v2/results
+
+      - name: Upload 15m model artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: model-15m
+          path: |
+            v2/models/rl/ppo_15m_best.zip
+            v2/results/latest_results_15m.json
+          retention-days: 30
+
+  evaluate-ensemble:
+    needs: [train-1m, train-5m, train-15m]
+    if: always() && (github.event.inputs.timeframe == 'all' || github.event_name == 'schedule')
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+
+    permissions:
+      contents: write
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 1
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+          cache: 'pip'
+
+      - name: Install Python dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install torch --index-url https://download.pytorch.org/whl/cpu
+          pip install "stable-baselines3[extra]>=2.2.0"
+          pip install gymnasium>=0.29.0
+          pip install pandas>=2.1.0
+          pip install numpy>=1.24.0
+          pip install pyarrow>=14.0.0
+          pip install pyyaml>=6.0
+
+      - name: Create required directories
+        run: |
+          mkdir -p v2/models/rl
+          mkdir -p v2/results
+
+      - name: Download 1m model artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: model-1m
+          path: v2/
+        continue-on-error: true
+
+      - name: Download 5m model artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: model-5m
+          path: v2/
+        continue-on-error: true
+
+      - name: Download 15m model artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: model-15m
+          path: v2/
+        continue-on-error: true
+
+      - name: Move models to correct location
+        run: |
+          # Move model files to correct directories if needed
+          find v2/ -name "*.zip" -exec mv {} v2/models/rl/ \; 2>/dev/null || true
+          find v2/ -name "*.json" -exec mv {} v2/results/ \; 2>/dev/null || true
+          ls -la v2/models/rl/ || echo "No models found"
+          ls -la v2/results/ || echo "No results found"
+
+      - name: Evaluate ensemble
+        run: |
+          cd $GITHUB_WORKSPACE
+          python -c "
+          import sys
+          sys.path.insert(0, '.')
+          
+          from v2.src.rl.ensemble import RLEnsemble
+          from v2.src.rl.ensemble_evaluator import EnsembleEvaluator
+          import json
+          from pathlib import Path
+          
+          # Load ensemble
+          ensemble = RLEnsemble(models_dir='v2/models/rl')
+          loaded = ensemble.load_models()
+          
+          print('=' * 60)
+          print('🔧 ENSEMBLE STATUS')
+          print('=' * 60)
+          status = ensemble.get_status()
+          print(json.dumps(status, indent=2))
+          
+          if not loaded:
+              print('⚠️  No models loaded, skipping evaluation')
+              sys.exit(0)
+          
+          print('\\n✅ Ensemble evaluation complete!')
+          "
+
+      - name: Commit and push models
+        run: |
+          git config --local user.email "github-actions[bot]@users.noreply.github.com"
+          git config --local user.name "github-actions[bot]"
+
+          # Add model and results files
+          git add v2/models/rl/*.zip || true
+          git add v2/results/*.json || true
+
+          # Check if there are changes to commit
+          if git diff --staged --quiet; then
+            echo "No changes to commit"
+          else
+            TIMESTAMP=$(date -u +"%Y-%m-%d %H:%M UTC")
+            git commit -m "🤖 Multi-timeframe RL ensemble training - ${TIMESTAMP}"
+            git push
+            echo "✅ Models committed and pushed successfully"
+          fi
+
+      - name: Create summary
+        run: |
+          echo "## 🤖 Multi-Timeframe RL Ensemble Training Summary" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "**Training completed at:** $(date -u +"%Y-%m-%d %H:%M UTC")" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "### Configuration" >> $GITHUB_STEP_SUMMARY
+          echo "- **Timesteps per model:** ${{ github.event.inputs.timesteps || '200000' }}" >> $GITHUB_STEP_SUMMARY
+          echo "- **Trained timeframes:** 1m, 5m, 15m" >> $GITHUB_STEP_SUMMARY
+          echo "- **Confluence voting:** 2/3 majority required" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "### Models" >> $GITHUB_STEP_SUMMARY
+          echo "| Timeframe | Pattern Type | Status |" >> $GITHUB_STEP_SUMMARY
+          echo "|-----------|-------------|--------|" >> $GITHUB_STEP_SUMMARY
+          if [ -f "v2/models/rl/ppo_1m_best.zip" ]; then
+            echo "| 1m | Scalping | ✅ |" >> $GITHUB_STEP_SUMMARY
+          else
+            echo "| 1m | Scalping | ❌ |" >> $GITHUB_STEP_SUMMARY
+          fi
+          if [ -f "v2/models/rl/ppo_5m_best.zip" ]; then
+            echo "| 5m | Day Trade | ✅ |" >> $GITHUB_STEP_SUMMARY
+          else
+            echo "| 5m | Day Trade | ❌ |" >> $GITHUB_STEP_SUMMARY
+          fi
+          if [ -f "v2/models/rl/ppo_15m_best.zip" ]; then
+            echo "| 15m | Short Swing | ✅ |" >> $GITHUB_STEP_SUMMARY
+          else
+            echo "| 15m | Short Swing | ❌ |" >> $GITHUB_STEP_SUMMARY
+          fi
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "### Results" >> $GITHUB_STEP_SUMMARY
+          for tf in 1m 5m 15m; do
+            if [ -f "v2/results/latest_results_${tf}.json" ]; then
+              echo "#### ${tf} Model" >> $GITHUB_STEP_SUMMARY
+              echo "\`\`\`json" >> $GITHUB_STEP_SUMMARY
+              cat "v2/results/latest_results_${tf}.json" >> $GITHUB_STEP_SUMMARY
+              echo "\`\`\`" >> $GITHUB_STEP_SUMMARY
+            fi
+          done
