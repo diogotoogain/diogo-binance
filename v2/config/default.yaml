@@ -591,3 +591,50 @@ logging:
     max_size_mb: 100
     backup_count: 5
     level: "DEBUG"
+
+# ═══════════════════════════════════════════════════════════════════════════
+# LIQUIDATIONS
+# ═══════════════════════════════════════════════════════════════════════════
+liquidations:
+  enabled: true                      # OPTIMIZE: [true, false]
+  
+  # Thresholds para considerar significativo
+  significant_single_liq_usd: 100000     # OPTIMIZE: range(50000, 500000) - $100k+
+  significant_cascade_usd: 1000000       # OPTIMIZE: range(500000, 5000000) - $1M em janela
+  cascade_window_seconds: 60             # OPTIMIZE: [30, 60, 120, 300]
+  
+  # Detecção de cascata
+  cascade_detection:
+    enabled: true                    # OPTIMIZE: [true, false]
+    min_liquidations: 5              # OPTIMIZE: [3, 5, 10, 20] - Mínimo de liqs na janela
+    volume_acceleration: 2.0         # OPTIMIZE: range(1.5, 5.0) - Aceleração vs média
+  
+  # Features
+  features:
+    include_liq_volume: true         # Volume total de liquidações
+    include_liq_count: true          # Contagem de liquidações
+    include_liq_imbalance: true      # Long liqs vs Short liqs
+    include_liq_acceleration: true   # Taxa de aceleração
+    lookback_windows: [60, 300, 900] # OPTIMIZE: janelas em segundos
+  
+  # Estratégia de liquidações
+  strategy:
+    enabled: true                    # OPTIMIZE: [true, false]
+    
+    # Operar NA DIREÇÃO das liquidações (momentum)
+    # Se longs estão sendo liquidados, shortar
+    follow_cascade: true             # OPTIMIZE: [true, false]
+    min_cascade_size_usd: 500000     # OPTIMIZE: range(100000, 2000000)
+    
+    # Ou operar CONTRA (reversão após cascata)
+    fade_cascade: false              # OPTIMIZE: [true, false]
+    fade_after_seconds: 300          # OPTIMIZE: range(60, 600)
+    fade_min_cascade_size: 2000000   # OPTIMIZE: range(1000000, 5000000)
+  
+  # Filtro para outras estratégias
+  filter:
+    enabled: true                    # OPTIMIZE: [true, false]
+    # Pausar trades durante cascata violenta
+    pause_during_cascade: true       # OPTIMIZE: [true, false]
+    pause_threshold_usd: 5000000     # OPTIMIZE: range(1000000, 10000000)
+    resume_after_seconds: 120        # OPTIMIZE: range(60, 300)

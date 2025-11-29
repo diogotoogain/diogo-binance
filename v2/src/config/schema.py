@@ -1477,6 +1477,140 @@ def get_all_optimizable_params() -> List[OptimizableParam]:
         ),
     ])
     
+    # ═══════════════════════════════════════════════════════════════════════
+    # LIQUIDATIONS (~15 params)
+    # ═══════════════════════════════════════════════════════════════════════
+    params.extend([
+        OptimizableParam(
+            name='liquidations.enabled',
+            param_type=ParamType.BOOL,
+            default=True,
+            description='Habilitar features de liquidação'
+        ),
+        OptimizableParam(
+            name='liquidations.significant_single_liq_usd',
+            param_type=ParamType.INT,
+            default=100000,
+            low=50000,
+            high=500000,
+            step=50000,
+            description='Threshold para liquidação única significativa'
+        ),
+        OptimizableParam(
+            name='liquidations.significant_cascade_usd',
+            param_type=ParamType.INT,
+            default=1000000,
+            low=500000,
+            high=5000000,
+            step=500000,
+            description='Threshold para cascata significativa'
+        ),
+        OptimizableParam(
+            name='liquidations.cascade_window_seconds',
+            param_type=ParamType.CATEGORICAL,
+            default=60,
+            choices=[30, 60, 120, 300],
+            description='Janela de detecção de cascata em segundos'
+        ),
+        OptimizableParam(
+            name='liquidations.cascade_detection.enabled',
+            param_type=ParamType.BOOL,
+            default=True,
+            description='Habilitar detecção de cascata'
+        ),
+        OptimizableParam(
+            name='liquidations.cascade_detection.min_liquidations',
+            param_type=ParamType.CATEGORICAL,
+            default=5,
+            choices=[3, 5, 10, 20],
+            description='Mínimo de liquidações para cascata'
+        ),
+        OptimizableParam(
+            name='liquidations.cascade_detection.volume_acceleration',
+            param_type=ParamType.FLOAT,
+            default=2.0,
+            low=1.5,
+            high=5.0,
+            step=0.5,
+            description='Aceleração de volume para cascata'
+        ),
+        OptimizableParam(
+            name='liquidations.strategy.enabled',
+            param_type=ParamType.BOOL,
+            default=True,
+            description='Habilitar estratégia de liquidações'
+        ),
+        OptimizableParam(
+            name='liquidations.strategy.follow_cascade',
+            param_type=ParamType.BOOL,
+            default=True,
+            description='Seguir cascata (momentum)'
+        ),
+        OptimizableParam(
+            name='liquidations.strategy.min_cascade_size_usd',
+            param_type=ParamType.INT,
+            default=500000,
+            low=100000,
+            high=2000000,
+            step=100000,
+            description='Tamanho mínimo de cascata para follow'
+        ),
+        OptimizableParam(
+            name='liquidations.strategy.fade_cascade',
+            param_type=ParamType.BOOL,
+            default=False,
+            description='Operar reversão após cascata'
+        ),
+        OptimizableParam(
+            name='liquidations.strategy.fade_after_seconds',
+            param_type=ParamType.INT,
+            default=300,
+            low=60,
+            high=600,
+            step=60,
+            description='Segundos após cascata para fade'
+        ),
+        OptimizableParam(
+            name='liquidations.strategy.fade_min_cascade_size',
+            param_type=ParamType.INT,
+            default=2000000,
+            low=1000000,
+            high=5000000,
+            step=500000,
+            description='Tamanho mínimo para fade'
+        ),
+        OptimizableParam(
+            name='liquidations.filter.enabled',
+            param_type=ParamType.BOOL,
+            default=True,
+            description='Habilitar filtro de liquidações'
+        ),
+        OptimizableParam(
+            name='liquidations.filter.pause_during_cascade',
+            param_type=ParamType.BOOL,
+            default=True,
+            description='Pausar durante cascata'
+        ),
+        OptimizableParam(
+            name='liquidations.filter.pause_threshold_usd',
+            param_type=ParamType.INT,
+            default=5000000,
+            low=1000000,
+            high=10000000,
+            step=1000000,
+            description='Threshold para pausar trading'
+        ),
+        OptimizableParam(
+            name='liquidations.filter.resume_after_seconds',
+            param_type=ParamType.INT,
+            default=120,
+            low=60,
+            high=300,
+            step=30,
+            description='Segundos para retomar após pausa'
+        ),
+    ])
+    
     return params
 
 
@@ -2410,6 +2544,95 @@ OPTIMIZABLE_PARAMS: Dict[str, List[OptimizableParam]] = {
             description="Step days between windows",
         ),
     ],
+    # Liquidations
+    "liquidations": [
+        OptimizableParam(
+            name="significant_single_liq_usd",
+            param_type=ParamType.INT,
+            low=50000,
+            high=500000,
+            default=100000,
+            description="Threshold for significant single liquidation",
+        ),
+        OptimizableParam(
+            name="significant_cascade_usd",
+            param_type=ParamType.INT,
+            low=500000,
+            high=5000000,
+            default=1000000,
+            description="Threshold for significant cascade",
+        ),
+        OptimizableParam(
+            name="cascade_window_seconds",
+            param_type=ParamType.INT,
+            low=30,
+            high=300,
+            default=60,
+            description="Cascade detection window",
+        ),
+    ],
+    "liquidations.cascade_detection": [
+        OptimizableParam(
+            name="min_liquidations",
+            param_type=ParamType.INT,
+            low=3,
+            high=20,
+            default=5,
+            description="Minimum liquidations for cascade",
+        ),
+        OptimizableParam(
+            name="volume_acceleration",
+            param_type=ParamType.FLOAT,
+            low=1.5,
+            high=5.0,
+            default=2.0,
+            description="Volume acceleration threshold",
+        ),
+    ],
+    "liquidations.strategy": [
+        OptimizableParam(
+            name="min_cascade_size_usd",
+            param_type=ParamType.INT,
+            low=100000,
+            high=2000000,
+            default=500000,
+            description="Minimum cascade size for follow",
+        ),
+        OptimizableParam(
+            name="fade_after_seconds",
+            param_type=ParamType.INT,
+            low=60,
+            high=600,
+            default=300,
+            description="Seconds after cascade for fade",
+        ),
+        OptimizableParam(
+            name="fade_min_cascade_size",
+            param_type=ParamType.INT,
+            low=1000000,
+            high=5000000,
+            default=2000000,
+            description="Minimum cascade size for fade",
+        ),
+    ],
+    "liquidations.filter": [
+        OptimizableParam(
+            name="pause_threshold_usd",
+            param_type=ParamType.INT,
+            low=1000000,
+            high=10000000,
+            default=5000000,
+            description="Threshold to pause trading",
+        ),
+        OptimizableParam(
+            name="resume_after_seconds",
+            param_type=ParamType.INT,
+            low=60,
+            high=300,
+            default=120,
+            description="Seconds to resume after pause",
+        ),
+    ],
 }
 
 # Feature toggles (enabled/disabled)
@@ -2486,6 +2709,48 @@ FEATURE_TOGGLES: Dict[str, OptimizableParam] = {
         default=True,
         description="Enable Liquidity Clusters feature",
     ),
+    "liquidations.enabled": OptimizableParam(
+        name="enabled",
+        param_type=ParamType.BOOL,
+        default=True,
+        description="Enable Liquidation features",
+    ),
+    "liquidations.cascade_detection.enabled": OptimizableParam(
+        name="enabled",
+        param_type=ParamType.BOOL,
+        default=True,
+        description="Enable Cascade detection",
+    ),
+    "liquidations.strategy.enabled": OptimizableParam(
+        name="enabled",
+        param_type=ParamType.BOOL,
+        default=True,
+        description="Enable Liquidation strategy",
+    ),
+    "liquidations.strategy.follow_cascade": OptimizableParam(
+        name="follow_cascade",
+        param_type=ParamType.BOOL,
+        default=True,
+        description="Follow cascade momentum",
+    ),
+    "liquidations.strategy.fade_cascade": OptimizableParam(
+        name="fade_cascade",
+        param_type=ParamType.BOOL,
+        default=False,
+        description="Fade cascade reversal",
+    ),
+    "liquidations.filter.enabled": OptimizableParam(
+        name="enabled",
+        param_type=ParamType.BOOL,
+        default=True,
+        description="Enable Liquidation filter",
+    ),
+    "liquidations.filter.pause_during_cascade": OptimizableParam(
+        name="pause_during_cascade",
+        param_type=ParamType.BOOL,
+        default=True,
+        description="Pause during cascade",
+    ),
 }
 
 # Strategy toggles
@@ -2513,6 +2778,12 @@ STRATEGY_TOGGLES: Dict[str, OptimizableParam] = {
         param_type=ParamType.BOOL,
         default=True,
         description="Enable Volatility Breakout strategy",
+    ),
+    "strategies.liquidation_cascade.enabled": OptimizableParam(
+        name="enabled",
+        param_type=ParamType.BOOL,
+        default=True,
+        description="Enable Liquidation Cascade strategy",
     ),
 }
 
