@@ -132,20 +132,66 @@ def prepare_training_data(data: pd.DataFrame) -> pd.DataFrame:
         df["rsi"] = df["rsi"].fillna(50)
 
     if "adx" not in df.columns:
-        # Simplified ADX calculation
-        df["adx"] = 25  # Default value
+        # Calculate ADX using directional movement
+        # True Range
+        tr = pd.concat(
+            [
+                df["high"] - df["low"],
+                abs(df["high"] - df["close"].shift(1)),
+                abs(df["low"] - df["close"].shift(1)),
+            ],
+            axis=1,
+        ).max(axis=1)
+
+        # Directional Movement
+        plus_dm = df["high"].diff()
+        minus_dm = df["low"].diff().abs()
+        plus_dm = plus_dm.where((plus_dm > minus_dm) & (plus_dm > 0), 0)
+        minus_dm = minus_dm.where((minus_dm > plus_dm) & (minus_dm > 0), 0)
+
+        # Smoothed averages (14 period)
+        period = 14
+        atr_smooth = tr.rolling(period).mean()
+        plus_di = 100 * (plus_dm.rolling(period).mean() / atr_smooth)
+        minus_di = 100 * (minus_dm.rolling(period).mean() / atr_smooth)
+
+        # DX and ADX
+        dx = 100 * abs(plus_di - minus_di) / (plus_di + minus_di + 1e-8)
+        df["adx"] = dx.rolling(period).mean().fillna(25)
 
     if "ofi" not in df.columns:
-        # Order Flow Imbalance proxy
-        df["ofi"] = np.random.randn(len(df)) * 0.1
+        # Order Flow Imbalance approximation from price changes
+        # Positive = buying pressure, Negative = selling pressure
+        price_change = df["close"].diff()
+        volume_dir = np.sign(price_change) * df["volume"]
+        df["ofi"] = (
+            volume_dir.rolling(20).sum()
+            / (df["volume"].rolling(20).sum() + 1e-8)
+        ).fillna(0)
 
     if "tfi" not in df.columns:
-        # Trade Flow Imbalance proxy
-        df["tfi"] = np.random.randn(len(df)) * 0.1
+        # Trade Flow Imbalance approximation
+        # Based on close position within high-low range
+        hl_range = df["high"] - df["low"]
+        close_position = (df["close"] - df["low"]) / (hl_range + 1e-8)
+        # Normalize to -1 to 1 range
+        df["tfi"] = (close_position * 2 - 1).rolling(20).mean().fillna(0)
 
     if "regime" not in df.columns:
-        # Market regime (0=crash, 1=normal, 2=trending)
-        df["regime"] = 1
+        # Simple regime detection based on volatility and trend
+        # 0=high volatility (crash-like), 1=normal, 2=trending
+        returns = df["close"].pct_change()
+        volatility = returns.rolling(20).std() * np.sqrt(252)
+        vol_pct = volatility.rank(pct=True)
+
+        # ADX-based trend detection
+        adx_threshold = 25
+        trend_mask = df["adx"] > adx_threshold
+
+        # Assign regimes
+        df["regime"] = 1  # Default normal
+        df.loc[vol_pct > 0.8, "regime"] = 0  # High volatility
+        df.loc[trend_mask & (vol_pct <= 0.8), "regime"] = 2  # Trending
 
     # Fill NaN values
     df = df.ffill().bfill()
@@ -211,8 +257,8 @@ def get_profit_focused_config() -> Dict[str, Any]:
         },
         "risk": {
             "kill_switch": {"enabled": True},
-            "max_position_size_pct": 50.0,  # Up to 50% of capital per trade
-            "max_leverage": 10,
+            "max_position_size_pct": 10.0,  # Up to 10% of capital per trade
+            "max_leverage": 5,  # Conservative leverage for automated trading
             "max_drawdown_pct": 20.0,
         },
         "backtest": {
@@ -310,9 +356,9 @@ def run_backtest(
     env = TradingEnvironment(config, backtest_data)
     wrapped_env = FlatActionWrapper(env)
 
-    # Load model
+    # Load model with the wrapped environment
     agent = PPOAgent(config, wrapped_env)
-    agent.load(model_path)
+    agent.load(model_path, env=wrapped_env)
 
     # Run backtest episodes
     n_episodes = 5
@@ -329,8 +375,8 @@ def run_backtest(
             done = terminated or truncated
             total_reward += reward
 
-        # Get episode stats
-        stats = env.get_episode_stats()
+        # Get episode stats from unwrapped environment
+        stats = wrapped_env.unwrapped.get_episode_stats()
         stats["total_reward"] = total_reward
         all_metrics.append(stats)
 
