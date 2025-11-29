@@ -111,7 +111,7 @@ class TestTradingEnvironment:
 
         # Take a step with hold action
         action = {
-            "direction": 1,  # 0 = hold
+            "direction": 1,  # index 1 maps to 0 (hold) in [-1, 0, 1]
             "position_size": 0,
             "sl_mult": 0,
             "tp_mult": 0,
@@ -134,7 +134,7 @@ class TestTradingEnvironment:
 
         # Open long position
         action = {
-            "direction": 2,  # 1 = long
+            "direction": 2,  # index 2 maps to 1 (long) in [-1, 0, 1]
             "position_size": 2,  # 0.5
             "sl_mult": 1,
             "tp_mult": 1,
@@ -155,7 +155,7 @@ class TestTradingEnvironment:
 
         # Open short position
         action = {
-            "direction": 0,  # -1 = short
+            "direction": 0,  # index 0 maps to -1 (short) in [-1, 0, 1]
             "position_size": 2,
             "sl_mult": 1,
             "tp_mult": 1,
@@ -172,10 +172,10 @@ class TestTradingEnvironment:
         env = TradingEnvironment(config, sample_data)
         env.reset()
 
-        # Run a few steps
+        # Run a few steps with hold action
         for _ in range(10):
             action = {
-                "direction": 1,
+                "direction": 1,  # index 1 = hold
                 "position_size": 0,
                 "sl_mult": 0,
                 "tp_mult": 0,

@@ -9,6 +9,7 @@ from dataclasses import dataclass
 from datetime import datetime, timedelta
 from typing import Any, Callable, Dict, List, Optional, Tuple, Union
 
+import numpy as np
 import pandas as pd
 
 from .engine import BacktestEngine
@@ -350,8 +351,6 @@ class WalkForwardOptimizer:
         test_returns = [r.test_metrics.get("total_return_pct", 0) for r in self.results]
         test_drawdowns = [r.test_metrics.get("max_drawdown", 0) for r in self.results]
 
-        import numpy as np
-
         return {
             "n_windows": len(self.results),
             "train_sharpe_mean": float(np.mean(train_sharpes)),
@@ -385,8 +384,6 @@ class WalkForwardOptimizer:
             r.test_metrics.get("sharpe_ratio", 0) for r in self.results
         ]
 
-        import numpy as np
-
         avg_train = np.mean(train_sharpes)
         avg_test = np.mean(test_sharpes)
 
@@ -406,8 +403,6 @@ class WalkForwardOptimizer:
         """
         if not self.results:
             return 0.0
-
-        import numpy as np
 
         test_sharpes = [
             r.test_metrics.get("sharpe_ratio", 0) for r in self.results

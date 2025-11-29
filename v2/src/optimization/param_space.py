@@ -5,6 +5,7 @@ Reads optimizable parameters from the schema and generates suggestions
 for Optuna trials.
 """
 
+import copy
 from typing import Any, Dict, List, Optional
 
 import optuna
@@ -194,8 +195,6 @@ class ParamSpace:
         Returns:
             Updated configuration dictionary
         """
-        import copy
-
         updated_config = copy.deepcopy(config)
 
         for key, value in params.items():
