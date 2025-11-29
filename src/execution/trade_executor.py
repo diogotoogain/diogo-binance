@@ -159,6 +159,12 @@ class TradeExecutor:
     async def _open_position(self, side: str, qty: float, price: float, sl: float, tp: float) -> bool:
         try:
             order = await self.client.futures_create_order(symbol=self.symbol, side=side, type='MARKET', quantity=qty)
+            fill = float(order.get('avgPrice', 0))
+            if fill <= 0:
+                fill = price  # Usa o preço passado como parâmetro
+            if fill <= 0:
+                logger.error("❌ Preço inválido! Não é possível abrir posição.")
+                return False
             
             # FIX: Validar preço retornado
             fill = float(order.get('avgPrice', 0))

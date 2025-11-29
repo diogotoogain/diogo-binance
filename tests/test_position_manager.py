@@ -60,6 +60,9 @@ class TestPositionManager:
         result = self.pm.should_close(51100)
         assert result == 'TAKE_PROFIT'
 
+    def test_close_position_zero_entry_price(self):
+        """Test that division by zero is avoided when entry_price is 0."""
+        # Manually set a position with entry_price = 0 to simulate the bug
     def test_close_position_no_division_by_zero(self):
         """Test that closing position with zero entry price returns None (rejected)."""
         # Manually set a position with zero entry price (edge case)
@@ -68,6 +71,20 @@ class TestPositionManager:
         self.pm.current_position = Position(
             symbol='BTCUSDT',
             side='LONG',
+            entry_price=0.0,  # Bug scenario: zero entry price
+            quantity=0.1,
+            stop_loss=49500,
+            take_profit=51000,
+            entry_time=datetime.now()
+        )
+        # Should not raise ZeroDivisionError
+        pnl = self.pm.close_position(50000)
+        assert pnl == 50000 * 0.1  # pnl calculation still works
+        assert self.pm.has_position() is False
+
+    def test_close_position_zero_quantity(self):
+        """Test that division by zero is avoided when quantity is 0."""
+            entry_price=0.0,  # Invalid but should not crash
             entry_price=0.0,  # Invalid entry price
             quantity=0.1,
             stop_loss=0.0,
@@ -87,11 +104,15 @@ class TestPositionManager:
             symbol='BTCUSDT',
             side='LONG',
             entry_price=50000,
+            quantity=0.0,  # Bug scenario: zero quantity
             quantity=0.0,  # Invalid but should not crash
             stop_loss=49500,
             take_profit=51000,
             entry_time=datetime.now()
         )
+        # Should not raise ZeroDivisionError
+        pnl = self.pm.close_position(51000)
+        assert pnl == 0.0  # pnl is 0 because quantity is 0
         # Should not raise an exception
         pnl = self.pm.close_position(51000)
         assert pnl == 0  # No quantity means no PNL
