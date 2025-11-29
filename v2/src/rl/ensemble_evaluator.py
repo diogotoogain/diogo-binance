@@ -15,6 +15,10 @@ from .ensemble import RLEnsemble
 
 logger = logging.getLogger(__name__)
 
+# Maximum profit factor to display when there are no losing trades
+# (avoids infinity in reports)
+MAX_PROFIT_FACTOR = 999.99
+
 
 class EnsembleEvaluator:
     """
@@ -683,7 +687,7 @@ class EnsembleEvaluator:
             "total_pnl": total_pnl,
             "total_return_pct": total_return_pct,
             "win_rate": win_rate,
-            "profit_factor": profit_factor if profit_factor != float("inf") else 999.99,
+            "profit_factor": profit_factor if profit_factor != float("inf") else MAX_PROFIT_FACTOR,
             "sharpe_ratio": sharpe,
             "max_drawdown": max_drawdown,
             "avg_trade": total_pnl / n_trades if n_trades > 0 else 0,

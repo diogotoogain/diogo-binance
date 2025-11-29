@@ -161,7 +161,10 @@ class RLEnsemble:
                 action, _ = model.predict(obs, deterministic=True)
 
                 # Extract scalar from numpy array if needed
-                action_value = int(action.item()) if hasattr(action, 'item') else int(action)
+                try:
+                    action_value = int(action.item())
+                except AttributeError:
+                    action_value = int(action)
 
                 # Convert action to vote
                 vote = self._action_to_vote(action_value)

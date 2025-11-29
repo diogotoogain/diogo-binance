@@ -124,8 +124,17 @@ def generate_synthetic_data(timeframe: str, n_bars: int = 50000) -> pd.DataFrame
 
     np.random.seed(42 + hash(timeframe) % 1000)
 
-    # Different volatility for different timeframes
-    volatility = {"1m": 0.0005, "5m": 0.001, "15m": 0.002}.get(timeframe, 0.001)
+    # Volatility per bar varies by timeframe:
+    # - 1m: Lower volatility per bar (~0.05% per minute)
+    # - 5m: Medium volatility (~0.1% per 5 minutes)
+    # - 15m: Higher volatility (~0.2% per 15 minutes)
+    # These values approximate typical BTC/USDT volatility patterns
+    VOLATILITY_BY_TIMEFRAME = {
+        "1m": 0.0005,   # ~0.05% per minute
+        "5m": 0.001,    # ~0.1% per 5 minutes
+        "15m": 0.002,   # ~0.2% per 15 minutes
+    }
+    volatility = VOLATILITY_BY_TIMEFRAME.get(timeframe, 0.001)
 
     returns = np.random.randn(n_bars) * volatility
     prices = 50000 * np.exp(np.cumsum(returns))
