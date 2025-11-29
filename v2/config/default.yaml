@@ -342,18 +342,20 @@ ensemble:
 # ═══════════════════════════════════════════════════════════════════════════
 risk:
   risk_per_trade_pct: 0.5         # OPTIMIZE: [0.25, 0.5, 1.0, 1.5, 2.0]
+  max_position_size_pct: 5.0      # OPTIMIZE: [2, 5, 10, 15, 20]
   max_daily_loss_pct: 3.0         # OPTIMIZE: range(1.0, 5.0)
+  max_daily_trades: 50            # OPTIMIZE: [20, 50, 100]
   max_weekly_loss_pct: 7.0        # OPTIMIZE: range(3.0, 10.0)
   max_monthly_loss_pct: 15.0      # OPTIMIZE: range(10.0, 20.0)
   max_drawdown_pct: 20.0          # OPTIMIZE: range(10.0, 30.0)
-  max_open_positions: 1           # OPTIMIZE: [1, 2, 3]
+  max_concurrent_positions: 1     # OPTIMIZE: [1, 2, 3]
   max_leverage: 10                # OPTIMIZE: [3, 5, 10, 15, 20]
   
-  regime_risk_adjustment:
+  regime_adjustment:
     enabled: true                 # OPTIMIZE: [true, false]
-    crash_regime_multiplier: 0.3  # OPTIMIZE: range(0.1, 0.5)
-    high_vol_regime_multiplier: 0.5  # OPTIMIZE: range(0.3, 0.7)
-    low_vol_regime_multiplier: 1.5   # OPTIMIZE: range(1.0, 2.0)
+    crash_multiplier: 0.3         # OPTIMIZE: range(0.1, 0.5)
+    high_vol_multiplier: 0.5      # OPTIMIZE: range(0.3, 0.7)
+    low_vol_multiplier: 1.5       # OPTIMIZE: range(1.0, 2.0)
   
   correlation_risk:
     enabled: true                 # OPTIMIZE: [true, false]
@@ -365,8 +367,8 @@ risk:
   # ═══════════════════════════════════════════════════════════════════════
   kill_switch:
     enabled: true                 # NUNCA DESATIVAR! Validado no loader
-    max_loss_trigger_pct: 5.0     # OPTIMIZE: range(3.0, 10.0)
-    pause_duration_hours: 24      # OPTIMIZE: range(12, 48)
+    trigger_loss_pct: 5.0         # OPTIMIZE: range(3.0, 10.0)
+    pause_hours: 24               # OPTIMIZE: range(12, 48)
     check_interval_seconds: 60    # OPTIMIZE: range(30, 300)
     cooldown_multiplier: 2.0      # OPTIMIZE: range(1.0, 3.0)
 
@@ -374,30 +376,32 @@ risk:
 # POSITION MANAGEMENT
 # ═══════════════════════════════════════════════════════════════════════════
 position:
-  sl:  # Stop Loss
-    enabled: true
-    default_pct: 1.0              # OPTIMIZE: range(0.5, 3.0)
-    atr_multiplier: 2.0           # OPTIMIZE: range(1.0, 4.0)
-    use_atr_based: true           # OPTIMIZE: [true, false]
+  # Stop Loss configuration
+  sl_type: "atr"                  # TOGGLE: [fixed_pct, atr, volatility]
+  sl_fixed_pct: 1.0               # OPTIMIZE: [0.5, 1.0, 1.5, 2.0, 3.0]
+  sl_atr_multiplier: 1.5          # OPTIMIZE: [0.5, 1.0, 1.5, 2.0, 3.0]
   
-  tp:  # Take Profit
-    enabled: true
-    default_pct: 2.0              # OPTIMIZE: range(1.0, 5.0)
-    atr_multiplier: 3.0           # OPTIMIZE: range(1.5, 6.0)
-    risk_reward_ratio: 2.0        # OPTIMIZE: range(1.0, 4.0)
+  # Take Profit configuration
+  tp_type: "atr"                  # TOGGLE: [fixed_pct, atr, rr_ratio]
+  tp_fixed_pct: 2.0               # OPTIMIZE: [1.0, 2.0, 3.0, 5.0]
+  tp_atr_multiplier: 2.5          # OPTIMIZE: [1.5, 2.0, 2.5, 3.0, 5.0]
+  tp_rr_ratio: 2.0                # OPTIMIZE: [1.0, 1.5, 2.0, 3.0, 4.0]
   
-  trailing:
+  # Trailing Stop configuration
+  trailing_stop:
     enabled: true                 # OPTIMIZE: [true, false]
+    type: "fixed_pct"             # TOGGLE: [fixed_pct, atr]
     activation_pct: 1.0           # OPTIMIZE: range(0.5, 2.0)
-    trailing_pct: 0.5             # OPTIMIZE: range(0.2, 1.0)
-    use_atr_based: true           # OPTIMIZE: [true, false]
-    atr_multiplier: 1.0           # OPTIMIZE: range(0.5, 2.0)
+    trail_pct: 0.5                # OPTIMIZE: range(0.2, 1.0)
+    trail_atr_mult: 1.0           # OPTIMIZE: range(0.5, 2.0)
   
+  # Partial exits
   partial_exits:
     enabled: true                 # OPTIMIZE: [true, false]
     levels: [0.5, 0.75, 1.0]      # % of target
     sizes: [0.33, 0.33, 0.34]     # % of position
   
+  # Time-based exit
   time_based_exit:
     enabled: true                 # OPTIMIZE: [true, false]
     max_holding_hours: 24         # OPTIMIZE: range(4, 72)
@@ -409,18 +413,17 @@ bet_sizing:
   method: "kelly"                 # OPTIMIZE: ["fixed", "kelly", "vol_target", "rl"]
   
   fixed:
-    position_size_pct: 1.0        # OPTIMIZE: range(0.5, 3.0)
+    size_pct: 2.0                 # OPTIMIZE: range(0.5, 3.0)
   
   kelly:
     fraction: 0.25                # OPTIMIZE: range(0.1, 0.5)
-    max_kelly: 0.5                # OPTIMIZE: range(0.25, 0.75)
+    max_size_pct: 10.0            # OPTIMIZE: range(5, 15)
     lookback_trades: 100          # OPTIMIZE: range(50, 200)
   
   vol_target:
-    target_annual_vol: 0.15       # OPTIMIZE: range(0.1, 0.3)
-    vol_lookback: 20              # OPTIMIZE: [10, 20, 50]
-    min_size_pct: 0.25            # OPTIMIZE: range(0.1, 0.5)
-    max_size_pct: 2.0             # OPTIMIZE: range(1.0, 4.0)
+    annual_vol: 0.15              # OPTIMIZE: range(0.1, 0.3)
+    base_size_pct: 2.0            # OPTIMIZE: range(1.0, 3.0)
+    max_size_pct: 10.0            # OPTIMIZE: range(5.0, 15.0)
   
   rl:
     enabled: false                # OPTIMIZE: [true, false]
