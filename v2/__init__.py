@@ -1,3 +1,4 @@
+"""V2 Trading Bot Package."""
 # V2 Trading Bot Package
 """
 V2 Multi-Strategy Quant Trading Bot.

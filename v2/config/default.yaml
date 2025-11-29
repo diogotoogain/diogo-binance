@@ -1,4 +1,7 @@
 # ═══════════════════════════════════════════════════════════════
+# V2 TRADING BOT - DEFAULT CONFIGURATION
+# ═══════════════════════════════════════════════════════════════
+# REGRA: NENHUM NÚMERO HARDCODED - Todos os parâmetros vêm daqui!
 # V2 DEFAULT CONFIGURATION
 # Todos os parâmetros são configuráveis - ZERO hardcoded
 # All parameters are configurable - NO HARDCODED VALUES
@@ -13,6 +16,117 @@ market:
   base_timeframes: ["1s", "1m", "5m", "15m", "1h"]
 
 # ═══════════════════════════════════════════════════════════════
+# RISK MANAGEMENT
+# ═══════════════════════════════════════════════════════════════
+risk:
+  # Risk per trade - OPTIMIZE: [0.25, 0.5, 1.0, 1.5, 2.0]
+  risk_per_trade_pct: 1.0
+  
+  # Max position size as % of balance - OPTIMIZE: [2, 5, 10, 15, 20]
+  max_position_size_pct: 5.0
+  
+  # Daily loss limit - OPTIMIZE: [2, 3, 5, 7]
+  max_daily_loss_pct: 3.0
+  
+  # Maximum trades per day - OPTIMIZE: [20, 50, 100]
+  max_daily_trades: 50
+  
+  # Weekly loss limit - OPTIMIZE: [5, 7, 10, 15]
+  max_weekly_loss_pct: 7.0
+  
+  # Monthly loss limit - OPTIMIZE: [10, 15, 20, 25]
+  max_monthly_loss_pct: 15.0
+  
+  # Maximum drawdown - OPTIMIZE: [10, 15, 20, 25, 30]
+  max_drawdown_pct: 20.0
+  
+  # Max concurrent positions - OPTIMIZE: [1, 2, 3, 5]
+  max_concurrent_positions: 1
+  
+  # Max leverage - OPTIMIZE: [3, 5, 10, 15, 20]
+  max_leverage: 10
+
+  # ═════════════════════════════════════════════════════════════
+  # KILL SWITCH - CRÍTICO! NUNCA DESATIVAR!
+  # ═════════════════════════════════════════════════════════════
+  kill_switch:
+    # ⚠️ SEMPRE TRUE - Se tentar desativar, sistema lança exceção!
+    enabled: true
+    # Trigger loss % - OPTIMIZE: [3, 5, 7, 10]
+    trigger_loss_pct: 5.0
+    # Pause hours after trigger - OPTIMIZE: [12, 24, 48]
+    pause_hours: 24
+
+  # ═════════════════════════════════════════════════════════════
+  # REGIME ADJUSTMENT
+  # ═════════════════════════════════════════════════════════════
+  regime_adjustment:
+    enabled: true
+    # Multiplier during crash/extreme volatility - OPTIMIZE: [0.1, 0.2, 0.3, 0.5]
+    crash_multiplier: 0.3
+    # Multiplier during high volatility - OPTIMIZE: [0.3, 0.5, 0.7]
+    high_vol_multiplier: 0.5
+
+# ═══════════════════════════════════════════════════════════════
+# BET SIZING
+# ═══════════════════════════════════════════════════════════════
+bet_sizing:
+  # Method - TOGGLE: [fixed, kelly, vol_target, rl]
+  method: "kelly"
+  
+  # Fixed size configuration
+  fixed:
+    # Size % - OPTIMIZE: [1, 2, 3, 5]
+    size_pct: 2.0
+  
+  # Kelly criterion configuration
+  kelly:
+    # Fraction of Kelly - OPTIMIZE: [0.1, 0.25, 0.5, 0.75]
+    fraction: 0.25
+    # Max size % - OPTIMIZE: [5, 10, 15, 20]
+    max_size_pct: 10.0
+  
+  # Volatility targeting configuration
+  vol_target:
+    # Target annual volatility - OPTIMIZE: [0.10, 0.15, 0.20, 0.25]
+    annual_vol: 0.15
+    # Base size percentage - OPTIMIZE: [1, 2, 3, 5]
+    base_size_pct: 2.0
+    # Max size percentage - OPTIMIZE: [5, 10, 15, 20]
+    max_size_pct: 10.0
+
+# ═══════════════════════════════════════════════════════════════
+# POSITION MANAGEMENT
+# ═══════════════════════════════════════════════════════════════
+position:
+  # Stop Loss type - TOGGLE: [fixed_pct, atr, volatility]
+  sl_type: "atr"
+  # Fixed SL % - OPTIMIZE: [0.5, 1.0, 1.5, 2.0, 3.0]
+  sl_fixed_pct: 1.0
+  # ATR multiplier for SL - OPTIMIZE: [0.5, 1.0, 1.5, 2.0, 3.0]
+  sl_atr_multiplier: 1.5
+  
+  # Take Profit type - TOGGLE: [fixed_pct, atr, rr_ratio]
+  tp_type: "atr"
+  # Fixed TP % - OPTIMIZE: [1.0, 1.5, 2.0, 3.0, 5.0]
+  tp_fixed_pct: 2.0
+  # ATR multiplier for TP - OPTIMIZE: [1.0, 1.5, 2.0, 2.5, 3.0, 5.0]
+  tp_atr_multiplier: 2.5
+  # Risk:Reward ratio for TP - OPTIMIZE: [1.5, 2.0, 2.5, 3.0]
+  tp_rr_ratio: 2.0
+  
+  # Trailing Stop configuration
+  trailing_stop:
+    # Enable trailing stop - TOGGLE
+    enabled: true
+    # Type - TOGGLE: [fixed_pct, atr]
+    type: "atr"
+    # Activation threshold % - OPTIMIZE: [0.5, 1.0, 1.5, 2.0]
+    activation_pct: 1.0
+    # Trail % - OPTIMIZE: [0.3, 0.5, 0.75, 1.0]
+    trail_pct: 0.5
+    # ATR multiplier for trailing - OPTIMIZE: [0.5, 1.0, 1.5, 2.0]
+    trail_atr_mult: 1.0
 # FEATURES
 # LABELING
 # ═══════════════════════════════════════════════════════════════
