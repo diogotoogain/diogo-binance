@@ -12,8 +12,9 @@ import numpy as np
 import pandas as pd
 import pytest
 
-# Add parent directory to path for relative imports
-sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))))
+# Add project root to path for relative imports
+PROJECT_ROOT = Path(__file__).parent.parent.parent
+sys.path.insert(0, str(PROJECT_ROOT))
 
 # Check if river is available
 try:
@@ -437,8 +438,9 @@ class TestOnlineLearningScript:
     
     def test_prepare_features(self):
         """prepare_features should generate valid features."""
-        # Import the function
-        sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+        # Import the function using the project root path constant
+        v2_scripts = PROJECT_ROOT / "v2" / "scripts"
+        sys.path.insert(0, str(v2_scripts.parent))
         from scripts.online_learning_update import prepare_features
         
         # Create sample data

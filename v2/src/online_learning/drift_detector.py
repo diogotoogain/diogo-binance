@@ -37,13 +37,19 @@ class MarketDriftDetector:
         ...     print("Market changed significantly - consider pausing")
     """
     
+    # Default history management thresholds
+    DEFAULT_MAX_HISTORY_SIZE = 1000
+    DEFAULT_TRIM_HISTORY_SIZE = 500
+    
     def __init__(
         self,
         pnl_delta: float = 0.002,
         win_rate_delta: float = 0.01,
         spread_delta: float = 0.005,
         pause_threshold: int = 2,
-        cooldown_samples: int = 50
+        cooldown_samples: int = 50,
+        max_history_size: int = 1000,
+        trim_history_size: int = 500
     ):
         """
         Initialize MarketDriftDetector.
@@ -54,6 +60,8 @@ class MarketDriftDetector:
             spread_delta: ADWIN sensitivity for spread drift
             pause_threshold: Number of metrics in drift to trigger pause
             cooldown_samples: Samples to wait after drift before resuming
+            max_history_size: Maximum number of metric history entries to keep
+            trim_history_size: Number of entries to keep when trimming history
         """
         if not RIVER_AVAILABLE:
             raise ImportError(
@@ -66,6 +74,8 @@ class MarketDriftDetector:
         self.spread_delta = spread_delta
         self.pause_threshold = pause_threshold
         self.cooldown_samples = cooldown_samples
+        self.max_history_size = max_history_size
+        self.trim_history_size = trim_history_size
         
         # Initialize ADWIN detectors
         self.pnl_detector = drift.ADWIN(delta=pnl_delta)
@@ -143,9 +153,9 @@ class MarketDriftDetector:
             'spread': spread
         })
         
-        # Keep history manageable
-        if len(self.metric_history) > 1000:
-            self.metric_history = self.metric_history[-500:]
+        # Keep history manageable using configurable thresholds
+        if len(self.metric_history) > self.max_history_size:
+            self.metric_history = self.metric_history[-self.trim_history_size:]
         
         return {
             'drift_detected': drift_detected,

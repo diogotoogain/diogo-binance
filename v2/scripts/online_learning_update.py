@@ -32,6 +32,12 @@ logging.basicConfig(
 )
 logger = logging.getLogger(__name__)
 
+# Feature engineering constants
+TRADES_NORMALIZATION_FACTOR = 100.0  # Normalize trades count by this value
+TRADES_INTENSITY_CAP = 5.0  # Maximum trades intensity value
+VOLUME_CHANGE_CLIP_MIN = -5.0  # Minimum value for volume change clipping
+VOLUME_CHANGE_CLIP_MAX = 5.0  # Maximum value for volume change clipping
+
 
 def load_recent_data(data_dir: Path, hours: int = 6) -> Optional[pd.DataFrame]:
     """
@@ -154,14 +160,17 @@ def prepare_features(data: pd.DataFrame) -> Tuple[List[Dict[str, float]], List[i
             if curr['close'] != 0:
                 high_low_range = (curr['high'] - curr['low']) / curr['close']
         
-        # Trades intensity (normalized)
+        # Trades intensity (normalized by constant, capped)
         trades_intensity = 0
         if 'trades_count' in curr:
-            trades_intensity = min(curr['trades_count'] / 100.0, 5.0)  # Cap at 5
+            trades_intensity = min(
+                curr['trades_count'] / TRADES_NORMALIZATION_FACTOR,
+                TRADES_INTENSITY_CAP
+            )
         
         features = {
             'price_change': price_change,
-            'volume_change': min(max(volume_change, -5), 5),  # Clip extreme values
+            'volume_change': min(max(volume_change, VOLUME_CHANGE_CLIP_MIN), VOLUME_CHANGE_CLIP_MAX),
             'high_low_range': high_low_range,
             'trades_intensity': trades_intensity
         }

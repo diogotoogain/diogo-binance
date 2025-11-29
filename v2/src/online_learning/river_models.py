@@ -40,11 +40,15 @@ class OnlineLearner:
         >>> learner = OnlineLearner.load('model.pkl')
     """
     
+    # Threshold for accuracy drop to indicate drift (10%)
+    DRIFT_ACCURACY_THRESHOLD = 0.1
+    
     def __init__(
         self,
         grace_period: int = 200,
         delta: float = 1e-7,
         drift_detector_delta: float = 0.002,
+        drift_accuracy_threshold: float = 0.1,
         seed: int = 42
     ):
         """
@@ -54,6 +58,7 @@ class OnlineLearner:
             grace_period: Number of samples before considering splits
             delta: Confidence level for splits (lower = more conservative)
             drift_detector_delta: Sensitivity for drift detection (lower = more sensitive)
+            drift_accuracy_threshold: Accuracy drop threshold for drift detection
             seed: Random seed for reproducibility
         """
         if not RIVER_AVAILABLE:
@@ -65,6 +70,7 @@ class OnlineLearner:
         self.grace_period = grace_period
         self.delta = delta
         self.drift_detector_delta = drift_detector_delta
+        self.drift_accuracy_threshold = drift_accuracy_threshold
         self.seed = seed
         
         # Initialize Hoeffding Adaptive Tree classifier
@@ -207,7 +213,7 @@ class OnlineLearner:
             recent_acc = self.training_history[-1].get('batch_accuracy', 0)
             prev_acc = self.training_history[-2].get('batch_accuracy', 0)
             # Significant accuracy drop might indicate drift
-            if prev_acc - recent_acc > 0.1:
+            if prev_acc - recent_acc > self.drift_accuracy_threshold:
                 return True
         return False
     
@@ -263,6 +269,7 @@ class OnlineLearner:
             'grace_period': self.grace_period,
             'delta': self.delta,
             'drift_detector_delta': self.drift_detector_delta,
+            'drift_accuracy_threshold': self.drift_accuracy_threshold,
             'seed': self.seed
         }
         
@@ -288,6 +295,7 @@ class OnlineLearner:
             grace_period=state['grace_period'],
             delta=state['delta'],
             drift_detector_delta=state['drift_detector_delta'],
+            drift_accuracy_threshold=state.get('drift_accuracy_threshold', cls.DRIFT_ACCURACY_THRESHOLD),
             seed=state['seed']
         )
         
