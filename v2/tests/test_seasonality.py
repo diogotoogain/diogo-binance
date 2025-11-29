@@ -9,7 +9,6 @@ Tests cover:
 """
 import pytest
 from datetime import datetime
-from unittest.mock import patch
 
 import sys
 from pathlib import Path
@@ -155,7 +154,7 @@ class TestSeasonalityFeatures:
     """Tests for SeasonalityFeatures."""
     
     def test_initialization(self, seasonality_config):
-        """SeasonalityFeatures deve inicializar corretamente."""
+        """SeasonalityFeatures should initialize correctly."""
         sf = SeasonalityFeatures(seasonality_config)
         assert sf.enabled is True
         assert sf.monthly_enabled is True
@@ -304,7 +303,7 @@ class TestSeasonalityAdjuster:
     """Tests for SeasonalityAdjuster."""
     
     def test_initialization(self, seasonality_config):
-        """SeasonalityAdjuster deve inicializar corretamente."""
+        """SeasonalityAdjuster should initialize correctly."""
         sa = SeasonalityAdjuster(seasonality_config)
         assert sa.enabled is True
         assert sa.seasonality_features is not None
