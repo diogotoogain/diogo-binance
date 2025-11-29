@@ -66,6 +66,7 @@ class DerivativesFilter:
             fr_config.get('extreme_action', 'reduce_size')
         )
         self.fr_extreme_size_multiplier = fr_config.get('extreme_size_multiplier', 0.5)
+        self.fr_favorable_boost_multiplier = fr_config.get('favorable_boost_multiplier', 1.2)
         
         # Configuração de Open Interest
         oi_config = config.get('open_interest', {})
@@ -77,12 +78,14 @@ class DerivativesFilter:
         self.div_enabled = div_config.get('enabled', True)
         self.div_price_threshold = div_config.get('price_change_threshold', 0.02)
         self.div_oi_threshold = div_config.get('oi_change_threshold', 0.03)
+        self.div_favorable_boost_multiplier = div_config.get('favorable_boost_multiplier', 1.2)
         
         # Configuração de Long/Short Ratio
         ls_config = config.get('long_short_ratio', {})
         self.ls_enabled = ls_config.get('enabled', True)
         self.ls_extreme_long = ls_config.get('extreme_long', 2.0)
         self.ls_extreme_short = ls_config.get('extreme_short', 0.5)
+        self.ls_favorable_boost_multiplier = ls_config.get('favorable_boost_multiplier', 1.2)
     
     def should_trade(
         self,
@@ -235,7 +238,7 @@ class DerivativesFilter:
                     return (False, 0.0, f"FR={funding_rate:.4%} extreme, reversing bias to short")
             else:
                 # Short quando mercado está muito long = favorável
-                return (True, 1.2, f"FR={funding_rate:.4%} extreme positive, shorts favored")
+                return (True, self.fr_favorable_boost_multiplier, f"FR={funding_rate:.4%} extreme positive, shorts favored")
         
         # Funding muito negativo = mercado muito short
         elif funding_rate <= self.fr_extreme_negative:
@@ -250,7 +253,7 @@ class DerivativesFilter:
                     return (False, 0.0, f"FR={funding_rate:.4%} extreme, reversing bias to long")
             else:
                 # Long quando mercado está muito short = favorável
-                return (True, 1.2, f"FR={funding_rate:.4%} extreme negative, longs favored")
+                return (True, self.fr_favorable_boost_multiplier, f"FR={funding_rate:.4%} extreme negative, longs favored")
         
         return None
     
@@ -287,7 +290,7 @@ class DerivativesFilter:
                         f"Bearish divergence: price up {price_change_pct:.2%} but OI down {oi_change_pct:.2%}")
             else:
                 # Short em divergência bearish = favorável
-                return (True, 1.2, 
+                return (True, self.div_favorable_boost_multiplier, 
                         f"Bearish divergence favors shorts")
         
         # Preço cai + OI sobe = capitulação (pode ser fundo)
@@ -327,7 +330,7 @@ class DerivativesFilter:
                 return (True, 0.7, 
                         f"L/S ratio={long_short_ratio:.2f} very high, reducing long size")
             else:
-                return (True, 1.2,
+                return (True, self.ls_favorable_boost_multiplier,
                         f"L/S ratio={long_short_ratio:.2f} extreme long, shorts favored")
         
         # Muitos shorts
@@ -336,7 +339,7 @@ class DerivativesFilter:
                 return (True, 0.7,
                         f"L/S ratio={long_short_ratio:.2f} very low, reducing short size")
             else:
-                return (True, 1.2,
+                return (True, self.ls_favorable_boost_multiplier,
                         f"L/S ratio={long_short_ratio:.2f} extreme short, longs favored")
         
         return None

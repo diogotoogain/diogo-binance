@@ -608,6 +608,7 @@ derivatives:
     # Ações quando funding está extremo
     extreme_action: "reduce_size"    # OPTIMIZE: ["none", "reduce_size", "reverse_bias", "pause"]
     extreme_size_multiplier: 0.5     # OPTIMIZE: range(0.2, 0.8)
+    favorable_boost_multiplier: 1.2  # OPTIMIZE: range(1.0, 1.5) - Boost when favorable
     
     # Usar como feature
     include_in_features: true
@@ -627,6 +628,7 @@ derivatives:
       lookback_bars: 20              # OPTIMIZE: [10, 20, 50]
       price_change_threshold: 0.02   # OPTIMIZE: range(0.01, 0.05)
       oi_change_threshold: 0.03      # OPTIMIZE: range(0.01, 0.05)
+      favorable_boost_multiplier: 1.2  # OPTIMIZE: range(1.0, 1.5) - Boost when favorable
     
     # Usar como feature
     include_in_features: true
@@ -636,3 +638,4 @@ derivatives:
     enabled: true                    # OPTIMIZE: [true, false]
     extreme_long: 2.0                # OPTIMIZE: range(1.5, 3.0) - Muito mais longs que shorts
     extreme_short: 0.5               # OPTIMIZE: range(0.3, 0.7)
+    favorable_boost_multiplier: 1.2  # OPTIMIZE: range(1.0, 1.5) - Boost when favorable
