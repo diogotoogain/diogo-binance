@@ -51,3 +51,6 @@ logs/
 # Temporary files
 *.tmp
 *.temp
+
+# Note: Parquet data files in v2/data/raw/1s/ are intentionally tracked
+# for real-time 1-second candle data collection
