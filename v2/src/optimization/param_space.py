@@ -16,7 +16,7 @@ from ..config.schema import (
     STRATEGY_TOGGLES,
     OptimizableParam,
     ParamType,
-    get_all_optimizable_params,
+    get_params_dict,
     get_feature_toggles,
     get_strategy_toggles,
 )
@@ -50,8 +50,7 @@ class ParamSpace:
 
     def _load_optimizable_params(self) -> Dict[str, List[OptimizableParam]]:
         """Load all optimizable parameters from schema."""
-        params, _ = get_all_optimizable_params()
-        return params
+        return get_params_dict()
 
     def suggest(self, trial: optuna.Trial) -> Dict[str, Any]:
         """

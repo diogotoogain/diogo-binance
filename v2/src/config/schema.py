@@ -2517,24 +2517,6 @@ STRATEGY_TOGGLES: Dict[str, OptimizableParam] = {
 }
 
 
-def get_all_optimizable_params() -> Tuple[Dict[str, List[OptimizableParam]], int]:
-    """
-    Get all optimizable parameters with their definitions.
-
-    Returns:
-        Tuple of (params dict, total count)
-    """
-    total_count = 0
-    for params_list in OPTIMIZABLE_PARAMS.values():
-        total_count += len(params_list)
-
-    # Add toggles
-    total_count += len(FEATURE_TOGGLES)
-    total_count += len(STRATEGY_TOGGLES)
-
-    return OPTIMIZABLE_PARAMS, total_count
-
-
 def get_feature_toggles() -> Dict[str, OptimizableParam]:
     """Get all feature toggle parameters."""
     return FEATURE_TOGGLES
@@ -2545,18 +2527,23 @@ def get_strategy_toggles() -> Dict[str, OptimizableParam]:
     return STRATEGY_TOGGLES
 
 
-def count_optimizable_params() -> int:
-    """Count total optimizable parameters."""
-    _, count = get_all_optimizable_params()
-    return count
+def get_params_dict() -> Dict[str, List[OptimizableParam]]:
+    """
+    Get optimizable parameters organized by section from OPTIMIZABLE_PARAMS.
+    
+    This returns only the section-organized parameters, not toggles.
+    For a flat list of all parameters, use get_all_optimizable_params().
+    
+    Returns:
+        Dictionary mapping section names to lists of OptimizableParam
+    """
+    return OPTIMIZABLE_PARAMS
 
 
 # Verify we have ~150 parameters as specified
 if __name__ == "__main__":
-    params, count = get_all_optimizable_params()
+    params = get_all_optimizable_params()
+    count = len(params)
     print(f"Total optimizable parameters: {count}")
-    print("\nBy section:")
-    for section, params_list in params.items():
-        print(f"  {section}: {len(params_list)} params")
     print(f"\nFeature toggles: {len(FEATURE_TOGGLES)}")
     print(f"Strategy toggles: {len(STRATEGY_TOGGLES)}")
