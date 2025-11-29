@@ -11,6 +11,8 @@ from typing import Any, Dict, Optional
 import logging
 import time
 
+import numpy as np
+
 
 class SignalDirection(Enum):
     """Direção do sinal de trading."""
@@ -148,7 +150,6 @@ class Strategy(ABC):
         if len(self._returns) < 2:
             return 0.0
         
-        import numpy as np
         returns = np.array(self._returns)
         mean_return = np.mean(returns) - risk_free_rate
         std_return = np.std(returns, ddof=1)
@@ -172,7 +173,6 @@ class Strategy(ABC):
         if len(self._returns) < 2:
             return 0.0
         
-        import numpy as np
         returns = np.array(self._returns)
         negative_returns = returns[returns < 0]
         
