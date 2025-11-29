@@ -36,6 +36,8 @@ class LiquidityClusters(Feature):
         super().__init__(config, enabled)
         self.levels = config.get('levels', 10)
         self.threshold_percentile = config.get('threshold_percentile', 80)
+        self.recalc_frequency = config.get('recalc_frequency', 100)
+        self.cluster_threshold_pct = config.get('cluster_threshold_pct', 0.1)
         
     def calculate(self, data: pd.DataFrame) -> pd.DataFrame:
         """
@@ -178,8 +180,8 @@ class LiquidityClusters(Feature):
         state['prices'].append(price)
         state['update_counter'] += 1
         
-        # Recalcula clusters periodicamente (a cada 100 updates)
-        if state['update_counter'] >= 100:
+        # Recalcula clusters periodicamente (configurável)
+        if state['update_counter'] >= self.recalc_frequency:
             state['update_counter'] = 0
             self._update_cluster_levels(state)
         
@@ -191,8 +193,8 @@ class LiquidityClusters(Feature):
         
         cluster_distance = min(abs(price - level) for level in cluster_levels)
         
-        # Verifica se está em zona de cluster
-        cluster_threshold = price * 0.001  # 0.1%
+        # Verifica se está em zona de cluster (configurável via cluster_threshold_pct)
+        cluster_threshold = price * self.cluster_threshold_pct / 100  # Convertido para porcentagem
         in_cluster = 1 if cluster_distance < cluster_threshold else 0
         
         return {

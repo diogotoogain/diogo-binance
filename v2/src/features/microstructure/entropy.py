@@ -58,12 +58,13 @@ class ShannonEntropy(Feature):
         
         # Discretiza os valores em bins
         try:
-            hist, _ = np.histogram(values, bins=self.n_bins, density=True)
+            hist, _ = np.histogram(values, bins=self.n_bins, density=False)
         except ValueError:
             return 0.0
         
         # Normaliza para probabilidades
-        hist = hist / hist.sum() if hist.sum() > 0 else hist
+        total = hist.sum()
+        hist = hist / total if total > 0 else hist
         
         # Remove zeros para evitar log(0)
         hist = hist[hist > 0]

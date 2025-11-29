@@ -63,6 +63,8 @@ features:
       enabled: true
       levels: 10  # OPTIMIZE: [5, 10, 15, 20]
       threshold_percentile: 80  # OPTIMIZE: [70, 80, 90]
+      recalc_frequency: 100  # OPTIMIZE: [50, 100, 200]
+      cluster_threshold_pct: 0.1  # OPTIMIZE: [0.05, 0.1, 0.2]
 
 # ═══════════════════════════════════════════════════════════════
 # REGIME DETECTION

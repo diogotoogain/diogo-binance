@@ -2,12 +2,9 @@
 Testes para o sistema de features V2.
 """
 import pytest
-import sys
 import numpy as np
 import pandas as pd
 from datetime import datetime, timedelta
-
-sys.path.insert(0, '.')
 
 from v2.src.features.base import Feature
 from v2.src.features.microstructure import OFI, TFI, MicroPrice, ShannonEntropy, VPIN
