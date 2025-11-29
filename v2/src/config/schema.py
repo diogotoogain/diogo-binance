@@ -1193,6 +1193,207 @@ def get_all_optimizable_params() -> List[OptimizableParam]:
     ])
     
     # ═══════════════════════════════════════════════════════════════════════
+    # SEASONALITY (~20 params)
+    # ═══════════════════════════════════════════════════════════════════════
+    params.extend([
+        OptimizableParam(
+            name='seasonality.enabled',
+            param_type=ParamType.BOOL,
+            default=True,
+            description='Habilitar ajuste de sazonalidade'
+        ),
+        OptimizableParam(
+            name='seasonality.monthly_adjustment.enabled',
+            param_type=ParamType.BOOL,
+            default=True,
+            description='Habilitar ajuste mensal'
+        ),
+        OptimizableParam(
+            name='seasonality.monthly_adjustment.january',
+            param_type=ParamType.FLOAT,
+            default=1.0,
+            low=0.5,
+            high=1.5,
+            step=0.1,
+            description='Multiplicador Janeiro'
+        ),
+        OptimizableParam(
+            name='seasonality.monthly_adjustment.february',
+            param_type=ParamType.FLOAT,
+            default=1.0,
+            low=0.5,
+            high=1.5,
+            step=0.1,
+            description='Multiplicador Fevereiro'
+        ),
+        OptimizableParam(
+            name='seasonality.monthly_adjustment.march',
+            param_type=ParamType.FLOAT,
+            default=1.0,
+            low=0.5,
+            high=1.5,
+            step=0.1,
+            description='Multiplicador Março'
+        ),
+        OptimizableParam(
+            name='seasonality.monthly_adjustment.april',
+            param_type=ParamType.FLOAT,
+            default=1.0,
+            low=0.5,
+            high=1.5,
+            step=0.1,
+            description='Multiplicador Abril'
+        ),
+        OptimizableParam(
+            name='seasonality.monthly_adjustment.may',
+            param_type=ParamType.FLOAT,
+            default=0.8,
+            low=0.5,
+            high=1.5,
+            step=0.1,
+            description='Multiplicador Maio - Sell in May'
+        ),
+        OptimizableParam(
+            name='seasonality.monthly_adjustment.june',
+            param_type=ParamType.FLOAT,
+            default=0.7,
+            low=0.5,
+            high=1.5,
+            step=0.1,
+            description='Multiplicador Junho - Verão'
+        ),
+        OptimizableParam(
+            name='seasonality.monthly_adjustment.july',
+            param_type=ParamType.FLOAT,
+            default=0.7,
+            low=0.5,
+            high=1.5,
+            step=0.1,
+            description='Multiplicador Julho - Verão'
+        ),
+        OptimizableParam(
+            name='seasonality.monthly_adjustment.august',
+            param_type=ParamType.FLOAT,
+            default=0.7,
+            low=0.5,
+            high=1.5,
+            step=0.1,
+            description='Multiplicador Agosto - Verão'
+        ),
+        OptimizableParam(
+            name='seasonality.monthly_adjustment.september',
+            param_type=ParamType.FLOAT,
+            default=0.8,
+            low=0.5,
+            high=1.5,
+            step=0.1,
+            description='Multiplicador Setembro'
+        ),
+        OptimizableParam(
+            name='seasonality.monthly_adjustment.october',
+            param_type=ParamType.FLOAT,
+            default=1.2,
+            low=0.5,
+            high=1.5,
+            step=0.1,
+            description='Multiplicador Outubro - Uptober'
+        ),
+        OptimizableParam(
+            name='seasonality.monthly_adjustment.november',
+            param_type=ParamType.FLOAT,
+            default=1.3,
+            low=0.5,
+            high=1.5,
+            step=0.1,
+            description='Multiplicador Novembro'
+        ),
+        OptimizableParam(
+            name='seasonality.monthly_adjustment.december',
+            param_type=ParamType.FLOAT,
+            default=1.2,
+            low=0.5,
+            high=1.5,
+            step=0.1,
+            description='Multiplicador Dezembro'
+        ),
+        OptimizableParam(
+            name='seasonality.month_period.enabled',
+            param_type=ParamType.BOOL,
+            default=True,
+            description='Habilitar ajuste por período do mês'
+        ),
+        OptimizableParam(
+            name='seasonality.month_period.early_month_multiplier',
+            param_type=ParamType.FLOAT,
+            default=1.0,
+            low=0.7,
+            high=1.3,
+            step=0.1,
+            description='Multiplicador início do mês (dias 1-10)'
+        ),
+        OptimizableParam(
+            name='seasonality.month_period.mid_month_multiplier',
+            param_type=ParamType.FLOAT,
+            default=1.0,
+            low=0.7,
+            high=1.3,
+            step=0.1,
+            description='Multiplicador meio do mês (dias 11-20)'
+        ),
+        OptimizableParam(
+            name='seasonality.month_period.late_month_multiplier',
+            param_type=ParamType.FLOAT,
+            default=0.9,
+            low=0.7,
+            high=1.3,
+            step=0.1,
+            description='Multiplicador fim do mês (dias 21-31)'
+        ),
+        OptimizableParam(
+            name='seasonality.quarter_adjustment.enabled',
+            param_type=ParamType.BOOL,
+            default=True,
+            description='Habilitar ajuste por quarter'
+        ),
+        OptimizableParam(
+            name='seasonality.quarter_adjustment.q1_multiplier',
+            param_type=ParamType.FLOAT,
+            default=1.0,
+            low=0.7,
+            high=1.3,
+            step=0.1,
+            description='Multiplicador Q1 (Jan-Mar)'
+        ),
+        OptimizableParam(
+            name='seasonality.quarter_adjustment.q2_multiplier',
+            param_type=ParamType.FLOAT,
+            default=0.9,
+            low=0.7,
+            high=1.3,
+            step=0.1,
+            description='Multiplicador Q2 (Abr-Jun)'
+        ),
+        OptimizableParam(
+            name='seasonality.quarter_adjustment.q3_multiplier',
+            param_type=ParamType.FLOAT,
+            default=0.8,
+            low=0.7,
+            high=1.3,
+            step=0.1,
+            description='Multiplicador Q3 (Jul-Set)'
+        ),
+        OptimizableParam(
+            name='seasonality.quarter_adjustment.q4_multiplier',
+            param_type=ParamType.FLOAT,
+            default=1.2,
+            low=0.7,
+            high=1.3,
+            step=0.1,
+            description='Multiplicador Q4 (Out-Dez) - Historicamente mais forte'
+        ),
+    ])
+    
+    # ═══════════════════════════════════════════════════════════════════════
     # POSITION MANAGEMENT (~12 params)
     # ═══════════════════════════════════════════════════════════════════════
     params.extend([
@@ -1613,6 +1814,268 @@ def get_all_optimizable_params() -> List[OptimizableParam]:
             low=100,
             high=5000,
             description='Número de simulações Monte Carlo'
+        ),
+    ])
+    
+    # ═══════════════════════════════════════════════════════════════════════
+    # LIQUIDATIONS (~15 params)
+    # ═══════════════════════════════════════════════════════════════════════
+    params.extend([
+        OptimizableParam(
+            name='liquidations.enabled',
+            param_type=ParamType.BOOL,
+            default=True,
+            description='Habilitar features de liquidação'
+        ),
+        OptimizableParam(
+            name='liquidations.significant_single_liq_usd',
+            param_type=ParamType.INT,
+            default=100000,
+            low=50000,
+            high=500000,
+            step=50000,
+            description='Threshold para liquidação única significativa'
+        ),
+        OptimizableParam(
+            name='liquidations.significant_cascade_usd',
+            param_type=ParamType.INT,
+            default=1000000,
+            low=500000,
+            high=5000000,
+            step=500000,
+            description='Threshold para cascata significativa'
+        ),
+        OptimizableParam(
+            name='liquidations.cascade_window_seconds',
+            param_type=ParamType.CATEGORICAL,
+            default=60,
+            choices=[30, 60, 120, 300],
+            description='Janela de detecção de cascata em segundos'
+        ),
+        OptimizableParam(
+            name='liquidations.cascade_detection.enabled',
+            param_type=ParamType.BOOL,
+            default=True,
+            description='Habilitar detecção de cascata'
+        ),
+        OptimizableParam(
+            name='liquidations.cascade_detection.min_liquidations',
+            param_type=ParamType.CATEGORICAL,
+            default=5,
+            choices=[3, 5, 10, 20],
+            description='Mínimo de liquidações para cascata'
+        ),
+        OptimizableParam(
+            name='liquidations.cascade_detection.volume_acceleration',
+            param_type=ParamType.FLOAT,
+            default=2.0,
+            low=1.5,
+            high=5.0,
+            step=0.5,
+            description='Aceleração de volume para cascata'
+        ),
+        OptimizableParam(
+            name='liquidations.strategy.enabled',
+            param_type=ParamType.BOOL,
+            default=True,
+            description='Habilitar estratégia de liquidações'
+        ),
+        OptimizableParam(
+            name='liquidations.strategy.follow_cascade',
+            param_type=ParamType.BOOL,
+            default=True,
+            description='Seguir cascata (momentum)'
+        ),
+        OptimizableParam(
+            name='liquidations.strategy.min_cascade_size_usd',
+            param_type=ParamType.INT,
+            default=500000,
+            low=100000,
+            high=2000000,
+            step=100000,
+            description='Tamanho mínimo de cascata para follow'
+        ),
+        OptimizableParam(
+            name='liquidations.strategy.fade_cascade',
+            param_type=ParamType.BOOL,
+            default=False,
+            description='Operar reversão após cascata'
+        ),
+        OptimizableParam(
+            name='liquidations.strategy.fade_after_seconds',
+            param_type=ParamType.INT,
+            default=300,
+            low=60,
+            high=600,
+            step=60,
+            description='Segundos após cascata para fade'
+        ),
+        OptimizableParam(
+            name='liquidations.strategy.fade_min_cascade_size',
+            param_type=ParamType.INT,
+            default=2000000,
+            low=1000000,
+            high=5000000,
+            step=500000,
+            description='Tamanho mínimo para fade'
+        ),
+        OptimizableParam(
+            name='liquidations.filter.enabled',
+            param_type=ParamType.BOOL,
+            default=True,
+            description='Habilitar filtro de liquidações'
+        ),
+        OptimizableParam(
+            name='liquidations.filter.pause_during_cascade',
+            param_type=ParamType.BOOL,
+            default=True,
+            description='Pausar durante cascata'
+        ),
+        OptimizableParam(
+            name='liquidations.filter.pause_threshold_usd',
+            param_type=ParamType.INT,
+            default=5000000,
+            low=1000000,
+            high=10000000,
+            step=1000000,
+            description='Threshold para pausar trading'
+        ),
+        OptimizableParam(
+            name='liquidations.filter.resume_after_seconds',
+            param_type=ParamType.INT,
+            default=120,
+            low=60,
+            high=300,
+            step=30,
+            description='Segundos para retomar após pausa'
+    # DERIVATIVES PARAMETERS (~15 params)
+    # ═══════════════════════════════════════════════════════════════════════
+    params.extend([
+        OptimizableParam(
+            name='derivatives.enabled',
+            param_type=ParamType.BOOL,
+            default=True,
+            description='Habilitar features de derivativos'
+        ),
+        # Funding Rate
+        OptimizableParam(
+            name='derivatives.funding_rate.enabled',
+            param_type=ParamType.BOOL,
+            default=True,
+            description='Habilitar features de Funding Rate'
+        ),
+        OptimizableParam(
+            name='derivatives.funding_rate.extreme_positive',
+            param_type=ParamType.FLOAT,
+            default=0.001,
+            low=0.0005,
+            high=0.003,
+            step=0.0001,
+            description='Threshold para funding rate extremo positivo'
+        ),
+        OptimizableParam(
+            name='derivatives.funding_rate.extreme_negative',
+            param_type=ParamType.FLOAT,
+            default=-0.001,
+            low=-0.003,
+            high=-0.0005,
+            step=0.0001,
+            description='Threshold para funding rate extremo negativo'
+        ),
+        OptimizableParam(
+            name='derivatives.funding_rate.extreme_action',
+            param_type=ParamType.CATEGORICAL,
+            default='reduce_size',
+            choices=['none', 'reduce_size', 'reverse_bias', 'pause'],
+            description='Ação quando funding rate está extremo'
+        ),
+        OptimizableParam(
+            name='derivatives.funding_rate.extreme_size_multiplier',
+            param_type=ParamType.FLOAT,
+            default=0.5,
+            low=0.2,
+            high=0.8,
+            step=0.1,
+            description='Multiplicador de tamanho quando funding extremo'
+        ),
+        OptimizableParam(
+            name='derivatives.funding_rate.lookback_periods',
+            param_type=ParamType.CATEGORICAL,
+            default=8,
+            choices=[4, 8, 16, 24],
+            description='Períodos de lookback para Funding Rate'
+        ),
+        # Open Interest
+        OptimizableParam(
+            name='derivatives.open_interest.enabled',
+            param_type=ParamType.BOOL,
+            default=True,
+            description='Habilitar features de Open Interest'
+        ),
+        OptimizableParam(
+            name='derivatives.open_interest.significant_change_pct',
+            param_type=ParamType.FLOAT,
+            default=5.0,
+            low=2.0,
+            high=10.0,
+            step=0.5,
+            description='Mudança percentual significativa de OI'
+        ),
+        OptimizableParam(
+            name='derivatives.open_interest.divergence_detection.enabled',
+            param_type=ParamType.BOOL,
+            default=True,
+            description='Habilitar detecção de divergência OI vs Preço'
+        ),
+        OptimizableParam(
+            name='derivatives.open_interest.divergence_detection.lookback_bars',
+            param_type=ParamType.CATEGORICAL,
+            default=20,
+            choices=[10, 20, 50],
+            description='Lookback para detecção de divergência'
+        ),
+        OptimizableParam(
+            name='derivatives.open_interest.divergence_detection.price_change_threshold',
+            param_type=ParamType.FLOAT,
+            default=0.02,
+            low=0.01,
+            high=0.05,
+            step=0.005,
+            description='Threshold de mudança de preço para divergência'
+        ),
+        OptimizableParam(
+            name='derivatives.open_interest.divergence_detection.oi_change_threshold',
+            param_type=ParamType.FLOAT,
+            default=0.03,
+            low=0.01,
+            high=0.05,
+            step=0.005,
+            description='Threshold de mudança de OI para divergência'
+        ),
+        # Long/Short Ratio
+        OptimizableParam(
+            name='derivatives.long_short_ratio.enabled',
+            param_type=ParamType.BOOL,
+            default=True,
+            description='Habilitar features de Long/Short Ratio'
+        ),
+        OptimizableParam(
+            name='derivatives.long_short_ratio.extreme_long',
+            param_type=ParamType.FLOAT,
+            default=2.0,
+            low=1.5,
+            high=3.0,
+            step=0.1,
+            description='Ratio extremo de longs'
+        ),
+        OptimizableParam(
+            name='derivatives.long_short_ratio.extreme_short',
+            param_type=ParamType.FLOAT,
+            default=0.5,
+            low=0.3,
+            high=0.7,
+            step=0.05,
+            description='Ratio extremo de shorts'
         ),
     ])
     
@@ -2323,6 +2786,191 @@ OPTIMIZABLE_PARAMS: Dict[str, List[OptimizableParam]] = {
             description="Pause duration after kill switch",
         ),
     ],
+    # Seasonality
+    "seasonality": [
+        OptimizableParam(
+            name="enabled",
+            param_type=ParamType.BOOL,
+            default=True,
+            description="Enable seasonality adjustment",
+        ),
+    ],
+    "seasonality.monthly_adjustment": [
+        OptimizableParam(
+            name="enabled",
+            param_type=ParamType.BOOL,
+            default=True,
+            description="Enable monthly adjustment",
+        ),
+        OptimizableParam(
+            name="january",
+            param_type=ParamType.FLOAT,
+            low=0.5,
+            high=1.5,
+            default=1.0,
+            description="January multiplier",
+        ),
+        OptimizableParam(
+            name="february",
+            param_type=ParamType.FLOAT,
+            low=0.5,
+            high=1.5,
+            default=1.0,
+            description="February multiplier",
+        ),
+        OptimizableParam(
+            name="march",
+            param_type=ParamType.FLOAT,
+            low=0.5,
+            high=1.5,
+            default=1.0,
+            description="March multiplier",
+        ),
+        OptimizableParam(
+            name="april",
+            param_type=ParamType.FLOAT,
+            low=0.5,
+            high=1.5,
+            default=1.0,
+            description="April multiplier",
+        ),
+        OptimizableParam(
+            name="may",
+            param_type=ParamType.FLOAT,
+            low=0.5,
+            high=1.5,
+            default=0.8,
+            description="May multiplier - Sell in May",
+        ),
+        OptimizableParam(
+            name="june",
+            param_type=ParamType.FLOAT,
+            low=0.5,
+            high=1.5,
+            default=0.7,
+            description="June multiplier - Summer",
+        ),
+        OptimizableParam(
+            name="july",
+            param_type=ParamType.FLOAT,
+            low=0.5,
+            high=1.5,
+            default=0.7,
+            description="July multiplier - Summer",
+        ),
+        OptimizableParam(
+            name="august",
+            param_type=ParamType.FLOAT,
+            low=0.5,
+            high=1.5,
+            default=0.7,
+            description="August multiplier - Summer",
+        ),
+        OptimizableParam(
+            name="september",
+            param_type=ParamType.FLOAT,
+            low=0.5,
+            high=1.5,
+            default=0.8,
+            description="September multiplier",
+        ),
+        OptimizableParam(
+            name="october",
+            param_type=ParamType.FLOAT,
+            low=0.5,
+            high=1.5,
+            default=1.2,
+            description="October multiplier - Uptober",
+        ),
+        OptimizableParam(
+            name="november",
+            param_type=ParamType.FLOAT,
+            low=0.5,
+            high=1.5,
+            default=1.3,
+            description="November multiplier",
+        ),
+        OptimizableParam(
+            name="december",
+            param_type=ParamType.FLOAT,
+            low=0.5,
+            high=1.5,
+            default=1.2,
+            description="December multiplier",
+        ),
+    ],
+    "seasonality.month_period": [
+        OptimizableParam(
+            name="enabled",
+            param_type=ParamType.BOOL,
+            default=True,
+            description="Enable month period adjustment",
+        ),
+        OptimizableParam(
+            name="early_month_multiplier",
+            param_type=ParamType.FLOAT,
+            low=0.7,
+            high=1.3,
+            default=1.0,
+            description="Early month multiplier (days 1-10)",
+        ),
+        OptimizableParam(
+            name="mid_month_multiplier",
+            param_type=ParamType.FLOAT,
+            low=0.7,
+            high=1.3,
+            default=1.0,
+            description="Mid month multiplier (days 11-20)",
+        ),
+        OptimizableParam(
+            name="late_month_multiplier",
+            param_type=ParamType.FLOAT,
+            low=0.7,
+            high=1.3,
+            default=0.9,
+            description="Late month multiplier (days 21-31)",
+        ),
+    ],
+    "seasonality.quarter_adjustment": [
+        OptimizableParam(
+            name="enabled",
+            param_type=ParamType.BOOL,
+            default=True,
+            description="Enable quarter adjustment",
+        ),
+        OptimizableParam(
+            name="q1_multiplier",
+            param_type=ParamType.FLOAT,
+            low=0.7,
+            high=1.3,
+            default=1.0,
+            description="Q1 multiplier (Jan-Mar)",
+        ),
+        OptimizableParam(
+            name="q2_multiplier",
+            param_type=ParamType.FLOAT,
+            low=0.7,
+            high=1.3,
+            default=0.9,
+            description="Q2 multiplier (Apr-Jun)",
+        ),
+        OptimizableParam(
+            name="q3_multiplier",
+            param_type=ParamType.FLOAT,
+            low=0.7,
+            high=1.3,
+            default=0.8,
+            description="Q3 multiplier (Jul-Sep)",
+        ),
+        OptimizableParam(
+            name="q4_multiplier",
+            param_type=ParamType.FLOAT,
+            low=0.7,
+            high=1.3,
+            default=1.2,
+            description="Q4 multiplier (Oct-Dec) - Historically stronger",
+        ),
+    ],
     # Bet Sizing
     "bet_sizing.kelly": [
         OptimizableParam(
@@ -2549,6 +3197,184 @@ OPTIMIZABLE_PARAMS: Dict[str, List[OptimizableParam]] = {
             description="Step days between windows",
         ),
     ],
+    # Liquidations
+    "liquidations": [
+        OptimizableParam(
+            name="significant_single_liq_usd",
+            param_type=ParamType.INT,
+            low=50000,
+            high=500000,
+            default=100000,
+            description="Threshold for significant single liquidation",
+        ),
+        OptimizableParam(
+            name="significant_cascade_usd",
+            param_type=ParamType.INT,
+            low=500000,
+            high=5000000,
+            default=1000000,
+            description="Threshold for significant cascade",
+        ),
+        OptimizableParam(
+            name="cascade_window_seconds",
+            param_type=ParamType.INT,
+            low=30,
+            high=300,
+            default=60,
+            description="Cascade detection window",
+        ),
+    ],
+    "liquidations.cascade_detection": [
+        OptimizableParam(
+            name="min_liquidations",
+            param_type=ParamType.INT,
+            low=3,
+            high=20,
+            default=5,
+            description="Minimum liquidations for cascade",
+        ),
+        OptimizableParam(
+            name="volume_acceleration",
+            param_type=ParamType.FLOAT,
+            low=1.5,
+            high=5.0,
+            default=2.0,
+            description="Volume acceleration threshold",
+        ),
+    ],
+    "liquidations.strategy": [
+        OptimizableParam(
+            name="min_cascade_size_usd",
+            param_type=ParamType.INT,
+            low=100000,
+            high=2000000,
+            default=500000,
+            description="Minimum cascade size for follow",
+        ),
+        OptimizableParam(
+            name="fade_after_seconds",
+            param_type=ParamType.INT,
+            low=60,
+            high=600,
+            default=300,
+            description="Seconds after cascade for fade",
+        ),
+        OptimizableParam(
+            name="fade_min_cascade_size",
+            param_type=ParamType.INT,
+            low=1000000,
+            high=5000000,
+            default=2000000,
+            description="Minimum cascade size for fade",
+        ),
+    ],
+    "liquidations.filter": [
+        OptimizableParam(
+            name="pause_threshold_usd",
+            param_type=ParamType.INT,
+            low=1000000,
+            high=10000000,
+            default=5000000,
+            description="Threshold to pause trading",
+        ),
+        OptimizableParam(
+            name="resume_after_seconds",
+            param_type=ParamType.INT,
+            low=60,
+            high=300,
+            default=120,
+            description="Seconds to resume after pause",
+    # Derivatives - Funding Rate
+    "derivatives.funding_rate": [
+        OptimizableParam(
+            name="extreme_positive",
+            param_type=ParamType.FLOAT,
+            low=0.0005,
+            high=0.003,
+            default=0.001,
+            description="Extreme positive funding rate threshold",
+        ),
+        OptimizableParam(
+            name="extreme_negative",
+            param_type=ParamType.FLOAT,
+            low=-0.003,
+            high=-0.0005,
+            default=-0.001,
+            description="Extreme negative funding rate threshold",
+        ),
+        OptimizableParam(
+            name="extreme_size_multiplier",
+            param_type=ParamType.FLOAT,
+            low=0.2,
+            high=0.8,
+            default=0.5,
+            description="Size multiplier when funding is extreme",
+        ),
+        OptimizableParam(
+            name="lookback_periods",
+            param_type=ParamType.INT,
+            low=4,
+            high=24,
+            default=8,
+            description="Number of funding rate periods to look back",
+        ),
+    ],
+    # Derivatives - Open Interest
+    "derivatives.open_interest": [
+        OptimizableParam(
+            name="significant_change_pct",
+            param_type=ParamType.FLOAT,
+            low=2.0,
+            high=10.0,
+            default=5.0,
+            description="Significant OI change percentage",
+        ),
+    ],
+    "derivatives.open_interest.divergence_detection": [
+        OptimizableParam(
+            name="lookback_bars",
+            param_type=ParamType.INT,
+            low=10,
+            high=50,
+            default=20,
+            description="Lookback bars for divergence detection",
+        ),
+        OptimizableParam(
+            name="price_change_threshold",
+            param_type=ParamType.FLOAT,
+            low=0.01,
+            high=0.05,
+            default=0.02,
+            description="Price change threshold for divergence",
+        ),
+        OptimizableParam(
+            name="oi_change_threshold",
+            param_type=ParamType.FLOAT,
+            low=0.01,
+            high=0.05,
+            default=0.03,
+            description="OI change threshold for divergence",
+        ),
+    ],
+    # Derivatives - Long/Short Ratio
+    "derivatives.long_short_ratio": [
+        OptimizableParam(
+            name="extreme_long",
+            param_type=ParamType.FLOAT,
+            low=1.5,
+            high=3.0,
+            default=2.0,
+            description="Extreme long ratio threshold",
+        ),
+        OptimizableParam(
+            name="extreme_short",
+            param_type=ParamType.FLOAT,
+            low=0.3,
+            high=0.7,
+            default=0.5,
+            description="Extreme short ratio threshold",
+        ),
+    ],
 }
 
 # Feature toggles (enabled/disabled)
@@ -2625,6 +3451,78 @@ FEATURE_TOGGLES: Dict[str, OptimizableParam] = {
         default=True,
         description="Enable Liquidity Clusters feature",
     ),
+    "liquidations.enabled": OptimizableParam(
+        name="enabled",
+        param_type=ParamType.BOOL,
+        default=True,
+        description="Enable Liquidation features",
+    ),
+    "liquidations.cascade_detection.enabled": OptimizableParam(
+        name="enabled",
+        param_type=ParamType.BOOL,
+        default=True,
+        description="Enable Cascade detection",
+    ),
+    "liquidations.strategy.enabled": OptimizableParam(
+        name="enabled",
+        param_type=ParamType.BOOL,
+        default=True,
+        description="Enable Liquidation strategy",
+    ),
+    "liquidations.strategy.follow_cascade": OptimizableParam(
+        name="follow_cascade",
+        param_type=ParamType.BOOL,
+        default=True,
+        description="Follow cascade momentum",
+    ),
+    "liquidations.strategy.fade_cascade": OptimizableParam(
+        name="fade_cascade",
+        param_type=ParamType.BOOL,
+        default=False,
+        description="Fade cascade reversal",
+    ),
+    "liquidations.filter.enabled": OptimizableParam(
+        name="enabled",
+        param_type=ParamType.BOOL,
+        default=True,
+        description="Enable Liquidation filter",
+    ),
+    "liquidations.filter.pause_during_cascade": OptimizableParam(
+        name="pause_during_cascade",
+        param_type=ParamType.BOOL,
+        default=True,
+        description="Pause during cascade",
+    # Derivatives feature toggles
+    "derivatives.enabled": OptimizableParam(
+        name="enabled",
+        param_type=ParamType.BOOL,
+        default=True,
+        description="Enable derivatives features",
+    ),
+    "derivatives.funding_rate.enabled": OptimizableParam(
+        name="enabled",
+        param_type=ParamType.BOOL,
+        default=True,
+        description="Enable Funding Rate feature",
+    ),
+    "derivatives.open_interest.enabled": OptimizableParam(
+        name="enabled",
+        param_type=ParamType.BOOL,
+        default=True,
+        description="Enable Open Interest feature",
+    ),
+    "derivatives.open_interest.divergence_detection.enabled": OptimizableParam(
+        name="enabled",
+        param_type=ParamType.BOOL,
+        default=True,
+        description="Enable OI/Price divergence detection",
+    ),
+    "derivatives.long_short_ratio.enabled": OptimizableParam(
+        name="enabled",
+        param_type=ParamType.BOOL,
+        default=True,
+        description="Enable Long/Short Ratio feature",
+    ),
 }
 
 # Strategy toggles
@@ -2652,6 +3550,12 @@ STRATEGY_TOGGLES: Dict[str, OptimizableParam] = {
         param_type=ParamType.BOOL,
         default=True,
         description="Enable Volatility Breakout strategy",
+    ),
+    "strategies.liquidation_cascade.enabled": OptimizableParam(
+        name="enabled",
+        param_type=ParamType.BOOL,
+        default=True,
+        description="Enable Liquidation Cascade strategy",
     ),
 }
 

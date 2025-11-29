@@ -9,6 +9,7 @@ This package provides comprehensive risk management for the trading bot:
 - Take Profit calculation
 - Trailing Stop
 - Regime-based risk adjustment
+- Seasonality-based risk adjustment
 """
 from .kill_switch import KillSwitch
 from .daily_limits import DailyLimits
@@ -17,6 +18,7 @@ from .stop_loss import StopLossCalculator
 from .take_profit import TakeProfitCalculator
 from .trailing_stop import TrailingStop
 from .regime_adjustment import RegimeAdjustment
+from .seasonality_adjuster import SeasonalityAdjuster
 from .risk_manager import RiskManager
 
 __all__ = [
@@ -27,5 +29,6 @@ __all__ = [
     'TakeProfitCalculator',
     'TrailingStop',
     'RegimeAdjustment',
+    'SeasonalityAdjuster',
     'RiskManager',
 ]

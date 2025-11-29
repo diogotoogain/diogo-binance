@@ -397,6 +397,44 @@ risk:
     cooldown_multiplier: 2.0      # OPTIMIZE: range(1.0, 3.0)
 
 # ═══════════════════════════════════════════════════════════════════════════
+# SEASONALITY - Ajuste de risco por padrões sazonais
+# ═══════════════════════════════════════════════════════════════════════════
+seasonality:
+  enabled: true                      # OPTIMIZE: [true, false]
+  
+  # Multipliers por mês (1.0 = normal, <1.0 = reduz, >1.0 = aumenta)
+  monthly_adjustment:
+    enabled: true                    # OPTIMIZE: [true, false]
+    january: 1.0                     # OPTIMIZE: range(0.5, 1.5)
+    february: 1.0                    # OPTIMIZE: range(0.5, 1.5)
+    march: 1.0                       # OPTIMIZE: range(0.5, 1.5)
+    april: 1.0                       # OPTIMIZE: range(0.5, 1.5)
+    may: 0.8                         # OPTIMIZE: range(0.5, 1.5) - "Sell in May"
+    june: 0.7                        # OPTIMIZE: range(0.5, 1.5)
+    july: 0.7                        # OPTIMIZE: range(0.5, 1.5)
+    august: 0.7                      # OPTIMIZE: range(0.5, 1.5)
+    september: 0.8                   # OPTIMIZE: range(0.5, 1.5)
+    october: 1.2                     # OPTIMIZE: range(0.5, 1.5) - "Uptober"
+    november: 1.3                    # OPTIMIZE: range(0.5, 1.5)
+    december: 1.2                    # OPTIMIZE: range(0.5, 1.5)
+  
+  # Dias específicos do mês
+  month_period:
+    enabled: true                    # OPTIMIZE: [true, false]
+    # Início do mês (dias 1-10) vs fim do mês (dias 20-31)
+    early_month_multiplier: 1.0      # OPTIMIZE: range(0.7, 1.3)
+    mid_month_multiplier: 1.0        # OPTIMIZE: range(0.7, 1.3)
+    late_month_multiplier: 0.9       # OPTIMIZE: range(0.7, 1.3) - Rebalanceamentos de fundos
+  
+  # Quarter analysis
+  quarter_adjustment:
+    enabled: true                    # OPTIMIZE: [true, false]
+    q1_multiplier: 1.0               # OPTIMIZE: range(0.7, 1.3)
+    q2_multiplier: 0.9               # OPTIMIZE: range(0.7, 1.3)
+    q3_multiplier: 0.8               # OPTIMIZE: range(0.7, 1.3)
+    q4_multiplier: 1.2               # OPTIMIZE: range(0.7, 1.3) - Historicamente mais forte
+
+# ═══════════════════════════════════════════════════════════════════════════
 # POSITION MANAGEMENT
 # ═══════════════════════════════════════════════════════════════════════════
 position:
@@ -615,3 +653,96 @@ logging:
     max_size_mb: 100
     backup_count: 5
     level: "DEBUG"
+
+# ═══════════════════════════════════════════════════════════════════════════
+# LIQUIDATIONS
+# ═══════════════════════════════════════════════════════════════════════════
+liquidations:
+  enabled: true                      # OPTIMIZE: [true, false]
+  
+  # Thresholds para considerar significativo
+  significant_single_liq_usd: 100000     # OPTIMIZE: range(50000, 500000) - $100k+
+  significant_cascade_usd: 1000000       # OPTIMIZE: range(500000, 5000000) - $1M em janela
+  cascade_window_seconds: 60             # OPTIMIZE: [30, 60, 120, 300]
+  
+  # Detecção de cascata
+  cascade_detection:
+    enabled: true                    # OPTIMIZE: [true, false]
+    min_liquidations: 5              # OPTIMIZE: [3, 5, 10, 20] - Mínimo de liqs na janela
+    volume_acceleration: 2.0         # OPTIMIZE: range(1.5, 5.0) - Aceleração vs média
+  
+  # Features
+  features:
+    include_liq_volume: true         # Volume total de liquidações
+    include_liq_count: true          # Contagem de liquidações
+    include_liq_imbalance: true      # Long liqs vs Short liqs
+    include_liq_acceleration: true   # Taxa de aceleração
+    lookback_windows: [60, 300, 900] # OPTIMIZE: janelas em segundos
+  
+  # Estratégia de liquidações
+  strategy:
+    enabled: true                    # OPTIMIZE: [true, false]
+    
+    # Operar NA DIREÇÃO das liquidações (momentum)
+    # Se longs estão sendo liquidados, shortar
+    follow_cascade: true             # OPTIMIZE: [true, false]
+    min_cascade_size_usd: 500000     # OPTIMIZE: range(100000, 2000000)
+    
+    # Ou operar CONTRA (reversão após cascata)
+    fade_cascade: false              # OPTIMIZE: [true, false]
+    fade_after_seconds: 300          # OPTIMIZE: range(60, 600)
+    fade_min_cascade_size: 2000000   # OPTIMIZE: range(1000000, 5000000)
+  
+  # Filtro para outras estratégias
+  filter:
+    enabled: true                    # OPTIMIZE: [true, false]
+    # Pausar trades durante cascata violenta
+    pause_during_cascade: true       # OPTIMIZE: [true, false]
+    pause_threshold_usd: 5000000     # OPTIMIZE: range(1000000, 10000000)
+    resume_after_seconds: 120        # OPTIMIZE: range(60, 300)
+# DERIVATIVES (Funding Rate, Open Interest, Long/Short Ratio)
+# ═══════════════════════════════════════════════════════════════════════════
+derivatives:
+  enabled: true                      # OPTIMIZE: [true, false]
+  
+  funding_rate:
+    enabled: true                    # OPTIMIZE: [true, false]
+    
+    # Thresholds para considerar extremo
+    extreme_positive: 0.001          # OPTIMIZE: range(0.0005, 0.003) - 0.1% = muito bullish
+    extreme_negative: -0.001         # OPTIMIZE: range(-0.003, -0.0005)
+    
+    # Ações quando funding está extremo
+    extreme_action: "reduce_size"    # OPTIMIZE: ["none", "reduce_size", "reverse_bias", "pause"]
+    extreme_size_multiplier: 0.5     # OPTIMIZE: range(0.2, 0.8)
+    favorable_boost_multiplier: 1.2  # OPTIMIZE: range(1.0, 1.5) - Boost when favorable
+    
+    # Usar como feature
+    include_in_features: true
+    lookback_periods: 8              # OPTIMIZE: [4, 8, 16, 24] - Últimos N períodos de 8h
+  
+  open_interest:
+    enabled: true                    # OPTIMIZE: [true, false]
+    
+    # Mudança percentual significativa
+    significant_change_pct: 5.0      # OPTIMIZE: range(2.0, 10.0)
+    
+    # Divergência OI vs Preço
+    divergence_detection:
+      enabled: true                  # OPTIMIZE: [true, false]
+      # Preço sobe + OI cai = rally falso (bearish)
+      # Preço cai + OI sobe = capitulação (pode ser fundo)
+      lookback_bars: 20              # OPTIMIZE: [10, 20, 50]
+      price_change_threshold: 0.02   # OPTIMIZE: range(0.01, 0.05)
+      oi_change_threshold: 0.03      # OPTIMIZE: range(0.01, 0.05)
+      favorable_boost_multiplier: 1.2  # OPTIMIZE: range(1.0, 1.5) - Boost when favorable
+    
+    # Usar como feature
+    include_in_features: true
+    
+  # Long/Short Ratio (se disponível)
+  long_short_ratio:
+    enabled: true                    # OPTIMIZE: [true, false]
+    extreme_long: 2.0                # OPTIMIZE: range(1.5, 3.0) - Muito mais longs que shorts
+    extreme_short: 0.5               # OPTIMIZE: range(0.3, 0.7)
+    favorable_boost_multiplier: 1.2  # OPTIMIZE: range(1.0, 1.5) - Boost when favorable

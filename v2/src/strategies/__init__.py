@@ -12,6 +12,7 @@ from v2.src.strategies.momentum_intraday import MomentumIntraday
 from v2.src.strategies.mean_reversion_intraday import MeanReversionIntraday
 from v2.src.strategies.volatility_breakout import VolatilityBreakout
 from v2.src.strategies.ensemble import EnsembleManager
+from v2.src.strategies.liquidation_cascade_strategy import LiquidationCascadeStrategy
 
 __all__ = [
     'Strategy',
@@ -23,4 +24,5 @@ __all__ = [
     'MeanReversionIntraday',
     'VolatilityBreakout',
     'EnsembleManager',
+    'LiquidationCascadeStrategy',
 ]
