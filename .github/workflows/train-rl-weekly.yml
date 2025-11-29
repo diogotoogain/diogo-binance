@@ -1,0 +1,129 @@
+name: Weekly RL Training
+
+on:
+  schedule:
+    # Run every Sunday at 3:00 AM UTC
+    - cron: '0 3 * * 0'
+  workflow_dispatch:
+    inputs:
+      timesteps:
+        description: 'Total training timesteps (default: 500000)'
+        required: false
+        default: '500000'
+      backtest_days:
+        description: 'Number of days for backtesting (default: 30)'
+        required: false
+        default: '30'
+
+jobs:
+  train-rl:
+    runs-on: ubuntu-latest
+    timeout-minutes: 360  # 6 hours (max GitHub Actions timeout)
+
+    permissions:
+      contents: write
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 1
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+          cache: 'pip'
+
+      - name: Install system dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y --no-install-recommends \
+            libgl1-mesa-glx \
+            libglib2.0-0
+
+      - name: Install Python dependencies
+        run: |
+          python -m pip install --upgrade pip
+          # Core ML/RL dependencies
+          pip install torch --index-url https://download.pytorch.org/whl/cpu
+          pip install "stable-baselines3[extra]>=2.2.0"
+          pip install gymnasium>=0.29.0
+          # Data processing
+          pip install pandas>=2.1.0
+          pip install numpy>=1.24.0
+          pip install pyarrow>=14.0.0
+          # Config
+          pip install pyyaml>=6.0
+          # Utilities
+          pip install colorama>=0.4.6
+          pip install tqdm>=4.66.0
+          pip install rich>=13.0.0
+
+      - name: Verify installation
+        run: |
+          python -c "import torch; print(f'PyTorch: {torch.__version__}')"
+          python -c "import stable_baselines3; print(f'SB3: {stable_baselines3.__version__}')"
+          python -c "import gymnasium; print(f'Gymnasium: {gymnasium.__version__}')"
+          python -c "import pandas; print(f'Pandas: {pandas.__version__}')"
+
+      - name: Create required directories
+        run: |
+          mkdir -p v2/models/rl
+          mkdir -p v2/results
+
+      - name: Run RL training
+        run: |
+          cd $GITHUB_WORKSPACE
+          python v2/scripts/train_weekly.py \
+            --timesteps ${{ github.event.inputs.timesteps || '500000' }} \
+            --backtest-days ${{ github.event.inputs.backtest_days || '30' }} \
+            --data-dir v2/data/raw \
+            --model-dir v2/models/rl \
+            --results-dir v2/results
+
+      - name: Display results
+        run: |
+          echo "📊 Training Results:"
+          if [ -f v2/results/latest_results.json ]; then
+            cat v2/results/latest_results.json
+          else
+            echo "No results file found"
+          fi
+
+      - name: Commit and push results
+        run: |
+          git config --local user.email "github-actions[bot]@users.noreply.github.com"
+          git config --local user.name "github-actions[bot]"
+
+          # Add model and results files
+          git add v2/models/rl/*.zip || true
+          git add v2/results/*.json || true
+
+          # Check if there are changes to commit
+          if git diff --staged --quiet; then
+            echo "No changes to commit"
+          else
+            TIMESTAMP=$(date -u +"%Y-%m-%d %H:%M UTC")
+            git commit -m "🤖 Weekly RL training results - ${TIMESTAMP}"
+            git push
+            echo "✅ Results committed and pushed successfully"
+          fi
+
+      - name: Create summary
+        run: |
+          echo "## 🤖 Weekly RL Training Summary" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "**Training completed at:** $(date -u +"%Y-%m-%d %H:%M UTC")" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "### Configuration" >> $GITHUB_STEP_SUMMARY
+          echo "- **Timesteps:** ${{ github.event.inputs.timesteps || '500000' }}" >> $GITHUB_STEP_SUMMARY
+          echo "- **Backtest days:** ${{ github.event.inputs.backtest_days || '30' }}" >> $GITHUB_STEP_SUMMARY
+          echo "- **Reward function:** Sortino (profit-focused)" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          if [ -f v2/results/latest_results.json ]; then
+            echo "### Results" >> $GITHUB_STEP_SUMMARY
+            echo "\`\`\`json" >> $GITHUB_STEP_SUMMARY
+            cat v2/results/latest_results.json >> $GITHUB_STEP_SUMMARY
+            echo "\`\`\`" >> $GITHUB_STEP_SUMMARY
+          fi
