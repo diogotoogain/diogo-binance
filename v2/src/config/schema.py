@@ -1608,6 +1608,134 @@ def get_all_optimizable_params() -> List[OptimizableParam]:
             high=300,
             step=30,
             description='Segundos para retomar após pausa'
+    # DERIVATIVES PARAMETERS (~15 params)
+    # ═══════════════════════════════════════════════════════════════════════
+    params.extend([
+        OptimizableParam(
+            name='derivatives.enabled',
+            param_type=ParamType.BOOL,
+            default=True,
+            description='Habilitar features de derivativos'
+        ),
+        # Funding Rate
+        OptimizableParam(
+            name='derivatives.funding_rate.enabled',
+            param_type=ParamType.BOOL,
+            default=True,
+            description='Habilitar features de Funding Rate'
+        ),
+        OptimizableParam(
+            name='derivatives.funding_rate.extreme_positive',
+            param_type=ParamType.FLOAT,
+            default=0.001,
+            low=0.0005,
+            high=0.003,
+            step=0.0001,
+            description='Threshold para funding rate extremo positivo'
+        ),
+        OptimizableParam(
+            name='derivatives.funding_rate.extreme_negative',
+            param_type=ParamType.FLOAT,
+            default=-0.001,
+            low=-0.003,
+            high=-0.0005,
+            step=0.0001,
+            description='Threshold para funding rate extremo negativo'
+        ),
+        OptimizableParam(
+            name='derivatives.funding_rate.extreme_action',
+            param_type=ParamType.CATEGORICAL,
+            default='reduce_size',
+            choices=['none', 'reduce_size', 'reverse_bias', 'pause'],
+            description='Ação quando funding rate está extremo'
+        ),
+        OptimizableParam(
+            name='derivatives.funding_rate.extreme_size_multiplier',
+            param_type=ParamType.FLOAT,
+            default=0.5,
+            low=0.2,
+            high=0.8,
+            step=0.1,
+            description='Multiplicador de tamanho quando funding extremo'
+        ),
+        OptimizableParam(
+            name='derivatives.funding_rate.lookback_periods',
+            param_type=ParamType.CATEGORICAL,
+            default=8,
+            choices=[4, 8, 16, 24],
+            description='Períodos de lookback para Funding Rate'
+        ),
+        # Open Interest
+        OptimizableParam(
+            name='derivatives.open_interest.enabled',
+            param_type=ParamType.BOOL,
+            default=True,
+            description='Habilitar features de Open Interest'
+        ),
+        OptimizableParam(
+            name='derivatives.open_interest.significant_change_pct',
+            param_type=ParamType.FLOAT,
+            default=5.0,
+            low=2.0,
+            high=10.0,
+            step=0.5,
+            description='Mudança percentual significativa de OI'
+        ),
+        OptimizableParam(
+            name='derivatives.open_interest.divergence_detection.enabled',
+            param_type=ParamType.BOOL,
+            default=True,
+            description='Habilitar detecção de divergência OI vs Preço'
+        ),
+        OptimizableParam(
+            name='derivatives.open_interest.divergence_detection.lookback_bars',
+            param_type=ParamType.CATEGORICAL,
+            default=20,
+            choices=[10, 20, 50],
+            description='Lookback para detecção de divergência'
+        ),
+        OptimizableParam(
+            name='derivatives.open_interest.divergence_detection.price_change_threshold',
+            param_type=ParamType.FLOAT,
+            default=0.02,
+            low=0.01,
+            high=0.05,
+            step=0.005,
+            description='Threshold de mudança de preço para divergência'
+        ),
+        OptimizableParam(
+            name='derivatives.open_interest.divergence_detection.oi_change_threshold',
+            param_type=ParamType.FLOAT,
+            default=0.03,
+            low=0.01,
+            high=0.05,
+            step=0.005,
+            description='Threshold de mudança de OI para divergência'
+        ),
+        # Long/Short Ratio
+        OptimizableParam(
+            name='derivatives.long_short_ratio.enabled',
+            param_type=ParamType.BOOL,
+            default=True,
+            description='Habilitar features de Long/Short Ratio'
+        ),
+        OptimizableParam(
+            name='derivatives.long_short_ratio.extreme_long',
+            param_type=ParamType.FLOAT,
+            default=2.0,
+            low=1.5,
+            high=3.0,
+            step=0.1,
+            description='Ratio extremo de longs'
+        ),
+        OptimizableParam(
+            name='derivatives.long_short_ratio.extreme_short',
+            param_type=ParamType.FLOAT,
+            default=0.5,
+            low=0.3,
+            high=0.7,
+            step=0.05,
+            description='Ratio extremo de shorts'
         ),
     ])
     
@@ -2631,6 +2759,95 @@ OPTIMIZABLE_PARAMS: Dict[str, List[OptimizableParam]] = {
             high=300,
             default=120,
             description="Seconds to resume after pause",
+    # Derivatives - Funding Rate
+    "derivatives.funding_rate": [
+        OptimizableParam(
+            name="extreme_positive",
+            param_type=ParamType.FLOAT,
+            low=0.0005,
+            high=0.003,
+            default=0.001,
+            description="Extreme positive funding rate threshold",
+        ),
+        OptimizableParam(
+            name="extreme_negative",
+            param_type=ParamType.FLOAT,
+            low=-0.003,
+            high=-0.0005,
+            default=-0.001,
+            description="Extreme negative funding rate threshold",
+        ),
+        OptimizableParam(
+            name="extreme_size_multiplier",
+            param_type=ParamType.FLOAT,
+            low=0.2,
+            high=0.8,
+            default=0.5,
+            description="Size multiplier when funding is extreme",
+        ),
+        OptimizableParam(
+            name="lookback_periods",
+            param_type=ParamType.INT,
+            low=4,
+            high=24,
+            default=8,
+            description="Number of funding rate periods to look back",
+        ),
+    ],
+    # Derivatives - Open Interest
+    "derivatives.open_interest": [
+        OptimizableParam(
+            name="significant_change_pct",
+            param_type=ParamType.FLOAT,
+            low=2.0,
+            high=10.0,
+            default=5.0,
+            description="Significant OI change percentage",
+        ),
+    ],
+    "derivatives.open_interest.divergence_detection": [
+        OptimizableParam(
+            name="lookback_bars",
+            param_type=ParamType.INT,
+            low=10,
+            high=50,
+            default=20,
+            description="Lookback bars for divergence detection",
+        ),
+        OptimizableParam(
+            name="price_change_threshold",
+            param_type=ParamType.FLOAT,
+            low=0.01,
+            high=0.05,
+            default=0.02,
+            description="Price change threshold for divergence",
+        ),
+        OptimizableParam(
+            name="oi_change_threshold",
+            param_type=ParamType.FLOAT,
+            low=0.01,
+            high=0.05,
+            default=0.03,
+            description="OI change threshold for divergence",
+        ),
+    ],
+    # Derivatives - Long/Short Ratio
+    "derivatives.long_short_ratio": [
+        OptimizableParam(
+            name="extreme_long",
+            param_type=ParamType.FLOAT,
+            low=1.5,
+            high=3.0,
+            default=2.0,
+            description="Extreme long ratio threshold",
+        ),
+        OptimizableParam(
+            name="extreme_short",
+            param_type=ParamType.FLOAT,
+            low=0.3,
+            high=0.7,
+            default=0.5,
+            description="Extreme short ratio threshold",
         ),
     ],
 }
@@ -2750,6 +2967,36 @@ FEATURE_TOGGLES: Dict[str, OptimizableParam] = {
         param_type=ParamType.BOOL,
         default=True,
         description="Pause during cascade",
+    # Derivatives feature toggles
+    "derivatives.enabled": OptimizableParam(
+        name="enabled",
+        param_type=ParamType.BOOL,
+        default=True,
+        description="Enable derivatives features",
+    ),
+    "derivatives.funding_rate.enabled": OptimizableParam(
+        name="enabled",
+        param_type=ParamType.BOOL,
+        default=True,
+        description="Enable Funding Rate feature",
+    ),
+    "derivatives.open_interest.enabled": OptimizableParam(
+        name="enabled",
+        param_type=ParamType.BOOL,
+        default=True,
+        description="Enable Open Interest feature",
+    ),
+    "derivatives.open_interest.divergence_detection.enabled": OptimizableParam(
+        name="enabled",
+        param_type=ParamType.BOOL,
+        default=True,
+        description="Enable OI/Price divergence detection",
+    ),
+    "derivatives.long_short_ratio.enabled": OptimizableParam(
+        name="enabled",
+        param_type=ParamType.BOOL,
+        default=True,
+        description="Enable Long/Short Ratio feature",
     ),
 }
 
