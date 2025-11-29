@@ -12,6 +12,7 @@ from v2.src.features.microstructure import OFI, TFI, MicroPrice, ShannonEntropy,
 from v2.src.features.microstructure.liquidation_features import LiquidationFeatures
 from v2.src.features.technical import EMA, RSI, MACD, ADX, BollingerBands, ATR
 from v2.src.features.volume import VolumeSpike, LiquidityClusters
+from v2.src.features.temporal import DayOfWeekFeatures
 from v2.src.features.derivatives import FundingRateFeatures, OpenInterestFeatures
 
 
@@ -58,6 +59,10 @@ class FeaturePipeline:
         if vol_config.get('enabled', True):
             self._init_volume_features(vol_config)
         
+        # Temporal features
+        temporal_config = features_config.get('temporal', {})
+        if temporal_config.get('enabled', True):
+            self._init_temporal_features(temporal_config)
         # Liquidation features (special handling - not a standard Feature)
         liq_config = self.config.get('liquidations', {})
         if liq_config.get('enabled', True):
@@ -178,6 +183,13 @@ class FeaturePipeline:
         oi_config = config.get('open_interest', {})
         if oi_config.get('enabled', True) and oi_config.get('include_in_features', True):
             self.features.append(OpenInterestFeatures(oi_config, enabled=True))
+            
+    def _init_temporal_features(self, config: Dict[str, Any]) -> None:
+        """Inicializa features temporais."""
+        # Day of Week
+        dow_config = config.get('day_of_week', {})
+        if dow_config.get('enabled', True):
+            self.features.append(DayOfWeekFeatures(dow_config, enabled=True))
             
     def calculate_all(self, data: pd.DataFrame) -> pd.DataFrame:
         """
