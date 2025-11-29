@@ -5,8 +5,10 @@ Tests for the Regime Detection Module.
 import pytest
 import pandas as pd
 import numpy as np
+import os
 import sys
-sys.path.insert(0, '/home/runner/work/diogo-binance/diogo-binance')
+# Add parent directory to path for relative imports
+sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))))
 
 from v2.src.regime.hmm_detector import HMMRegimeDetector
 from v2.src.regime.adx_regime import ADXRegimeDetector
@@ -456,7 +458,11 @@ class TestConfigIntegration:
         """Deve carregar configuração do arquivo YAML."""
         import yaml
         
-        config_path = '/home/runner/work/diogo-binance/diogo-binance/v2/config/default.yaml'
+        # Use relative path from test file location
+        config_path = os.path.join(
+            os.path.dirname(os.path.dirname(os.path.abspath(__file__))),
+            'config', 'default.yaml'
+        )
         
         with open(config_path, 'r') as f:
             config = yaml.safe_load(f)

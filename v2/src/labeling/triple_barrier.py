@@ -141,7 +141,12 @@ class TripleBarrierLabeler:
             if tp_hit and sl_hit:
                 # Ambos foram atingidos na mesma barra - usa ordem pelo tempo
                 # Assume que o mais próximo do open foi atingido primeiro
-                open_price = data['open'].iloc[i] if 'open' in data.columns else data['close'].iloc[i-1]
+                if 'open' in data.columns:
+                    open_price = data['open'].iloc[i]
+                elif i > 0:
+                    open_price = data['close'].iloc[i-1]
+                else:
+                    open_price = entry_price
                 if abs(open_price - tp) < abs(open_price - sl):
                     return 1  # TP mais próximo
                 else:

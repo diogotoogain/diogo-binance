@@ -5,8 +5,10 @@ Tests for the Labeling Module.
 import pytest
 import pandas as pd
 import numpy as np
+import os
 import sys
-sys.path.insert(0, '/home/runner/work/diogo-binance/diogo-binance')
+# Add parent directory to path for relative imports
+sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))))
 
 from v2.src.labeling.triple_barrier import TripleBarrierLabeler
 from v2.src.labeling.meta_labeling import MetaLabeler
