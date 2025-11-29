@@ -295,13 +295,18 @@ class TestSchema:
         assert count > 100
 
     def test_get_all_optimizable_params(self):
-        """Schema should return all optimizable parameters."""
-        from v2.src.config.schema import get_all_optimizable_params
+        """Schema should return all optimizable parameters as a flat list."""
+        from v2.src.config.schema import get_all_optimizable_params, get_params_dict
 
-        params, count = get_all_optimizable_params()
-        assert isinstance(params, dict)
-        assert count > 0
+        # get_all_optimizable_params returns a flat list
+        params = get_all_optimizable_params()
+        assert isinstance(params, list)
         assert len(params) > 0
+        
+        # get_params_dict returns a dict organized by section
+        params_dict = get_params_dict()
+        assert isinstance(params_dict, dict)
+        assert len(params_dict) > 0
 
     def test_get_feature_toggles(self):
         """Schema should return feature toggles."""
