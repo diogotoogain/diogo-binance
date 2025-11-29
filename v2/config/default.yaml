@@ -341,7 +341,7 @@ ensemble:
 # RISK MANAGEMENT
 # ═══════════════════════════════════════════════════════════════════════════
 risk:
-  risk_per_trade_pct: 1.0         # OPTIMIZE: [0.25, 0.5, 1.0, 1.5, 2.0]
+  risk_per_trade_pct: 0.5         # OPTIMIZE: [0.25, 0.5, 1.0, 1.5, 2.0]
   max_daily_loss_pct: 3.0         # OPTIMIZE: range(1.0, 5.0)
   max_weekly_loss_pct: 7.0        # OPTIMIZE: range(3.0, 10.0)
   max_monthly_loss_pct: 15.0      # OPTIMIZE: range(10.0, 20.0)
