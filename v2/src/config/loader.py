@@ -145,7 +145,7 @@ class ConfigLoader:
         risk_per_trade = self.get('risk.risk_per_trade_pct', 0)
         if not 0.1 <= risk_per_trade <= 5.0:
             raise ConfigValidationError(
-                f"risk_per_trade_pct ({risk_per_trade}) deve estar entre 0.1% e 5.0%"
+                f"risk_per_trade_pct ({risk_per_trade}) deve estar entre 0.1 e 5.0 (percentual)"
             )
         
         # Valida leverage

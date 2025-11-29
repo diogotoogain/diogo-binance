@@ -11,6 +11,7 @@ Features:
 
 import asyncio
 import json
+import logging
 import time
 from collections import deque
 from dataclasses import dataclass, field
@@ -20,6 +21,9 @@ from typing import Any, Callable, Coroutine, Dict, List, Optional, Set
 
 import websockets
 from websockets.exceptions import ConnectionClosed, WebSocketException
+
+# Logger para o módulo
+logger = logging.getLogger(__name__)
 
 
 class StreamType(Enum):
@@ -161,6 +165,10 @@ class WebSocketHandler:
     
     # Buffer GRANDE para evitar overflow - 10000 mensagens!
     DEFAULT_BUFFER_SIZE = 10000
+    MIN_BUFFER_SIZE = 10000
+    
+    # Constantes de reconexão
+    MAX_RECONNECT_DELAY = 60  # Máximo delay de reconexão em segundos
     
     def __init__(
         self,
@@ -182,9 +190,9 @@ class WebSocketHandler:
             ping_timeout: Timeout do ping em segundos
             testnet: Usar URL do testnet
         """
-        # Garante buffer mínimo de 10000
-        if buffer_size < 10000:
-            buffer_size = 10000
+        # Garante buffer mínimo
+        if buffer_size < self.MIN_BUFFER_SIZE:
+            buffer_size = self.MIN_BUFFER_SIZE
         
         self.buffer_size = buffer_size
         self.reconnect_delay = reconnect_delay
@@ -322,7 +330,7 @@ class WebSocketHandler:
         
         # Backoff exponencial
         delay = self.reconnect_delay * (2 ** (self._reconnect_count - 1))
-        delay = min(delay, 60)  # Máximo 60 segundos
+        delay = min(delay, self.MAX_RECONNECT_DELAY)
         
         await asyncio.sleep(delay)
         
@@ -418,8 +426,8 @@ class WebSocketHandler:
                 result = callback(msg)
                 if asyncio.iscoroutine(result):
                     await result
-            except Exception:
-                pass  # Não deixa callback quebrar o handler
+            except Exception as e:
+                logger.debug(f"Erro em callback de {msg.stream_type}: {e}")
         
         # Callbacks globais
         for callback in self._global_callbacks:
@@ -427,8 +435,8 @@ class WebSocketHandler:
                 result = callback(msg)
                 if asyncio.iscoroutine(result):
                     await result
-            except Exception:
-                pass
+            except Exception as e:
+                logger.debug(f"Erro em callback global: {e}")
     
     async def _ping_loop(self) -> None:
         """Loop de ping para manter conexão."""

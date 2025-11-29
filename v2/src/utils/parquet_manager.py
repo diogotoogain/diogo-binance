@@ -7,6 +7,7 @@ Features:
 - Append eficiente
 """
 
+import shutil
 from datetime import datetime
 from pathlib import Path
 from typing import List, Optional, Union
@@ -244,7 +245,6 @@ class ParquetManager:
         
         try:
             if filepath.is_dir():
-                import shutil
                 shutil.rmtree(filepath)
             elif filepath.exists():
                 filepath.unlink()
