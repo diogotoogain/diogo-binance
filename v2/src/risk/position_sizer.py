@@ -146,15 +146,17 @@ class PositionSizer:
         else:
             size_mult = 1.0
             
-        # Tamanho base (2% do balance)
-        base_pct = 2.0  # Poderia ser configurável
+        # Tamanho base (from config)
+        vol_config = self.config['bet_sizing']['vol_target']
+        base_pct = vol_config.get('base_size_pct', 2.0)
         base_size = balance * base_pct / 100 / price
         
         # Aplica multiplicador
         adjusted_size = base_size * size_mult
         
-        # Limita para não ser excessivo
-        max_size = balance * 0.1 / price  # Max 10% do balance
+        # Limita para não ser excessivo (from config)
+        max_pct = vol_config.get('max_size_pct', 10.0)
+        max_size = balance * max_pct / 100 / price
         return min(adjusted_size, max_size)
         
     def calculate_with_stop_loss(self, balance: float, current_price: float,

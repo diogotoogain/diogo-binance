@@ -100,34 +100,34 @@ class DailyLimits:
         if self._initial_balance <= 0:
             return False, "Balance not set"
             
-        # Verifica número de trades diários
+        # Check daily trades limit
         if self._daily_trades >= self.max_daily_trades:
-            msg = f"❌ Limite de trades diários atingido: {self._daily_trades}"
+            msg = f"❌ Daily trades limit reached: {self._daily_trades}"
             logger.warning(msg)
             return True, msg
             
-        # Verifica perda diária
+        # Check daily loss limit
         daily_loss_pct = abs(self._daily_pnl / self._initial_balance * 100)
         if self._daily_pnl < 0 and daily_loss_pct >= self.max_daily_loss_pct:
-            msg = f"❌ Limite de perda diária excedido: {daily_loss_pct:.2f}%"
+            msg = f"❌ Daily loss limit exceeded: {daily_loss_pct:.2f}%"
             logger.warning(msg)
             return True, msg
             
-        # Verifica perda semanal
+        # Check weekly loss limit
         weekly_loss_pct = abs(self._weekly_pnl / self._initial_balance * 100)
         if self._weekly_pnl < 0 and weekly_loss_pct >= self.max_weekly_loss_pct:
-            msg = f"❌ Limite de perda semanal excedido: {weekly_loss_pct:.2f}%"
+            msg = f"❌ Weekly loss limit exceeded: {weekly_loss_pct:.2f}%"
             logger.warning(msg)
             return True, msg
             
-        # Verifica perda mensal
+        # Check monthly loss limit
         monthly_loss_pct = abs(self._monthly_pnl / self._initial_balance * 100)
         if self._monthly_pnl < 0 and monthly_loss_pct >= self.max_monthly_loss_pct:
-            msg = f"❌ Limite de perda mensal excedido: {monthly_loss_pct:.2f}%"
+            msg = f"❌ Monthly loss limit exceeded: {monthly_loss_pct:.2f}%"
             logger.warning(msg)
             return True, msg
             
-        return False, "✅ Dentro dos limites"
+        return False, "✅ Within limits"
         
     def _check_and_reset(self) -> None:
         """Verifica e reseta contadores se necessário."""
@@ -147,8 +147,10 @@ class DailyLimits:
             self._last_weekly_reset = now
             logger.info("📆 Reset semanal de limites")
             
-        # Reset mensal (novo mês)
-        if now.month != self._last_monthly_reset.month:
+        # Reset mensal (novo mês - considerando ano também)
+        if (now.year > self._last_monthly_reset.year or 
+            (now.year == self._last_monthly_reset.year and 
+             now.month > self._last_monthly_reset.month)):
             self._monthly_pnl = 0.0
             self._last_monthly_reset = now
             logger.info("🗓️ Reset mensal de limites")

@@ -87,6 +87,10 @@ bet_sizing:
   vol_target:
     # Target annual volatility - OPTIMIZE: [0.10, 0.15, 0.20, 0.25]
     annual_vol: 0.15
+    # Base size percentage - OPTIMIZE: [1, 2, 3, 5]
+    base_size_pct: 2.0
+    # Max size percentage - OPTIMIZE: [5, 10, 15, 20]
+    max_size_pct: 10.0
 
 # ═══════════════════════════════════════════════════════════════
 # POSITION MANAGEMENT
@@ -111,7 +115,7 @@ position:
   # Trailing Stop configuration
   trailing_stop:
     # Enable trailing stop - TOGGLE
-    enabled: false
+    enabled: true
     # Type - TOGGLE: [fixed_pct, atr]
     type: "atr"
     # Activation threshold % - OPTIMIZE: [0.5, 1.0, 1.5, 2.0]

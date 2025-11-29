@@ -72,6 +72,8 @@ def valid_config():
             },
             'vol_target': {
                 'annual_vol': 0.15,
+                'base_size_pct': 2.0,
+                'max_size_pct': 10.0,
             },
         },
         'position': {
@@ -114,7 +116,7 @@ class TestKillSwitch:
     """Tests for KillSwitch - THE MOST CRITICAL COMPONENT!"""
     
     def test_kill_switch_cannot_be_disabled(self, disabled_kill_switch_config):
-        """Kill switch deve SEMPRE estar ativo - teste CRÍTICO!"""
+        """Kill switch must ALWAYS be enabled - CRITICAL test!"""
         with pytest.raises(ValueError, match="KILL SWITCH"):
             KillSwitch(disabled_kill_switch_config)
             
@@ -234,7 +236,7 @@ class TestDailyLimits:
         assert dl.is_exceeded() is True
         
     def test_weekly_loss_limit(self, valid_config):
-        """Deve detectar quando limite semanal é excedido."""
+        """Should detect when weekly limit is exceeded."""
         # Increase daily limit so weekly limit is hit first
         config = valid_config.copy()
         config['risk'] = valid_config['risk'].copy()
@@ -248,7 +250,7 @@ class TestDailyLimits:
         
         exceeded, reason = dl.check_all_limits()
         assert exceeded is True
-        assert "semanal" in reason.lower() or "weekly" in reason.lower()
+        assert "weekly" in reason.lower()
         
     def test_reset_daily(self, valid_config):
         """Reset diário deve zerar contadores."""

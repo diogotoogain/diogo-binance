@@ -40,7 +40,7 @@ class KillSwitch:
         
         # VALIDAÇÃO CRÍTICA - Kill switch DEVE estar ativo!
         if not self.config.get('enabled', True):
-            raise ValueError("🚨 KILL SWITCH NÃO PODE SER DESATIVADO!")
+            raise ValueError("KILL SWITCH CANNOT BE DISABLED! This is a critical protection mechanism.")
             
         self.trigger_loss_pct = self.config['trigger_loss_pct']
         self.pause_hours = self.config['pause_hours']
