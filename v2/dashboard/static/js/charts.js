@@ -45,6 +45,7 @@ const chartDefaults = {
 
 /**
  * Render Equity Curve Chart
+ * @param {Array<{timestamp: string|null, equity: number}>} data - Array of equity points with optional timestamps
  */
 function renderEquityChart(data) {
     const ctx = document.getElementById('equity-chart');
@@ -101,6 +102,7 @@ function renderEquityChart(data) {
 
 /**
  * Render Returns Distribution Chart
+ * @param {Array<number>} pnlValues - Array of P&L values for distribution histogram
  */
 function renderDistributionChart(pnlValues) {
     const ctx = document.getElementById('distribution-chart');
@@ -173,6 +175,7 @@ function renderDistributionChart(pnlValues) {
 
 /**
  * Render Hour of Day Chart
+ * @param {Array<{hour: number, trades: number, total_pnl: number, avg_pnl: number, win_rate: number}>} data - Hour analysis data
  */
 function renderHourChart(data) {
     const ctx = document.getElementById('hour-chart');
@@ -214,6 +217,7 @@ function renderHourChart(data) {
 
 /**
  * Render Day of Week Chart
+ * @param {Array<{day: number, day_name: string, trades: number, total_pnl: number, avg_pnl: number, win_rate: number}>} data - Day of week analysis data
  */
 function renderDowChart(data) {
     const ctx = document.getElementById('dow-chart');
@@ -244,6 +248,7 @@ function renderDowChart(data) {
 
 /**
  * Render Drawdown Chart (Underwater Curve)
+ * @param {Array<{timestamp: string|null, equity: number}>} equityData - Array of equity points
  */
 function renderDrawdownChart(equityData) {
     const ctx = document.getElementById('drawdown-chart');
@@ -299,6 +304,11 @@ function renderDrawdownChart(equityData) {
 
 /**
  * Render Streak Distribution Chart
+ * @param {Object} data - Sequence analysis data
+ * @param {number} data.max_win_streak - Maximum consecutive wins
+ * @param {number} data.max_loss_streak - Maximum consecutive losses
+ * @param {Array<{length: number, count: number}>} data.win_streak_distribution - Win streak distribution
+ * @param {Array<{length: number, count: number}>} data.loss_streak_distribution - Loss streak distribution
  */
 function renderStreakChart(data) {
     const ctx = document.getElementById('streak-chart');
@@ -375,6 +385,7 @@ function renderStreakChart(data) {
 
 /**
  * Render Rolling Metrics Chart
+ * @param {Array<{index: number, timestamp: string|null, win_rate: number, sharpe_like: number, avg_pnl: number, total_pnl: number}>} data - Rolling metrics data
  */
 function renderRollingChart(data) {
     const ctx = document.getElementById('rolling-chart');
@@ -456,6 +467,12 @@ function renderRollingChart(data) {
 
 /**
  * Render Monte Carlo Simulation Chart
+ * @param {Object} data - Monte Carlo simulation results
+ * @param {number} data.simulations - Number of simulations run
+ * @param {Object} data.percentiles - Percentile values (5th, 25th, 50th, 75th, 95th)
+ * @param {number} data.current_rank - Percentile rank of actual result
+ * @param {number} data.actual_final - Actual final balance
+ * @param {Array<{bin_start: number, bin_end: number, count: number}>} data.histogram - Distribution histogram
  */
 function renderMonteCarloChart(data) {
     const ctx = document.getElementById('monte-carlo-chart');
@@ -525,6 +542,8 @@ function renderMonteCarloChart(data) {
 
 /**
  * Render Strategy vs Buy & Hold Comparison Chart
+ * @param {Array<number>} strategyData - Normalized strategy equity values (as percentages)
+ * @param {Array<number>} buyHoldData - Normalized buy & hold values (as percentages)
  */
 function renderCompareChart(strategyData, buyHoldData) {
     const ctx = document.getElementById('compare-chart');

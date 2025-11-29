@@ -876,9 +876,10 @@ class BacktestDashboard:
         """
         import uvicorn
         
+        # Bind to localhost only for security (local analytics dashboard)
         config = uvicorn.Config(
             self.app,
-            host="0.0.0.0",
+            host="127.0.0.1",
             port=self.port,
             log_level="warning"
         )

@@ -76,7 +76,7 @@ class GracefulShutdown:
         """Handle interrupt signal."""
         if self._shutdown_requested:
             # Second interrupt - force exit
-            print("\n⚠️  Força forçada. Saindo sem salvar...")
+            print("\n⚠️  Force exit. Exiting without saving...")
             sys.exit(1)
         
         self._shutdown_requested = True

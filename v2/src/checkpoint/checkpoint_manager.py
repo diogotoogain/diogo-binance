@@ -5,7 +5,6 @@ Manages save/load of simulation state for persistence and recovery.
 """
 
 import gzip
-import hashlib
 import json
 import logging
 import pickle
@@ -16,6 +15,9 @@ from pathlib import Path
 from typing import Any, Dict, List, Optional
 
 logger = logging.getLogger(__name__)
+
+# Constants for time tracking
+SECONDS_PER_MINUTE = 60
 
 
 @dataclass
@@ -130,7 +132,7 @@ class CheckpointManager:
             True if should save, False otherwise
         """
         # Time-based check
-        elapsed_minutes = (time.time() - self._last_save_time) / 60
+        elapsed_minutes = (time.time() - self._last_save_time) / SECONDS_PER_MINUTE
         if elapsed_minutes >= self.save_interval_minutes:
             return True
         
@@ -315,14 +317,17 @@ class CheckpointManager:
         """
         Compute hash of configuration for validation.
         
+        Uses SHA-256 for reliable configuration change detection.
+        
         Args:
             config: Configuration dictionary
             
         Returns:
-            MD5 hash string
+            SHA-256 hash string
         """
+        import hashlib
         config_str = json.dumps(config, sort_keys=True, default=str)
-        return hashlib.md5(config_str.encode()).hexdigest()
+        return hashlib.sha256(config_str.encode()).hexdigest()
     
     def create_checkpoint(
         self,
