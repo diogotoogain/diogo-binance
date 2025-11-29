@@ -123,15 +123,6 @@ class VPINStrategy(BaseStrategy):
         }
         self.buckets.append(bucket)
         
-        # Log do bucket completo
-        imbalance = abs(self.current_bucket_buy_volume - self.current_bucket_sell_volume)
-        total = self.current_bucket_buy_volume + self.current_bucket_sell_volume
-        imbalance_pct = (imbalance / total * 100) if total > 0 else 0
-        
-        self.log(f"📦 Bucket completo | Buy: ${self.current_bucket_buy_volume:,.0f} | "
-                 f"Sell: ${self.current_bucket_sell_volume:,.0f} | "
-                 f"Deseq: {imbalance_pct:.1f}% | Buckets: {len(self.buckets)}")
-        
         # Reset do bucket atual
         self.current_bucket_buy_volume = 0.0
         self.current_bucket_sell_volume = 0.0
@@ -140,6 +131,7 @@ class VPINStrategy(BaseStrategy):
         # Recalcula VPIN
         self.current_vpin = self._calculate_vpin()
         
+        # FIX: Só loga quando VPIN está alto E pode gerar sinal (fora do cooldown)
         if self.current_vpin >= self.vpin_threshold_high and self._can_signal():
             direction = self._detect_direction()
             self.log(f"🚨 VPIN ALTO: {self.current_vpin:.2%} | Direção: {direction}")

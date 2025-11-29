@@ -39,6 +39,11 @@ class RiskManager:
         logger.info(f"💰 Saldo inicial: ${balance:.2f}")
 
     def calculate_position_size(self, balance: float, entry_price: float, stop_loss_price: float) -> float:
+        # Validar entrada para evitar divisão por zero
+        if entry_price <= 0 or balance <= 0:
+            logger.warning("⚠️ Entry price ou balance inválido!")
+            return 0.0
+        
         risk_amount = balance * self.risk_per_trade
         price_risk = abs(entry_price - stop_loss_price)
         
@@ -48,10 +53,16 @@ class RiskManager:
         
         position_size = risk_amount / price_risk
         max_size = (balance * self.max_position_size) / entry_price
-        position_size = min(position_size, max_size)
+        
+        # NOVO: Limite absoluto de 5% do saldo em valor USD
+        max_usd_value = balance * 0.05  # Máximo $250 se saldo é $5000
+        max_btc_from_usd = max_usd_value / entry_price
+        
+        position_size = min(position_size, max_size, max_btc_from_usd)
         position_size = round(position_size, 3)
         
-        logger.info(f"📊 Position Size: {position_size} BTC | Risco: ${risk_amount:.2f}")
+        usd_value = position_size * entry_price
+        logger.info(f"📊 Position Size: {position_size} BTC (${usd_value:.2f}) | Risco: ${risk_amount:.2f}")
         return position_size
 
     def can_open_position(self, current_positions: int) -> tuple:
