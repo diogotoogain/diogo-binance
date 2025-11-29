@@ -2,6 +2,9 @@
 # V2 TRADING BOT - DEFAULT CONFIGURATION
 # ═══════════════════════════════════════════════════════════════
 # REGRA: NENHUM NÚMERO HARDCODED - Todos os parâmetros vêm daqui!
+# V2 DEFAULT CONFIGURATION
+# Todos os parâmetros são configuráveis - ZERO hardcoded
+# All parameters are configurable - NO HARDCODED VALUES
 # ═══════════════════════════════════════════════════════════════
 
 # ═══════════════════════════════════════════════════════════════
@@ -124,6 +127,258 @@ position:
     trail_pct: 0.5
     # ATR multiplier for trailing - OPTIMIZE: [0.5, 1.0, 1.5, 2.0]
     trail_atr_mult: 1.0
+# FEATURES
+# LABELING
+# ═══════════════════════════════════════════════════════════════
+labeling:
+  triple_barrier:
+    enabled: true
+    tp_multiplier: 2.0       # OPTIMIZE: [1.0, 1.5, 2.0, 2.5, 3.0]
+    sl_multiplier: 1.0       # OPTIMIZE: [0.5, 1.0, 1.5, 2.0]
+    max_holding_bars: 100    # OPTIMIZE: [50, 100, 200, 500]
+  meta_labeling:
+    enabled: true
+    model_type: "xgboost"    # TOGGLE: [xgboost, lightgbm, random_forest]
+    confidence_threshold: 0.6  # OPTIMIZE: [0.5, 0.55, 0.6, 0.65, 0.7]
+# All parameters are optimizable - NO HARDCODED VALUES
+# ═══════════════════════════════════════════════════════════════
+
+# ═══════════════════════════════════════════════════════════════
+# FEATURES - ALL PARAMETERS OPTIMIZABLE
+# ═══════════════════════════════════════════════════════════════
+features:
+  microstructure:
+    enabled: true
+    ofi:
+      enabled: true
+      window: 20
+    tfi:
+      enabled: true
+      window: 20
+      window: 20  # OPTIMIZE: [5, 10, 20, 50, 100]
+    tfi:
+      enabled: true
+      window: 20  # OPTIMIZE: [5, 10, 20, 50, 100]
+    micro_price:
+      enabled: true
+    entropy:
+      enabled: true
+      window: 50  # OPTIMIZE: [20, 50, 100, 200]
+    vpin:
+      enabled: true
+      n_buckets: 50  # OPTIMIZE: [20, 50, 100]
+      bucket_size_usd: 100000
+
+  technical:
+    enabled: true
+    ema:
+      periods: [9, 21, 50, 100, 200]
+    rsi:
+      enabled: true
+      period: 14
+      overbought: 70
+      oversold: 30
+    adx:
+      enabled: true
+      period: 14
+    bollinger:
+      enabled: true
+      period: 20
+      std_dev: 2.0
+    atr:
+      enabled: true
+      period: 14
+
+# ═══════════════════════════════════════════════════════════════
+# STRATEGIES
+# ═══════════════════════════════════════════════════════════════
+strategies:
+  hft_ofi_scalper:
+    enabled: true
+    params:
+      ofi_threshold: 0.3              # OPTIMIZE: [0.1-0.5]
+      tfi_threshold: 0.3
+      min_spread_bps: 1.0
+      holding_seconds: 30             # OPTIMIZE: [10-300]
+    filters:
+      adx_filter:
+        enabled: true
+        max_adx: 30
+      volume_spike_filter:
+        enabled: true
+        min_spike_multiplier: 1.5
+    throttling:
+      enabled: true
+      max_trades_per_minute: 5
+      cooldown_after_loss_seconds: 30
+
+  momentum_intraday:
+    enabled: true
+    params:
+      ema_fast: 9                     # OPTIMIZE: [5-15]
+      ema_slow: 21                    # OPTIMIZE: [15-50]
+      rsi_entry_threshold: 50
+      holding_minutes: 60
+    filters:
+      adx_filter:
+        enabled: true
+        min_adx: 25
+      volume_confirmation:
+        enabled: true
+        min_volume_percentile: 60
+    throttling:
+      enabled: true
+      max_trades_per_hour: 4
+
+  mean_reversion_intraday:
+    enabled: true
+    params:
+      zscore_entry: 2.0               # OPTIMIZE: [1.5-3.0]
+      zscore_exit: 0.5
+      bollinger_entry_std: 2.0
+      holding_minutes: 30
+    filters:
+      adx_filter:
+        enabled: true
+        max_adx: 20
+      liquidity_cluster_filter:
+        enabled: true
+        proximity_threshold_pct: 0.5
+    throttling:
+      enabled: true
+      max_trades_per_hour: 6
+
+  volatility_breakout:
+    enabled: true
+    params:
+      squeeze_bb_width_percentile: 20
+      breakout_atr_mult: 1.5          # OPTIMIZE: [1.0-2.5]
+      volume_confirm_mult: 1.5
+      holding_minutes: 120
+    filters:
+      adx_filter:
+        enabled: true
+        min_adx_after_breakout: 20
+    throttling:
+      enabled: true
+      max_trades_per_day: 3
+
+# ═══════════════════════════════════════════════════════════════
+# ENSEMBLE
+# ═══════════════════════════════════════════════════════════════
+ensemble:
+  weighting_method: "sharpe"          # Options: sharpe, sortino, kelly, equal
+  lookback_days: 30
+  min_confidence: 0.5
+  rebalance_frequency_hours: 24
+  strategy_constraints:
+    max_weight_per_strategy: 0.6
+    min_weight_per_strategy: 0.0
+  disable_strategy_if:
+    max_drawdown_pct: 15.0
+    min_sharpe: 0.5
+
+# ═══════════════════════════════════════════════════════════════
+# RISK MANAGEMENT
+# ═══════════════════════════════════════════════════════════════
+risk_management:
+  max_risk_per_trade_pct: 0.5
+  max_daily_loss_pct: 3.0
+  max_weekly_loss_pct: 7.0
+  max_monthly_loss_pct: 15.0
+  max_drawdown_pct: 20.0
+  max_open_positions: 1
+  max_leverage: 10
+      enabled: true
+      periods: [9, 21, 50, 100, 200]  # OPTIMIZE: multiple period combinations
+    rsi:
+      enabled: true
+      period: 14  # OPTIMIZE: [7, 14, 21, 28]
+      overbought: 70  # OPTIMIZE: [65, 70, 75, 80]
+      oversold: 30  # OPTIMIZE: [20, 25, 30, 35]
+    macd:
+      enabled: true
+      fast: 12  # OPTIMIZE: [8, 12, 16]
+      slow: 26  # OPTIMIZE: [20, 26, 30]
+      signal: 9  # OPTIMIZE: [6, 9, 12]
+    adx:
+      enabled: true
+      period: 14  # OPTIMIZE: [7, 14, 21, 28]
+      trending_threshold: 25  # OPTIMIZE: [20, 25, 30, 35]
+      ranging_threshold: 20  # OPTIMIZE: [15, 18, 20]
+    bollinger:
+      enabled: true
+      period: 20  # OPTIMIZE: [10, 20, 30]
+      std_dev: 2.0  # OPTIMIZE: [1.5, 2.0, 2.5, 3.0]
+    atr:
+      enabled: true
+      period: 14  # OPTIMIZE: [7, 14, 21, 28]
+
+  volume_analysis:
+    enabled: true
+    volume_spike:
+      enabled: true
+      lookback: 20  # OPTIMIZE: [10, 20, 30, 50]
+      threshold_multiplier: 2.0  # OPTIMIZE: [1.5, 2.0, 2.5, 3.0]
+    liquidity_clusters:
+      enabled: true
+      levels: 10  # OPTIMIZE: [5, 10, 15, 20]
+      threshold_percentile: 80  # OPTIMIZE: [70, 80, 90]
+      recalc_frequency: 100  # OPTIMIZE: [50, 100, 200]
+      cluster_threshold_pct: 0.1  # OPTIMIZE: [0.05, 0.1, 0.2]
+
+# ═══════════════════════════════════════════════════════════════
+# REGIME DETECTION
+# ═══════════════════════════════════════════════════════════════
+regime:
+  hmm:
+    enabled: true
+    n_regimes: 3             # OPTIMIZE: [2, 3, 4]
+    features: ["returns", "volatility", "volume"]
+    covariance_type: "full"  # Options: spherical, diag, full, tied
+    n_iter: 100              # Max iterations for fitting
+    random_state: 42
+  adx_based:
+    enabled: true
+    trending_threshold: 25   # OPTIMIZE: [20, 25, 30]
+    ranging_threshold: 20    # OPTIMIZE: [15, 18, 20]
+  volatility:
+    enabled: true
+    lookback: 100            # Lookback period for percentile calculation
+    low_percentile: 25       # Below this = low volatility
+    high_percentile: 75      # Above this = high volatility
+    extreme_percentile: 95   # Above this = extreme volatility
+
+# ═══════════════════════════════════════════════════════════════
+# REGIME RISK ADJUSTMENT
+# ═══════════════════════════════════════════════════════════════
+risk_adjustment:
+  favorable_multiplier: 1.0
+  neutral_multiplier: 0.7
+  unfavorable_multiplier: 0.3
+
+# ═══════════════════════════════════════════════════════════════
+# STRATEGY WEIGHTS BY REGIME
+# ═══════════════════════════════════════════════════════════════
+strategy_weights:
+  trending:
+    momentum: 0.6
+    mean_reversion: 0.1
+    volatility_breakout: 0.3
+  ranging:
+    momentum: 0.1
+    mean_reversion: 0.6
+    volatility_breakout: 0.3
+  transition:
+    momentum: 0.33
+    mean_reversion: 0.33
+    volatility_breakout: 0.34
+regime_detection:
+  enabled: true
+  adx_regime:
+    enabled: true
+    trending_threshold: 25
+    ranging_threshold: 20
 
 # ═══════════════════════════════════════════════════════════════
 # LOGGING
@@ -131,3 +386,19 @@ position:
 logging:
   level: "INFO"
   format: "%(asctime)s - %(name)s - %(levelname)s - %(message)s"
+  format: "parquet"
+  compression: "snappy"
+  partition_by: "date"
+  store:
+    features: true
+    predictions: true
+    trades: true
+  retention_days: 90
+
+# ═══════════════════════════════════════════════════════════════
+# DATA
+# ═══════════════════════════════════════════════════════════════
+data:
+  parquet_path: "v2/data/parquet"
+  raw_path: "v2/data/raw"
+  processed_path: "v2/data/processed"
