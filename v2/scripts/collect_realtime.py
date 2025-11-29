@@ -19,6 +19,9 @@ from datetime import datetime, timezone
 from pathlib import Path
 from typing import Optional
 
+# Add parent directory to path for imports
+sys.path.insert(0, str(Path(__file__).parent.parent))
+
 import pandas as pd
 
 try:
@@ -26,9 +29,6 @@ try:
 except ImportError:
     print("Please install websockets: pip install websockets")
     sys.exit(1)
-
-# Add parent directory to path for imports
-sys.path.insert(0, str(Path(__file__).parent.parent))
 
 from src.utils.logger import setup_logging, get_logger
 

@@ -2,16 +2,16 @@
 Tests for real-time 1-second data collection and merge scripts.
 """
 
+import sys
 import tempfile
 from datetime import datetime
 from pathlib import Path
 
+# Add parent directory to path for imports
+sys.path.insert(0, str(Path(__file__).parent.parent))
+
 import pandas as pd
 import pytest
-
-# Import after ensuring path is set
-import sys
-sys.path.insert(0, str(Path(__file__).parent.parent))
 
 from scripts.collect_realtime import OneSecondCandleAggregator
 from scripts.merge_1s_data import find_data_files

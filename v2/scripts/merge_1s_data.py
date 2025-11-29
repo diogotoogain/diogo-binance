@@ -16,10 +16,10 @@ from datetime import datetime
 from pathlib import Path
 from typing import Optional
 
-import pandas as pd
-
 # Add parent directory to path for imports
 sys.path.insert(0, str(Path(__file__).parent.parent))
+
+import pandas as pd
 
 from src.utils.logger import setup_logging, get_logger
 
