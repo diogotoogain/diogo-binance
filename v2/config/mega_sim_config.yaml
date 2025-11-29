@@ -152,6 +152,23 @@ output:
   save_model: true
 
 # ═══════════════════════════════════════════════════════════════════════════
+# CHECKPOINT / PERSISTENCE
+# ═══════════════════════════════════════════════════════════════════════════
+checkpoint:
+  enabled: true
+  directory: "v2/checkpoints"
+  
+  # Frequency of auto-save
+  save_interval_minutes: 5       # Auto-save every 5 minutes
+  save_interval_candles: 10000   # Auto-save every 10,000 candles
+  
+  # Retention policy
+  keep_last_n: 5                 # Keep last 5 checkpoints
+  
+  # Compression
+  compress: true                 # Use gzip to save space
+
+# ═══════════════════════════════════════════════════════════════════════════
 # LOGGING
 # ═══════════════════════════════════════════════════════════════════════════
 logging:
