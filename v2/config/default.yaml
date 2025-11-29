@@ -1,3 +1,594 @@
+# ═══════════════════════════════════════════════════════════════════════════
+# V2 MULTI-STRATEGY QUANT TRADING BOT - MASTER CONFIGURATION
+# ═══════════════════════════════════════════════════════════════════════════
+# 
+# 🎯 FILOSOFIA CORE:
+#   - 🚫 NENHUM número hardcoded - Tudo é parâmetro otimizável
+#   - ✅ TUDO parametrizável via config YAML
+#   - ✅ Kill switch SEMPRE ativo (nunca desativar!)
+#   - ✅ ~150 parâmetros otimizáveis via Optuna/RL
+#
+# 📝 FORMATO DOS COMENTÁRIOS OPTIMIZE:
+#   # OPTIMIZE: [lista de valores discretos] ou range(min, max)
+#
+# ═══════════════════════════════════════════════════════════════════════════
+
+# ═══════════════════════════════════════════════════════════════════════════
+# ENVIRONMENT
+# ═══════════════════════════════════════════════════════════════════════════
+environment:
+  mode: "demo"                    # demo | live
+  use_demo_header: true           # Usar header X-MBX-DEMO
+  api_base_url: "https://fapi.binance.com"
+  testnet_url: "https://testnet.binancefuture.com"
+
+# ═══════════════════════════════════════════════════════════════════════════
+# MARKET
+# ═══════════════════════════════════════════════════════════════════════════
+market:
+  exchange: "binance"
+  symbol: "BTCUSDT"
+  base_asset: "BTC"
+  quote_asset: "USDT"
+  tick_size: 0.10
+  lot_size: 0.001
+  min_notional: 5.0
+
+# ═══════════════════════════════════════════════════════════════════════════
+# DATA
+# ═══════════════════════════════════════════════════════════════════════════
+data:
+  timeframes:
+    - "1s"
+    - "1m"
+    - "5m"
+    - "15m"
+    - "1h"
+    - "4h"
+  primary_timeframe: "1m"         # OPTIMIZE: ["1s", "1m", "5m"]
+  
+  bar_construction:
+    type: "time"                  # OPTIMIZE: ["time", "volume", "dollar"]
+    volume_bar_threshold: 100     # OPTIMIZE: range(50, 500)
+    dollar_bar_threshold: 10000000  # OPTIMIZE: range(5000000, 50000000)
+  
+  historical:
+    default_months: 6
+    chunk_size_days: 7
+    rate_limit_delay: 0.5         # segundos entre requests
+  
+  storage:
+    format: "parquet"
+    compression: "snappy"
+    partition_by: "date"
+
+# ═══════════════════════════════════════════════════════════════════════════
+# WEBSOCKET
+# ═══════════════════════════════════════════════════════════════════════════
+websocket:
+  enabled: true
+  buffer_size: 10000              # IMPORTANTE: Buffer grande para evitar overflow!
+  reconnect_delay: 1.0            # OPTIMIZE: range(0.5, 5.0)
+  max_reconnect_attempts: 10      # OPTIMIZE: range(5, 20)
+  ping_interval: 30               # segundos
+  ping_timeout: 10                # segundos
+  health_check_interval: 60       # segundos
+  
+  streams:
+    trades: true
+    klines: true
+    depth: true
+    ticker: true
+  
+  depth_levels: 20                # OPTIMIZE: [5, 10, 20]
+
+# ═══════════════════════════════════════════════════════════════════════════
+# FEATURES - MICROSTRUCTURE
+# ═══════════════════════════════════════════════════════════════════════════
+features:
+  microstructure:
+    enabled: true                 # OPTIMIZE: [true, false]
+    
+    ofi:  # Order Flow Imbalance
+      enabled: true               # OPTIMIZE: [true, false]
+      window: 20                  # OPTIMIZE: [5, 10, 20, 50, 100]
+      normalize: true
+    
+    tfi:  # Trade Flow Imbalance
+      enabled: true               # OPTIMIZE: [true, false]
+      window: 20                  # OPTIMIZE: [5, 10, 20, 50, 100]
+    
+    micro_price:
+      enabled: true               # OPTIMIZE: [true, false]
+    
+    entropy:
+      enabled: true               # OPTIMIZE: [true, false]
+      window: 50                  # OPTIMIZE: [20, 50, 100, 200]
+    
+    vpin:  # Volume-Synchronized Probability of Informed Trading
+      enabled: true               # OPTIMIZE: [true, false]
+      n_buckets: 50               # OPTIMIZE: [20, 50, 100]
+      window: 50                  # OPTIMIZE: [20, 50, 100]
+
+  # ═════════════════════════════════════════════════════════════════════════
+  # FEATURES - TECHNICAL
+  # ═════════════════════════════════════════════════════════════════════════
+  technical:
+    enabled: true                 # OPTIMIZE: [true, false]
+    
+    ema:
+      enabled: true               # OPTIMIZE: [true, false]
+      periods: [9, 21, 50, 100, 200]  # OPTIMIZE: subsets
+    
+    rsi:
+      enabled: true               # OPTIMIZE: [true, false]
+      period: 14                  # OPTIMIZE: [7, 14, 21, 28]
+      overbought: 70              # OPTIMIZE: range(65, 80)
+      oversold: 30                # OPTIMIZE: range(20, 35)
+    
+    macd:
+      enabled: true               # OPTIMIZE: [true, false]
+      fast: 12                    # OPTIMIZE: [8, 12, 16]
+      slow: 26                    # OPTIMIZE: [20, 26, 32]
+      signal: 9                   # OPTIMIZE: [6, 9, 12]
+    
+    adx:
+      enabled: true               # OPTIMIZE: [true, false]
+      period: 14                  # OPTIMIZE: [7, 14, 21]
+    
+    bollinger:
+      enabled: true               # OPTIMIZE: [true, false]
+      period: 20                  # OPTIMIZE: [10, 20, 30]
+      std_dev: 2.0                # OPTIMIZE: range(1.5, 3.0)
+    
+    atr:
+      enabled: true               # OPTIMIZE: [true, false]
+      period: 14                  # OPTIMIZE: [7, 14, 21]
+    
+    stochastic:
+      enabled: true               # OPTIMIZE: [true, false]
+      k_period: 14                # OPTIMIZE: [5, 14, 21]
+      d_period: 3                 # OPTIMIZE: [3, 5, 7]
+      overbought: 80              # OPTIMIZE: range(75, 85)
+      oversold: 20                # OPTIMIZE: range(15, 25)
+
+  # ═════════════════════════════════════════════════════════════════════════
+  # FEATURES - VOLUME ANALYSIS
+  # ═════════════════════════════════════════════════════════════════════════
+  volume:
+    enabled: true                 # OPTIMIZE: [true, false]
+    
+    volume_spike:
+      enabled: true               # OPTIMIZE: [true, false]
+      lookback: 20                # OPTIMIZE: [10, 20, 50]
+      threshold_multiplier: 2.0   # OPTIMIZE: range(1.5, 3.0)
+    
+    liquidity_clusters:
+      enabled: true               # OPTIMIZE: [true, false]
+      levels: 10                  # OPTIMIZE: [5, 10, 20]
+      threshold_percentile: 80    # OPTIMIZE: range(70, 90)
+    
+    vwap:
+      enabled: true               # OPTIMIZE: [true, false]
+      periods: [20, 50, 100]      # OPTIMIZE: subsets
+    
+    cvd:  # Cumulative Volume Delta
+      enabled: true               # OPTIMIZE: [true, false]
+      window: 100                 # OPTIMIZE: [50, 100, 200]
+
+# ═══════════════════════════════════════════════════════════════════════════
+# REGIME DETECTION
+# ═══════════════════════════════════════════════════════════════════════════
+regime:
+  enabled: true                   # OPTIMIZE: [true, false]
+  
+  hmm:
+    enabled: true                 # OPTIMIZE: [true, false]
+    n_regimes: 3                  # OPTIMIZE: [2, 3, 4]
+    features: ["returns", "volatility", "volume"]
+    covariance_type: "full"       # OPTIMIZE: ["spherical", "diag", "full"]
+    n_iter: 100                   # OPTIMIZE: range(50, 200)
+  
+  adx_based:
+    enabled: true                 # OPTIMIZE: [true, false]
+    trending_threshold: 25        # OPTIMIZE: range(20, 35)
+    ranging_threshold: 20         # OPTIMIZE: range(15, 25)
+  
+  volatility_based:
+    enabled: true                 # OPTIMIZE: [true, false]
+    high_vol_percentile: 80       # OPTIMIZE: range(70, 90)
+    low_vol_percentile: 20        # OPTIMIZE: range(10, 30)
+    lookback: 100                 # OPTIMIZE: [50, 100, 200]
+
+# ═══════════════════════════════════════════════════════════════════════════
+# LABELING
+# ═══════════════════════════════════════════════════════════════════════════
+labeling:
+  triple_barrier:
+    enabled: true                 # OPTIMIZE: [true, false]
+    tp_multiplier: 2.0            # OPTIMIZE: range(1.0, 5.0)
+    sl_multiplier: 1.0            # OPTIMIZE: range(0.5, 2.0)
+    max_holding_bars: 100         # OPTIMIZE: range(50, 300)
+    min_return: 0.001             # OPTIMIZE: range(0.0005, 0.005)
+  
+  meta_labeling:
+    enabled: true                 # OPTIMIZE: [true, false]
+    model_type: "xgboost"         # OPTIMIZE: ["xgboost", "lightgbm", "rf"]
+    confidence_threshold: 0.6     # OPTIMIZE: range(0.5, 0.8)
+    features: ["rsi", "adx", "ofi", "tfi", "regime"]
+
+# ═══════════════════════════════════════════════════════════════════════════
+# STRATEGIES
+# ═══════════════════════════════════════════════════════════════════════════
+strategies:
+  # HFT OFI Scalper
+  hft_ofi_scalper:
+    enabled: true                 # OPTIMIZE: [true, false]
+    params:
+      ofi_threshold: 0.3          # OPTIMIZE: range(0.1, 0.5)
+      tfi_threshold: 0.3          # OPTIMIZE: range(0.1, 0.5)
+      min_spread_bps: 1.0         # OPTIMIZE: range(0.5, 3.0)
+      holding_seconds: 30         # OPTIMIZE: range(10, 120)
+      min_volume: 100             # OPTIMIZE: range(50, 500)
+    filters:
+      adx_filter:
+        enabled: true             # OPTIMIZE: [true, false]
+        max_adx: 30               # OPTIMIZE: range(20, 40)
+      volume_spike_filter:
+        enabled: true             # OPTIMIZE: [true, false]
+        min_spike_multiplier: 1.5 # OPTIMIZE: range(1.2, 2.5)
+      regime_filter:
+        enabled: true             # OPTIMIZE: [true, false]
+        allowed_regimes: [0, 1]   # OPTIMIZE: subsets
+    throttling:
+      enabled: true
+      max_trades_per_minute: 5    # OPTIMIZE: range(1, 10)
+      cooldown_after_loss_seconds: 30  # OPTIMIZE: range(10, 120)
+
+  # Momentum Intraday
+  momentum_intraday:
+    enabled: true                 # OPTIMIZE: [true, false]
+    params:
+      ema_fast: 9                 # OPTIMIZE: [5, 9, 12]
+      ema_slow: 21                # OPTIMIZE: [15, 21, 30]
+      rsi_entry_threshold: 50     # OPTIMIZE: range(40, 60)
+      holding_minutes: 60         # OPTIMIZE: range(30, 240)
+      macd_signal_strength: 0.0   # OPTIMIZE: range(-0.5, 0.5)
+    filters:
+      adx_filter:
+        enabled: true             # OPTIMIZE: [true, false]
+        min_adx: 25               # OPTIMIZE: range(20, 35)
+      volume_confirmation:
+        enabled: true             # OPTIMIZE: [true, false]
+        min_volume_percentile: 60 # OPTIMIZE: range(40, 80)
+      trend_alignment:
+        enabled: true             # OPTIMIZE: [true, false]
+        higher_tf: "1h"
+    throttling:
+      enabled: true
+      max_trades_per_hour: 4      # OPTIMIZE: range(1, 10)
+
+  # Mean Reversion Intraday
+  mean_reversion_intraday:
+    enabled: true                 # OPTIMIZE: [true, false]
+    params:
+      zscore_entry: 2.0           # OPTIMIZE: range(1.5, 3.0)
+      zscore_exit: 0.5            # OPTIMIZE: range(0.0, 1.0)
+      bollinger_entry_std: 2.0    # OPTIMIZE: range(1.5, 3.0)
+      holding_minutes: 30         # OPTIMIZE: range(15, 120)
+      lookback: 100               # OPTIMIZE: [50, 100, 200]
+    filters:
+      adx_filter:
+        enabled: true             # OPTIMIZE: [true, false]
+        max_adx: 20               # OPTIMIZE: range(15, 30)
+      liquidity_cluster_filter:
+        enabled: true             # OPTIMIZE: [true, false]
+        proximity_threshold_pct: 0.5  # OPTIMIZE: range(0.2, 1.0)
+      rsi_confirmation:
+        enabled: true             # OPTIMIZE: [true, false]
+        overbought: 70            # OPTIMIZE: range(65, 80)
+        oversold: 30              # OPTIMIZE: range(20, 35)
+    throttling:
+      enabled: true
+      max_trades_per_hour: 6      # OPTIMIZE: range(2, 12)
+
+  # Volatility Breakout
+  volatility_breakout:
+    enabled: true                 # OPTIMIZE: [true, false]
+    params:
+      squeeze_bb_width_percentile: 20   # OPTIMIZE: range(10, 30)
+      breakout_atr_multiplier: 1.5      # OPTIMIZE: range(1.0, 3.0)
+      volume_confirmation_mult: 1.5     # OPTIMIZE: range(1.2, 2.5)
+      holding_minutes: 120              # OPTIMIZE: range(60, 480)
+      keltner_atr_mult: 1.5             # OPTIMIZE: range(1.0, 2.5)
+    filters:
+      adx_filter:
+        enabled: true             # OPTIMIZE: [true, false]
+        min_adx_after_breakout: 20  # OPTIMIZE: range(15, 30)
+      time_filter:
+        enabled: true             # OPTIMIZE: [true, false]
+        allowed_hours: [8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20]
+    throttling:
+      enabled: true
+      max_trades_per_day: 3       # OPTIMIZE: range(1, 6)
+
+# ═══════════════════════════════════════════════════════════════════════════
+# ENSEMBLE
+# ═══════════════════════════════════════════════════════════════════════════
+ensemble:
+  enabled: true                   # OPTIMIZE: [true, false]
+  weighting_method: "sharpe"      # OPTIMIZE: ["equal", "sharpe", "sortino", "calmar"]
+  lookback_days: 30               # OPTIMIZE: [7, 14, 30, 60]
+  min_confidence: 0.5             # OPTIMIZE: range(0.3, 0.7)
+  rebalance_frequency_hours: 24   # OPTIMIZE: [6, 12, 24, 48]
+  
+  strategy_constraints:
+    max_weight_per_strategy: 0.6  # OPTIMIZE: range(0.3, 0.8)
+    min_weight_per_strategy: 0.0  # OPTIMIZE: range(0.0, 0.1)
+    min_strategies_active: 2      # OPTIMIZE: [1, 2, 3]
+  
+  disable_strategy_if:
+    max_drawdown_pct: 15.0        # OPTIMIZE: range(10.0, 25.0)
+    min_sharpe: 0.5               # OPTIMIZE: range(0.0, 1.0)
+    min_win_rate: 0.4             # OPTIMIZE: range(0.3, 0.5)
+    max_consecutive_losses: 5     # OPTIMIZE: range(3, 10)
+  
+  meta_labeling_filter:
+    enabled: true                 # OPTIMIZE: [true, false]
+    min_meta_confidence: 0.6      # OPTIMIZE: range(0.5, 0.8)
+
+# ═══════════════════════════════════════════════════════════════════════════
+# RISK MANAGEMENT
+# ═══════════════════════════════════════════════════════════════════════════
+risk:
+  risk_per_trade_pct: 1.0         # OPTIMIZE: [0.25, 0.5, 1.0, 1.5, 2.0]
+  max_daily_loss_pct: 3.0         # OPTIMIZE: range(1.0, 5.0)
+  max_weekly_loss_pct: 7.0        # OPTIMIZE: range(3.0, 10.0)
+  max_monthly_loss_pct: 15.0      # OPTIMIZE: range(10.0, 20.0)
+  max_drawdown_pct: 20.0          # OPTIMIZE: range(10.0, 30.0)
+  max_open_positions: 1           # OPTIMIZE: [1, 2, 3]
+  max_leverage: 10                # OPTIMIZE: [3, 5, 10, 15, 20]
+  
+  regime_risk_adjustment:
+    enabled: true                 # OPTIMIZE: [true, false]
+    crash_regime_multiplier: 0.3  # OPTIMIZE: range(0.1, 0.5)
+    high_vol_regime_multiplier: 0.5  # OPTIMIZE: range(0.3, 0.7)
+    low_vol_regime_multiplier: 1.5   # OPTIMIZE: range(1.0, 2.0)
+  
+  correlation_risk:
+    enabled: true                 # OPTIMIZE: [true, false]
+    max_correlated_positions: 2   # OPTIMIZE: [1, 2, 3]
+    correlation_threshold: 0.7    # OPTIMIZE: range(0.5, 0.9)
+  
+  # ═══════════════════════════════════════════════════════════════════════
+  # KILL SWITCH - NUNCA DESATIVAR!
+  # ═══════════════════════════════════════════════════════════════════════
+  kill_switch:
+    enabled: true                 # NUNCA DESATIVAR! Validado no loader
+    max_loss_trigger_pct: 5.0     # OPTIMIZE: range(3.0, 10.0)
+    pause_duration_hours: 24      # OPTIMIZE: range(12, 48)
+    check_interval_seconds: 60    # OPTIMIZE: range(30, 300)
+    cooldown_multiplier: 2.0      # OPTIMIZE: range(1.0, 3.0)
+
+# ═══════════════════════════════════════════════════════════════════════════
+# POSITION MANAGEMENT
+# ═══════════════════════════════════════════════════════════════════════════
+position:
+  sl:  # Stop Loss
+    enabled: true
+    default_pct: 1.0              # OPTIMIZE: range(0.5, 3.0)
+    atr_multiplier: 2.0           # OPTIMIZE: range(1.0, 4.0)
+    use_atr_based: true           # OPTIMIZE: [true, false]
+  
+  tp:  # Take Profit
+    enabled: true
+    default_pct: 2.0              # OPTIMIZE: range(1.0, 5.0)
+    atr_multiplier: 3.0           # OPTIMIZE: range(1.5, 6.0)
+    risk_reward_ratio: 2.0        # OPTIMIZE: range(1.0, 4.0)
+  
+  trailing:
+    enabled: true                 # OPTIMIZE: [true, false]
+    activation_pct: 1.0           # OPTIMIZE: range(0.5, 2.0)
+    trailing_pct: 0.5             # OPTIMIZE: range(0.2, 1.0)
+    use_atr_based: true           # OPTIMIZE: [true, false]
+    atr_multiplier: 1.0           # OPTIMIZE: range(0.5, 2.0)
+  
+  partial_exits:
+    enabled: true                 # OPTIMIZE: [true, false]
+    levels: [0.5, 0.75, 1.0]      # % of target
+    sizes: [0.33, 0.33, 0.34]     # % of position
+  
+  time_based_exit:
+    enabled: true                 # OPTIMIZE: [true, false]
+    max_holding_hours: 24         # OPTIMIZE: range(4, 72)
+
+# ═══════════════════════════════════════════════════════════════════════════
+# BET SIZING
+# ═══════════════════════════════════════════════════════════════════════════
+bet_sizing:
+  method: "kelly"                 # OPTIMIZE: ["fixed", "kelly", "vol_target", "rl"]
+  
+  fixed:
+    position_size_pct: 1.0        # OPTIMIZE: range(0.5, 3.0)
+  
+  kelly:
+    fraction: 0.25                # OPTIMIZE: range(0.1, 0.5)
+    max_kelly: 0.5                # OPTIMIZE: range(0.25, 0.75)
+    lookback_trades: 100          # OPTIMIZE: range(50, 200)
+  
+  vol_target:
+    target_annual_vol: 0.15       # OPTIMIZE: range(0.1, 0.3)
+    vol_lookback: 20              # OPTIMIZE: [10, 20, 50]
+    min_size_pct: 0.25            # OPTIMIZE: range(0.1, 0.5)
+    max_size_pct: 2.0             # OPTIMIZE: range(1.0, 4.0)
+  
+  rl:
+    enabled: false                # OPTIMIZE: [true, false]
+    model_path: "models/rl/bet_sizing_model.zip"
+    action_space: [0.25, 0.5, 0.75, 1.0, 1.5, 2.0]
+
+# ═══════════════════════════════════════════════════════════════════════════
+# REINFORCEMENT LEARNING
+# ═══════════════════════════════════════════════════════════════════════════
+rl:
+  enabled: true                   # OPTIMIZE: [true, false]
+  train_on_colab: true
+  
+  environment:
+    observation_features:
+      - "ofi"
+      - "tfi"
+      - "rsi"
+      - "adx"
+      - "regime"
+      - "position"
+      - "unrealized_pnl"
+      - "time_in_position"
+    lookback_bars: 50             # OPTIMIZE: range(20, 100)
+    normalize_observations: true
+    reward_scaling: 1.0           # OPTIMIZE: range(0.1, 10.0)
+  
+  action_space:
+    type: "discrete"              # OPTIMIZE: ["discrete", "continuous"]
+    direction: [-1, 0, 1]         # SELL, HOLD, BUY
+    position_size: [0.0, 0.25, 0.5, 0.75, 1.0]
+    stop_loss_atr_mult: [0.5, 1.0, 1.5, 2.0, 3.0]
+    take_profit_atr_mult: [1.0, 1.5, 2.0, 3.0, 5.0]
+  
+  agents:
+    ppo:
+      enabled: true               # OPTIMIZE: [true, false]
+      learning_rate: 0.0003       # OPTIMIZE: range(0.00001, 0.001)
+      n_steps: 2048               # OPTIMIZE: [1024, 2048, 4096]
+      batch_size: 64              # OPTIMIZE: [32, 64, 128]
+      n_epochs: 10                # OPTIMIZE: [5, 10, 20]
+      gamma: 0.99                 # OPTIMIZE: range(0.95, 0.999)
+      clip_range: 0.2             # OPTIMIZE: range(0.1, 0.3)
+    
+    sac:
+      enabled: true               # OPTIMIZE: [true, false]
+      learning_rate: 0.0003       # OPTIMIZE: range(0.00001, 0.001)
+      buffer_size: 1000000        # OPTIMIZE: [100000, 500000, 1000000]
+      batch_size: 256             # OPTIMIZE: [128, 256, 512]
+      gamma: 0.99                 # OPTIMIZE: range(0.95, 0.999)
+      tau: 0.005                  # OPTIMIZE: range(0.001, 0.01)
+    
+    td3:
+      enabled: false              # OPTIMIZE: [true, false]
+      learning_rate: 0.0003       # OPTIMIZE: range(0.00001, 0.001)
+      buffer_size: 1000000
+      batch_size: 256
+      gamma: 0.99
+      tau: 0.005
+      policy_delay: 2             # OPTIMIZE: [1, 2, 3]
+
+# ═══════════════════════════════════════════════════════════════════════════
+# ONLINE LEARNING
+# ═══════════════════════════════════════════════════════════════════════════
+online_learning:
+  enabled: true                   # OPTIMIZE: [true, false]
+  
+  river_models:
+    enabled: true                 # OPTIMIZE: [true, false]
+    model_type: "HoeffdingTree"   # OPTIMIZE: ["HoeffdingTree", "ARFF", "LinearRegression"]
+    grace_period: 200             # OPTIMIZE: range(100, 500)
+    delta: 1e-7                   # OPTIMIZE: range(1e-8, 1e-5)
+  
+  drift_detection:
+    enabled: true                 # OPTIMIZE: [true, false]
+    method: "ADWIN"               # OPTIMIZE: ["ADWIN", "DDM", "EDDM"]
+    delta: 0.002                  # OPTIMIZE: range(0.001, 0.01)
+    retrain_on_drift: true        # OPTIMIZE: [true, false]
+    min_samples_before_drift: 100 # OPTIMIZE: range(50, 200)
+  
+  update_frequency:
+    trades: 10                    # Update after N trades
+    time_hours: 1                 # Update every N hours
+
+# ═══════════════════════════════════════════════════════════════════════════
+# OPTIMIZATION (OPTUNA)
+# ═══════════════════════════════════════════════════════════════════════════
+optimization:
+  enabled: true
+  n_trials: 1000                  # OPTIMIZE: range(100, 5000)
+  n_jobs: -1                      # Use all cores
+  study_name: "btcusdt_v2"
+  storage: "sqlite:///v2/data/optuna_study.db"
+  
+  objectives:
+    primary: "sharpe"             # OPTIMIZE: ["sharpe", "sortino", "calmar"]
+    secondary: "max_drawdown"     # OPTIMIZE: ["max_drawdown", "win_rate", "profit_factor"]
+    direction: ["maximize", "minimize"]
+  
+  pruning:
+    enabled: true                 # OPTIMIZE: [true, false]
+    method: "median"              # OPTIMIZE: ["median", "percentile", "hyperband"]
+    min_trials_before_pruning: 50 # OPTIMIZE: range(20, 100)
+  
+  sampler:
+    type: "TPE"                   # OPTIMIZE: ["TPE", "CMA-ES", "Random"]
+    n_startup_trials: 50          # OPTIMIZE: range(20, 100)
+    consider_prior: true
+  
+  feature_selection:
+    enabled: true                 # OPTIMIZE: [true, false]
+    method: "optuna"              # OPTIMIZE: ["optuna", "shap", "mutual_info"]
+  
+  strategy_selection:
+    enabled: true                 # OPTIMIZE: [true, false]
+    method: "optuna"
+
+# ═══════════════════════════════════════════════════════════════════════════
+# BACKTEST
+# ═══════════════════════════════════════════════════════════════════════════
+backtest:
+  initial_capital: 10000
+  
+  slippage_model:
+    type: "volume_based"          # OPTIMIZE: ["fixed", "volume_based", "spread_based"]
+    base_slippage_bps: 1.0        # OPTIMIZE: range(0.5, 3.0)
+    volume_impact_factor: 0.5     # OPTIMIZE: range(0.1, 1.0)
+    spread_factor: 1.0            # OPTIMIZE: range(0.5, 2.0)
+  
+  fees:
+    taker: 0.0004                 # 0.04%
+    maker: 0.0002                 # 0.02%
+    funding_rate_avg: 0.0001      # 0.01% per 8h
+    use_maker_when_possible: true
+  
+  walk_forward:
+    enabled: true                 # OPTIMIZE: [true, false]
+    train_window_days: 60         # OPTIMIZE: [30, 60, 90]
+    test_window_days: 14          # OPTIMIZE: [7, 14, 21]
+    step_days: 7                  # OPTIMIZE: [3, 7, 14]
+    min_train_samples: 1000       # OPTIMIZE: range(500, 2000)
+  
+  monte_carlo:
+    enabled: true                 # OPTIMIZE: [true, false]
+    n_simulations: 1000           # OPTIMIZE: range(100, 5000)
+    confidence_level: 0.95        # OPTIMIZE: [0.9, 0.95, 0.99]
+
+# ═══════════════════════════════════════════════════════════════════════════
+# LOGGING
+# ═══════════════════════════════════════════════════════════════════════════
+logging:
+  level: "INFO"                   # DEBUG, INFO, WARNING, ERROR
+  format: "parquet"
+  compression: "snappy"
+  partition_by: "date"
+  
+  console:
+    enabled: true
+    colored: true
+    level: "INFO"
+  
+  file:
+    enabled: true
+    path: "v2/logs"
+    max_size_mb: 100
+    backup_count: 5
+    level: "DEBUG"
+  
 # ═══════════════════════════════════════════════════════════════
 # V2 CONFIGURATION - ALL PARAMETERS FROM CONFIG, NO HARDCODED VALUES
 # V2 TRADING BOT - DEFAULT CONFIGURATION
@@ -681,6 +1272,10 @@ logging:
     trades: true
     pnl_by_strategy: true
     regime: true
+    signals: true
+    orderbook_snapshots: false    # Can be large
+  
+  retention_days: 90
   retention_days: 90
 
 # ═══════════════════════════════════════════════════════════════
