@@ -257,7 +257,9 @@ class ParameterOptimizer:
         downside_returns = returns[returns < 0]
 
         if len(downside_returns) == 0 or np.std(downside_returns) == 0:
-            return mean_return * 10000  # Scale up
+            # Scale mean return when no downside for comparable magnitudes
+            # Using annualization factor for minute data (525600 minutes/year)
+            return mean_return * np.sqrt(525600)
 
         sortino = mean_return / np.std(downside_returns)
         return float(sortino)

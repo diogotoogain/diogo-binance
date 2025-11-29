@@ -16,6 +16,41 @@ import pandas as pd
 
 logger = logging.getLogger(__name__)
 
+# Maximum points to display in charts to avoid browser performance issues
+MAX_CHART_POINTS = 5000
+
+
+def downsample_for_chart(data: List, max_points: int = MAX_CHART_POINTS) -> List:
+    """
+    Downsample data for chart visualization while preserving important features.
+    
+    Uses LTTB (Largest-Triangle-Three-Buckets) inspired approach that
+    preserves local extrema better than simple decimation.
+    
+    Args:
+        data: List of numeric values
+        max_points: Maximum number of points to return
+        
+    Returns:
+        Downsampled list
+    """
+    if len(data) <= max_points:
+        return data
+    
+    # Simple approach: keep every nth point plus first/last
+    # More sophisticated: use numpy to find local mins/maxes
+    arr = np.array(data)
+    step = len(arr) // max_points
+    
+    # Get evenly spaced indices
+    indices = np.arange(0, len(arr), step)
+    
+    # Ensure we include the last point
+    if indices[-1] != len(arr) - 1:
+        indices = np.append(indices, len(arr) - 1)
+    
+    return arr[indices].tolist()
+
 
 class SimulationReport:
     """
@@ -398,8 +433,8 @@ class SimulationReport:
     </div>
 
     <script>
-        // Equity Chart
-        const equityData = {json.dumps(equity[:10000] if len(equity) > 10000 else equity)};
+        // Equity Chart - downsampled for performance
+        const equityData = {json.dumps(downsample_for_chart(equity))};
         const equityCtx = document.getElementById('equityChart').getContext('2d');
         new Chart(equityCtx, {{
             type: 'line',
@@ -433,8 +468,8 @@ class SimulationReport:
             }}
         }});
 
-        // Drawdown Chart
-        const drawdownData = {json.dumps(drawdown_list[:10000] if len(drawdown_list) > 10000 else drawdown_list)};
+        // Drawdown Chart - downsampled for performance
+        const drawdownData = {json.dumps(downsample_for_chart(drawdown_list))};
         const ddCtx = document.getElementById('drawdownChart').getContext('2d');
         new Chart(ddCtx, {{
             type: 'line',

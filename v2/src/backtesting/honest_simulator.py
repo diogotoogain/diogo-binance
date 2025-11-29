@@ -173,10 +173,16 @@ class HonestSimulator:
             # 7. UPDATE EQUITY
             self._update_equity(current_candle)
 
-            # 8. NOW: LEARN FROM CURRENT CANDLE
-            if self.online_learner is not None and features:
-                label = self._get_label(current_candle, data.iloc[i+1] if i+1 < len(data) else None)
-                self._learn_from_sample(features, label)
+            # 8. DEFERRED LEARNING: Learn from PREVIOUS candle's outcome
+            # We learn what happened from the previous candle now that we can see
+            # the current candle. This ensures we never use future data for decisions.
+            if self.online_learner is not None and i > start_idx:
+                prev_candle = data.iloc[i - 1]
+                prev_features = self._calculate_features(data.iloc[:i - 1], None)
+                if prev_features:
+                    # Label based on whether price went up from prev to current
+                    label = self._get_label(prev_candle, current_candle)
+                    self._learn_from_sample(prev_features, label)
 
             # 9. DETECT DRIFT (market change)
             if self.drift_detector is not None:

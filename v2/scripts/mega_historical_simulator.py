@@ -351,7 +351,10 @@ def main():
         config['data']['end_date'] = args.end_date
     if args.quick_test:
         # Use only 1 month of data for quick test
-        config['data']['end_date'] = config['data']['start_date'][:8] + "31"
+        from datetime import timedelta
+        start_dt = datetime.strptime(config['data']['start_date'], "%Y-%m-%d")
+        end_dt = start_dt + timedelta(days=30)
+        config['data']['end_date'] = end_dt.strftime("%Y-%m-%d")
 
     # Setup logging
     logger = setup_logging(config)

@@ -309,11 +309,13 @@ class TestParameterOptimizer:
             param_grid=param_grid
         )
 
+        expected_combinations = len(param_grid['param_a']) * len(param_grid['param_b'])
+        
         assert result is not None
         assert 'param_a' in result.best_params
         assert 'param_b' in result.best_params
         assert result.best_score is not None
-        assert len(result.all_results) == 6  # 3 * 2 combinations
+        assert len(result.all_results) == expected_combinations
 
     def test_generate_report(self, optimizer, sample_data):
         """generate_report should create formatted report."""

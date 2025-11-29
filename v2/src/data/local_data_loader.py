@@ -282,6 +282,10 @@ class LocalDataLoader:
     ) -> int:
         """
         Estimate number of candles for a date range.
+        
+        Note: Cryptocurrency markets operate 24/7/365, so this estimate
+        assumes continuous trading without weekends or holidays.
+        For traditional markets, the actual count would be lower.
 
         Args:
             start_date: Start date (YYYY-MM-DD)
@@ -289,13 +293,13 @@ class LocalDataLoader:
             timeframe: Timeframe string (1m, 5m, 15m, etc.)
 
         Returns:
-            Estimated number of candles
+            Estimated number of candles (for 24/7 crypto markets)
         """
         start = datetime.strptime(start_date, "%Y-%m-%d")
         end = datetime.strptime(end_date, "%Y-%m-%d")
         days = (end - start).days
 
-        # Minutes per timeframe
+        # Minutes per timeframe (crypto = 24/7)
         tf_minutes = {
             '1s': 1/60,
             '1m': 1,
