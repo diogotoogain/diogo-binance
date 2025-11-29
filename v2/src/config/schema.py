@@ -890,6 +890,145 @@ def get_all_optimizable_params() -> List[OptimizableParam]:
     ])
     
     # ═══════════════════════════════════════════════════════════════════════
+    # DAY OF WEEK FILTER (applies to all strategies, ~20 params total)
+    # ═══════════════════════════════════════════════════════════════════════
+    # HFT OFI Scalper - Day of Week Filter
+    params.extend([
+        OptimizableParam(
+            name='strategies.hft_ofi_scalper.filters.day_of_week_filter.enabled',
+            param_type=ParamType.BOOL,
+            default=True,
+            description='Habilitar filtro de dia da semana'
+        ),
+        OptimizableParam(
+            name='strategies.hft_ofi_scalper.filters.day_of_week_filter.monday_multiplier',
+            param_type=ParamType.FLOAT,
+            default=0.7,
+            low=0.3,
+            high=1.0,
+            step=0.1,
+            description='Multiplicador de tamanho na segunda-feira'
+        ),
+        OptimizableParam(
+            name='strategies.hft_ofi_scalper.filters.day_of_week_filter.friday_multiplier',
+            param_type=ParamType.FLOAT,
+            default=0.8,
+            low=0.5,
+            high=1.0,
+            step=0.1,
+            description='Multiplicador de tamanho na sexta-feira'
+        ),
+        OptimizableParam(
+            name='strategies.hft_ofi_scalper.filters.day_of_week_filter.weekend_allowed',
+            param_type=ParamType.BOOL,
+            default=False,
+            description='Permitir trading no fim de semana'
+        ),
+    ])
+    
+    # Momentum Intraday - Day of Week Filter
+    params.extend([
+        OptimizableParam(
+            name='strategies.momentum_intraday.filters.day_of_week_filter.enabled',
+            param_type=ParamType.BOOL,
+            default=True,
+            description='Habilitar filtro de dia da semana'
+        ),
+        OptimizableParam(
+            name='strategies.momentum_intraday.filters.day_of_week_filter.monday_multiplier',
+            param_type=ParamType.FLOAT,
+            default=0.7,
+            low=0.3,
+            high=1.0,
+            step=0.1,
+            description='Multiplicador de tamanho na segunda-feira'
+        ),
+        OptimizableParam(
+            name='strategies.momentum_intraday.filters.day_of_week_filter.friday_multiplier',
+            param_type=ParamType.FLOAT,
+            default=0.8,
+            low=0.5,
+            high=1.0,
+            step=0.1,
+            description='Multiplicador de tamanho na sexta-feira'
+        ),
+        OptimizableParam(
+            name='strategies.momentum_intraday.filters.day_of_week_filter.weekend_allowed',
+            param_type=ParamType.BOOL,
+            default=False,
+            description='Permitir trading no fim de semana'
+        ),
+    ])
+    
+    # Mean Reversion Intraday - Day of Week Filter
+    params.extend([
+        OptimizableParam(
+            name='strategies.mean_reversion_intraday.filters.day_of_week_filter.enabled',
+            param_type=ParamType.BOOL,
+            default=True,
+            description='Habilitar filtro de dia da semana'
+        ),
+        OptimizableParam(
+            name='strategies.mean_reversion_intraday.filters.day_of_week_filter.monday_multiplier',
+            param_type=ParamType.FLOAT,
+            default=0.7,
+            low=0.3,
+            high=1.0,
+            step=0.1,
+            description='Multiplicador de tamanho na segunda-feira'
+        ),
+        OptimizableParam(
+            name='strategies.mean_reversion_intraday.filters.day_of_week_filter.friday_multiplier',
+            param_type=ParamType.FLOAT,
+            default=0.8,
+            low=0.5,
+            high=1.0,
+            step=0.1,
+            description='Multiplicador de tamanho na sexta-feira'
+        ),
+        OptimizableParam(
+            name='strategies.mean_reversion_intraday.filters.day_of_week_filter.weekend_allowed',
+            param_type=ParamType.BOOL,
+            default=False,
+            description='Permitir trading no fim de semana'
+        ),
+    ])
+    
+    # Volatility Breakout - Day of Week Filter
+    params.extend([
+        OptimizableParam(
+            name='strategies.volatility_breakout.filters.day_of_week_filter.enabled',
+            param_type=ParamType.BOOL,
+            default=True,
+            description='Habilitar filtro de dia da semana'
+        ),
+        OptimizableParam(
+            name='strategies.volatility_breakout.filters.day_of_week_filter.monday_multiplier',
+            param_type=ParamType.FLOAT,
+            default=0.7,
+            low=0.3,
+            high=1.0,
+            step=0.1,
+            description='Multiplicador de tamanho na segunda-feira'
+        ),
+        OptimizableParam(
+            name='strategies.volatility_breakout.filters.day_of_week_filter.friday_multiplier',
+            param_type=ParamType.FLOAT,
+            default=0.8,
+            low=0.5,
+            high=1.0,
+            step=0.1,
+            description='Multiplicador de tamanho na sexta-feira'
+        ),
+        OptimizableParam(
+            name='strategies.volatility_breakout.filters.day_of_week_filter.weekend_allowed',
+            param_type=ParamType.BOOL,
+            default=False,
+            description='Permitir trading no fim de semana'
+        ),
+    ])
+    
+    # ═══════════════════════════════════════════════════════════════════════
     # ENSEMBLE (~10 params)
     # ═══════════════════════════════════════════════════════════════════════
     params.extend([

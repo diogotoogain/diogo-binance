@@ -6,8 +6,9 @@ Cada estratégia herda de Strategy e implementa generate_signal().
 """
 from abc import ABC, abstractmethod
 from dataclasses import dataclass, field
+from datetime import datetime, timezone
 from enum import Enum
-from typing import Any, Dict, Optional
+from typing import Any, Dict, Optional, Tuple, Union
 import logging
 import time
 
@@ -94,8 +95,81 @@ class Strategy(ABC):
         self._returns: list = []
         self._max_returns_history = 252  # ~1 ano de dias úteis
         
+        # Day of week filter config - carregado dos filtros da estratégia
+        self._day_of_week_filter_config = self._load_day_of_week_filter_config()
+        
         self.log(f"Estratégia inicializada | Enabled: {enabled}")
     
+    def _load_day_of_week_filter_config(self) -> Dict[str, Any]:
+        """
+        Carrega configuração do filtro de dia da semana.
+        
+        Returns:
+            Dict com configuração do filtro
+        """
+        filters = self.config.get('filters', {})
+        dow_filter = filters.get('day_of_week_filter', {})
+        
+        return {
+            'enabled': dow_filter.get('enabled', False),
+            'allowed_days': dow_filter.get('allowed_days', [0, 1, 2, 3, 4]),
+            'monday_multiplier': dow_filter.get('monday_multiplier', 1.0),
+            'friday_multiplier': dow_filter.get('friday_multiplier', 1.0),
+            'weekend_allowed': dow_filter.get('weekend_allowed', False),
+        }
+    
+    def _check_day_of_week_filter(
+        self, timestamp: Union[datetime, float, int, None] = None
+    ) -> Tuple[bool, float]:
+        """
+        Verifica se o dia da semana permite trading.
+        
+        Args:
+            timestamp: Timestamp para verificar (usa hora atual se None)
+        
+        Returns:
+            Tuple[allowed: bool, size_multiplier: float]
+            - allowed: True se trading é permitido neste dia
+            - size_multiplier: Multiplicador de tamanho de posição (ex: 0.7 na segunda)
+        """
+        config = self._day_of_week_filter_config
+        
+        # Se filtro desabilitado, permite tudo com multiplier 1.0
+        if not config.get('enabled', False):
+            return (True, 1.0)
+        
+        # Determinar dia da semana
+        if timestamp is None:
+            dt = datetime.now(timezone.utc)
+        elif isinstance(timestamp, (int, float)):
+            dt = datetime.fromtimestamp(timestamp, tz=timezone.utc)
+        else:
+            dt = timestamp
+        
+        day_of_week = dt.weekday()  # 0=Monday, 6=Sunday
+        
+        # Verificar fim de semana
+        is_weekend = day_of_week >= 5
+        if is_weekend and not config.get('weekend_allowed', False):
+            return (False, 0.0)
+        
+        # Verificar se dia está na lista permitida
+        allowed_days = config.get('allowed_days', [0, 1, 2, 3, 4])
+        if day_of_week not in allowed_days:
+            return (False, 0.0)
+        
+        # Calcular multiplicador de tamanho
+        size_multiplier = 1.0
+        
+        # Segunda-feira
+        if day_of_week == 0:
+            size_multiplier = config.get('monday_multiplier', 1.0)
+        # Sexta-feira
+        elif day_of_week == 4:
+            size_multiplier = config.get('friday_multiplier', 1.0)
+        
+        return (True, size_multiplier)
+
     @abstractmethod
     def generate_signal(self, market_data: Dict[str, Any]) -> Optional[Signal]:
         """

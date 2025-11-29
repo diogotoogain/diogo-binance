@@ -11,6 +11,7 @@ from v2.src.features.base import Feature
 from v2.src.features.microstructure import OFI, TFI, MicroPrice, ShannonEntropy, VPIN
 from v2.src.features.technical import EMA, RSI, MACD, ADX, BollingerBands, ATR
 from v2.src.features.volume import VolumeSpike, LiquidityClusters
+from v2.src.features.temporal import DayOfWeekFeatures
 
 
 logger = logging.getLogger(__name__)
@@ -54,6 +55,11 @@ class FeaturePipeline:
         vol_config = features_config.get('volume_analysis', {})
         if vol_config.get('enabled', True):
             self._init_volume_features(vol_config)
+        
+        # Temporal features
+        temporal_config = features_config.get('temporal', {})
+        if temporal_config.get('enabled', True):
+            self._init_temporal_features(temporal_config)
         
         logger.info(f"Pipeline inicializado com {len(self.features)} features")
         
@@ -127,6 +133,13 @@ class FeaturePipeline:
         clusters_config = config.get('liquidity_clusters', {})
         if clusters_config.get('enabled', True):
             self.features.append(LiquidityClusters(clusters_config, enabled=True))
+            
+    def _init_temporal_features(self, config: Dict[str, Any]) -> None:
+        """Inicializa features temporais."""
+        # Day of Week
+        dow_config = config.get('day_of_week', {})
+        if dow_config.get('enabled', True):
+            self.features.append(DayOfWeekFeatures(dow_config, enabled=True))
             
     def calculate_all(self, data: pd.DataFrame) -> pd.DataFrame:
         """

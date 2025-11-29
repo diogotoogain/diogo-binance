@@ -240,6 +240,12 @@ strategies:
       regime_filter:
         enabled: true             # OPTIMIZE: [true, false]
         allowed_regimes: [0, 1]   # OPTIMIZE: subsets
+      day_of_week_filter:
+        enabled: true             # OPTIMIZE: [true, false]
+        allowed_days: [0, 1, 2, 3, 4]  # OPTIMIZE: subsets de [0,1,2,3,4,5,6] (0=Segunda, 6=Domingo)
+        monday_multiplier: 0.7    # OPTIMIZE: range(0.3, 1.0) - Reduz size na segunda
+        friday_multiplier: 0.8    # OPTIMIZE: range(0.5, 1.0) - Reduz size na sexta
+        weekend_allowed: false    # OPTIMIZE: [true, false]
     throttling:
       enabled: true
       max_trades_per_minute: 5    # OPTIMIZE: range(1, 10)
@@ -264,6 +270,12 @@ strategies:
       trend_alignment:
         enabled: true             # OPTIMIZE: [true, false]
         higher_tf: "1h"
+      day_of_week_filter:
+        enabled: true             # OPTIMIZE: [true, false]
+        allowed_days: [0, 1, 2, 3, 4]  # OPTIMIZE: subsets de [0,1,2,3,4,5,6] (0=Segunda, 6=Domingo)
+        monday_multiplier: 0.7    # OPTIMIZE: range(0.3, 1.0) - Reduz size na segunda
+        friday_multiplier: 0.8    # OPTIMIZE: range(0.5, 1.0) - Reduz size na sexta
+        weekend_allowed: false    # OPTIMIZE: [true, false]
     throttling:
       enabled: true
       max_trades_per_hour: 4      # OPTIMIZE: range(1, 10)
@@ -288,6 +300,12 @@ strategies:
         enabled: true             # OPTIMIZE: [true, false]
         overbought: 70            # OPTIMIZE: range(65, 80)
         oversold: 30              # OPTIMIZE: range(20, 35)
+      day_of_week_filter:
+        enabled: true             # OPTIMIZE: [true, false]
+        allowed_days: [0, 1, 2, 3, 4]  # OPTIMIZE: subsets de [0,1,2,3,4,5,6] (0=Segunda, 6=Domingo)
+        monday_multiplier: 0.7    # OPTIMIZE: range(0.3, 1.0) - Reduz size na segunda
+        friday_multiplier: 0.8    # OPTIMIZE: range(0.5, 1.0) - Reduz size na sexta
+        weekend_allowed: false    # OPTIMIZE: [true, false]
     throttling:
       enabled: true
       max_trades_per_hour: 6      # OPTIMIZE: range(2, 12)
@@ -308,6 +326,12 @@ strategies:
       time_filter:
         enabled: true             # OPTIMIZE: [true, false]
         allowed_hours: [8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20]
+      day_of_week_filter:
+        enabled: true             # OPTIMIZE: [true, false]
+        allowed_days: [0, 1, 2, 3, 4]  # OPTIMIZE: subsets de [0,1,2,3,4,5,6] (0=Segunda, 6=Domingo)
+        monday_multiplier: 0.7    # OPTIMIZE: range(0.3, 1.0) - Reduz size na segunda
+        friday_multiplier: 0.8    # OPTIMIZE: range(0.5, 1.0) - Reduz size na sexta
+        weekend_allowed: false    # OPTIMIZE: [true, false]
     throttling:
       enabled: true
       max_trades_per_day: 3       # OPTIMIZE: range(1, 6)
