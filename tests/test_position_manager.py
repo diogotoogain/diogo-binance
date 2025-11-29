@@ -61,23 +61,23 @@ class TestPositionManager:
         assert result == 'TAKE_PROFIT'
 
     def test_close_position_no_division_by_zero(self):
-        """Test that closing position with zero entry price does not cause division by zero."""
+        """Test that closing position with zero entry price returns None (rejected)."""
         # Manually set a position with zero entry price (edge case)
         from src.execution.position_manager import Position
         from datetime import datetime
         self.pm.current_position = Position(
             symbol='BTCUSDT',
             side='LONG',
-            entry_price=0.0,  # Invalid but should not crash
+            entry_price=0.0,  # Invalid entry price
             quantity=0.1,
             stop_loss=0.0,
             take_profit=0.0,
             entry_time=datetime.now()
         )
-        # Should not raise an exception
+        # Should return None because entry price is invalid
         pnl = self.pm.close_position(50000)
-        assert pnl == 50000 * 0.1  # PNL calculation still works
-        assert self.pm.has_position() is False
+        assert pnl is None  # Rejected due to invalid entry price
+        assert self.pm.has_position() is True  # Position still exists because close was rejected
 
     def test_close_position_zero_quantity_no_crash(self):
         """Test that closing position with zero quantity does not crash."""
@@ -117,3 +117,80 @@ class TestPositionManager:
         assert self.pm.has_position() is True
         self.pm.clear_position()
         assert self.pm.has_position() is False
+
+    # New tests for price validation (BUG 1 fixes)
+    
+    def test_close_position_with_none_price(self):
+        """Test that closing position with None price is rejected."""
+        self.pm.open_position('BTCUSDT', 'BUY', 50000, 0.1)
+        pnl = self.pm.close_position(None)
+        assert pnl is None  # Rejected
+        assert self.pm.has_position() is True  # Position still exists
+
+    def test_close_position_with_zero_price(self):
+        """Test that closing position with zero price is rejected."""
+        self.pm.open_position('BTCUSDT', 'BUY', 50000, 0.1)
+        pnl = self.pm.close_position(0)
+        assert pnl is None  # Rejected
+        assert self.pm.has_position() is True  # Position still exists
+
+    def test_close_position_with_negative_price(self):
+        """Test that closing position with negative price is rejected."""
+        self.pm.open_position('BTCUSDT', 'BUY', 50000, 0.1)
+        pnl = self.pm.close_position(-100)
+        assert pnl is None  # Rejected
+        assert self.pm.has_position() is True  # Position still exists
+
+    def test_close_position_with_suspicious_price(self):
+        """Test that closing position with suspicious price (>50% deviation) is rejected."""
+        self.pm.open_position('BTCUSDT', 'BUY', 50000, 0.1)
+        # Set last valid price using the proper method
+        self.pm.update_last_valid_price(50000)
+        # Try to close with a price that is 60% different
+        pnl = self.pm.close_position(20000)  # 60% lower
+        assert pnl is None  # Rejected
+        assert self.pm.has_position() is True  # Position still exists
+
+    def test_should_close_with_invalid_price(self):
+        """Test that should_close ignores invalid prices."""
+        self.pm.open_position('BTCUSDT', 'BUY', 50000, 0.1, 49500, 51000)
+        
+        # None price should be ignored
+        assert self.pm.should_close(None) is None
+        
+        # Zero price should be ignored
+        assert self.pm.should_close(0) is None
+        
+        # Negative price should be ignored
+        assert self.pm.should_close(-100) is None
+
+    def test_is_valid_price(self):
+        """Test the is_valid_price helper method."""
+        assert self.pm.is_valid_price(50000) is True
+        assert self.pm.is_valid_price(0.01) is True
+        assert self.pm.is_valid_price(0) is False
+        assert self.pm.is_valid_price(-100) is False
+        assert self.pm.is_valid_price(None) is False
+
+    def test_update_last_valid_price(self):
+        """Test that last_valid_price is updated correctly."""
+        assert self.pm.last_valid_price is None
+        
+        # Valid price updates the cache
+        self.pm.update_last_valid_price(50000)
+        assert self.pm.last_valid_price == 50000
+        
+        # Invalid prices don't update
+        self.pm.update_last_valid_price(0)
+        assert self.pm.last_valid_price == 50000
+        
+        self.pm.update_last_valid_price(None)
+        assert self.pm.last_valid_price == 50000
+
+    def test_should_close_updates_last_valid_price(self):
+        """Test that should_close updates last_valid_price."""
+        self.pm.open_position('BTCUSDT', 'BUY', 50000, 0.1, 49500, 51000)
+        
+        # should_close with valid price should update last_valid_price
+        self.pm.should_close(50500)
+        assert self.pm.last_valid_price == 50500

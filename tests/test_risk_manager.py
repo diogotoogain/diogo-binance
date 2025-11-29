@@ -80,3 +80,44 @@ class TestRiskManager:
         )
         # With zero price, max_btc_from_usd would be 0
         assert size == 0
+
+    # New tests for PnL validation (BUG 1 fixes)
+
+    def test_update_daily_pnl_with_none(self):
+        """Test that update_daily_pnl rejects None values."""
+        self.rm.set_initial_balance(10000)
+        initial_pnl = self.rm.daily_pnl
+        initial_trades = self.rm.trades_today
+        
+        self.rm.update_daily_pnl(None)
+        
+        # Should not update pnl or trades
+        assert self.rm.daily_pnl == initial_pnl
+        assert self.rm.trades_today == initial_trades
+
+    def test_update_daily_pnl_with_suspicious_value(self):
+        """Test that update_daily_pnl rejects suspicious values (> 100% of balance)."""
+        self.rm.set_initial_balance(10000)
+        initial_pnl = self.rm.daily_pnl
+        initial_trades = self.rm.trades_today
+        
+        # Try to update with suspicious PnL (larger than entire balance)
+        self.rm.update_daily_pnl(-15000)  # 150% loss, impossible
+        
+        # Should not update pnl or trades
+        assert self.rm.daily_pnl == initial_pnl
+        assert self.rm.trades_today == initial_trades
+
+    def test_update_daily_pnl_valid_values(self):
+        """Test that update_daily_pnl accepts valid values."""
+        self.rm.set_initial_balance(10000)
+        
+        # Valid positive PnL
+        self.rm.update_daily_pnl(100)
+        assert self.rm.daily_pnl == 100
+        assert self.rm.trades_today == 1
+        
+        # Valid negative PnL
+        self.rm.update_daily_pnl(-50)
+        assert self.rm.daily_pnl == 50
+        assert self.rm.trades_today == 2

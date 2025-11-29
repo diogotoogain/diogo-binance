@@ -186,6 +186,11 @@ class TradeExecutor:
             return False
 
     async def _close_position(self, price: float, reason: str) -> bool:
+        # VALIDAÇÃO CRÍTICA: Rejeitar preço inválido
+        if price is None or price <= 0:
+            logger.error(f"❌ Tentativa de fechar posição com preço inválido: {price}")
+            return False
+        
         if not self.position_manager.has_position():
             # Tenta sincronizar para ter certeza
             binance_pos = await self._get_binance_position()
@@ -212,7 +217,18 @@ class TradeExecutor:
             if fill <= 0:
                 fill = price
             
+            # VALIDAÇÃO CRÍTICA: Se ainda não tem preço válido, abortar
+            if fill <= 0:
+                logger.error(f"❌ Preço de fill inválido: {fill}. Abortando fechamento!")
+                return False
+            
             pnl = self.position_manager.close_position(fill)
+            
+            # VALIDAÇÃO: Se close_position retornou None, o preço foi rejeitado
+            if pnl is None:
+                logger.error(f"❌ Fechamento rejeitado pelo PositionManager (preço inválido)")
+                return False
+            
             self.risk_manager.update_daily_pnl(pnl)
             if pnl > 0: self.winning_trades += 1
             await self.notifier.notify_trade_close(self.symbol, entry, fill, pnl, reason)
