@@ -1054,6 +1054,207 @@ def get_all_optimizable_params() -> List[OptimizableParam]:
     ])
     
     # ═══════════════════════════════════════════════════════════════════════
+    # SEASONALITY (~20 params)
+    # ═══════════════════════════════════════════════════════════════════════
+    params.extend([
+        OptimizableParam(
+            name='seasonality.enabled',
+            param_type=ParamType.BOOL,
+            default=True,
+            description='Habilitar ajuste de sazonalidade'
+        ),
+        OptimizableParam(
+            name='seasonality.monthly_adjustment.enabled',
+            param_type=ParamType.BOOL,
+            default=True,
+            description='Habilitar ajuste mensal'
+        ),
+        OptimizableParam(
+            name='seasonality.monthly_adjustment.january',
+            param_type=ParamType.FLOAT,
+            default=1.0,
+            low=0.5,
+            high=1.5,
+            step=0.1,
+            description='Multiplicador Janeiro'
+        ),
+        OptimizableParam(
+            name='seasonality.monthly_adjustment.february',
+            param_type=ParamType.FLOAT,
+            default=1.0,
+            low=0.5,
+            high=1.5,
+            step=0.1,
+            description='Multiplicador Fevereiro'
+        ),
+        OptimizableParam(
+            name='seasonality.monthly_adjustment.march',
+            param_type=ParamType.FLOAT,
+            default=1.0,
+            low=0.5,
+            high=1.5,
+            step=0.1,
+            description='Multiplicador Março'
+        ),
+        OptimizableParam(
+            name='seasonality.monthly_adjustment.april',
+            param_type=ParamType.FLOAT,
+            default=1.0,
+            low=0.5,
+            high=1.5,
+            step=0.1,
+            description='Multiplicador Abril'
+        ),
+        OptimizableParam(
+            name='seasonality.monthly_adjustment.may',
+            param_type=ParamType.FLOAT,
+            default=0.8,
+            low=0.5,
+            high=1.5,
+            step=0.1,
+            description='Multiplicador Maio - Sell in May'
+        ),
+        OptimizableParam(
+            name='seasonality.monthly_adjustment.june',
+            param_type=ParamType.FLOAT,
+            default=0.7,
+            low=0.5,
+            high=1.5,
+            step=0.1,
+            description='Multiplicador Junho - Verão'
+        ),
+        OptimizableParam(
+            name='seasonality.monthly_adjustment.july',
+            param_type=ParamType.FLOAT,
+            default=0.7,
+            low=0.5,
+            high=1.5,
+            step=0.1,
+            description='Multiplicador Julho - Verão'
+        ),
+        OptimizableParam(
+            name='seasonality.monthly_adjustment.august',
+            param_type=ParamType.FLOAT,
+            default=0.7,
+            low=0.5,
+            high=1.5,
+            step=0.1,
+            description='Multiplicador Agosto - Verão'
+        ),
+        OptimizableParam(
+            name='seasonality.monthly_adjustment.september',
+            param_type=ParamType.FLOAT,
+            default=0.8,
+            low=0.5,
+            high=1.5,
+            step=0.1,
+            description='Multiplicador Setembro'
+        ),
+        OptimizableParam(
+            name='seasonality.monthly_adjustment.october',
+            param_type=ParamType.FLOAT,
+            default=1.2,
+            low=0.5,
+            high=1.5,
+            step=0.1,
+            description='Multiplicador Outubro - Uptober'
+        ),
+        OptimizableParam(
+            name='seasonality.monthly_adjustment.november',
+            param_type=ParamType.FLOAT,
+            default=1.3,
+            low=0.5,
+            high=1.5,
+            step=0.1,
+            description='Multiplicador Novembro'
+        ),
+        OptimizableParam(
+            name='seasonality.monthly_adjustment.december',
+            param_type=ParamType.FLOAT,
+            default=1.2,
+            low=0.5,
+            high=1.5,
+            step=0.1,
+            description='Multiplicador Dezembro'
+        ),
+        OptimizableParam(
+            name='seasonality.month_period.enabled',
+            param_type=ParamType.BOOL,
+            default=True,
+            description='Habilitar ajuste por período do mês'
+        ),
+        OptimizableParam(
+            name='seasonality.month_period.early_month_multiplier',
+            param_type=ParamType.FLOAT,
+            default=1.0,
+            low=0.7,
+            high=1.3,
+            step=0.1,
+            description='Multiplicador início do mês (dias 1-10)'
+        ),
+        OptimizableParam(
+            name='seasonality.month_period.mid_month_multiplier',
+            param_type=ParamType.FLOAT,
+            default=1.0,
+            low=0.7,
+            high=1.3,
+            step=0.1,
+            description='Multiplicador meio do mês (dias 11-20)'
+        ),
+        OptimizableParam(
+            name='seasonality.month_period.late_month_multiplier',
+            param_type=ParamType.FLOAT,
+            default=0.9,
+            low=0.7,
+            high=1.3,
+            step=0.1,
+            description='Multiplicador fim do mês (dias 21-31)'
+        ),
+        OptimizableParam(
+            name='seasonality.quarter_adjustment.enabled',
+            param_type=ParamType.BOOL,
+            default=True,
+            description='Habilitar ajuste por quarter'
+        ),
+        OptimizableParam(
+            name='seasonality.quarter_adjustment.q1_multiplier',
+            param_type=ParamType.FLOAT,
+            default=1.0,
+            low=0.7,
+            high=1.3,
+            step=0.1,
+            description='Multiplicador Q1 (Jan-Mar)'
+        ),
+        OptimizableParam(
+            name='seasonality.quarter_adjustment.q2_multiplier',
+            param_type=ParamType.FLOAT,
+            default=0.9,
+            low=0.7,
+            high=1.3,
+            step=0.1,
+            description='Multiplicador Q2 (Abr-Jun)'
+        ),
+        OptimizableParam(
+            name='seasonality.quarter_adjustment.q3_multiplier',
+            param_type=ParamType.FLOAT,
+            default=0.8,
+            low=0.7,
+            high=1.3,
+            step=0.1,
+            description='Multiplicador Q3 (Jul-Set)'
+        ),
+        OptimizableParam(
+            name='seasonality.quarter_adjustment.q4_multiplier',
+            param_type=ParamType.FLOAT,
+            default=1.2,
+            low=0.7,
+            high=1.3,
+            step=0.1,
+            description='Multiplicador Q4 (Out-Dez) - Historicamente mais forte'
+        ),
+    ])
+    
+    # ═══════════════════════════════════════════════════════════════════════
     # POSITION MANAGEMENT (~12 params)
     # ═══════════════════════════════════════════════════════════════════════
     params.extend([
@@ -2182,6 +2383,191 @@ OPTIMIZABLE_PARAMS: Dict[str, List[OptimizableParam]] = {
             high=48,
             default=24,
             description="Pause duration after kill switch",
+        ),
+    ],
+    # Seasonality
+    "seasonality": [
+        OptimizableParam(
+            name="enabled",
+            param_type=ParamType.BOOL,
+            default=True,
+            description="Enable seasonality adjustment",
+        ),
+    ],
+    "seasonality.monthly_adjustment": [
+        OptimizableParam(
+            name="enabled",
+            param_type=ParamType.BOOL,
+            default=True,
+            description="Enable monthly adjustment",
+        ),
+        OptimizableParam(
+            name="january",
+            param_type=ParamType.FLOAT,
+            low=0.5,
+            high=1.5,
+            default=1.0,
+            description="January multiplier",
+        ),
+        OptimizableParam(
+            name="february",
+            param_type=ParamType.FLOAT,
+            low=0.5,
+            high=1.5,
+            default=1.0,
+            description="February multiplier",
+        ),
+        OptimizableParam(
+            name="march",
+            param_type=ParamType.FLOAT,
+            low=0.5,
+            high=1.5,
+            default=1.0,
+            description="March multiplier",
+        ),
+        OptimizableParam(
+            name="april",
+            param_type=ParamType.FLOAT,
+            low=0.5,
+            high=1.5,
+            default=1.0,
+            description="April multiplier",
+        ),
+        OptimizableParam(
+            name="may",
+            param_type=ParamType.FLOAT,
+            low=0.5,
+            high=1.5,
+            default=0.8,
+            description="May multiplier - Sell in May",
+        ),
+        OptimizableParam(
+            name="june",
+            param_type=ParamType.FLOAT,
+            low=0.5,
+            high=1.5,
+            default=0.7,
+            description="June multiplier - Summer",
+        ),
+        OptimizableParam(
+            name="july",
+            param_type=ParamType.FLOAT,
+            low=0.5,
+            high=1.5,
+            default=0.7,
+            description="July multiplier - Summer",
+        ),
+        OptimizableParam(
+            name="august",
+            param_type=ParamType.FLOAT,
+            low=0.5,
+            high=1.5,
+            default=0.7,
+            description="August multiplier - Summer",
+        ),
+        OptimizableParam(
+            name="september",
+            param_type=ParamType.FLOAT,
+            low=0.5,
+            high=1.5,
+            default=0.8,
+            description="September multiplier",
+        ),
+        OptimizableParam(
+            name="october",
+            param_type=ParamType.FLOAT,
+            low=0.5,
+            high=1.5,
+            default=1.2,
+            description="October multiplier - Uptober",
+        ),
+        OptimizableParam(
+            name="november",
+            param_type=ParamType.FLOAT,
+            low=0.5,
+            high=1.5,
+            default=1.3,
+            description="November multiplier",
+        ),
+        OptimizableParam(
+            name="december",
+            param_type=ParamType.FLOAT,
+            low=0.5,
+            high=1.5,
+            default=1.2,
+            description="December multiplier",
+        ),
+    ],
+    "seasonality.month_period": [
+        OptimizableParam(
+            name="enabled",
+            param_type=ParamType.BOOL,
+            default=True,
+            description="Enable month period adjustment",
+        ),
+        OptimizableParam(
+            name="early_month_multiplier",
+            param_type=ParamType.FLOAT,
+            low=0.7,
+            high=1.3,
+            default=1.0,
+            description="Early month multiplier (days 1-10)",
+        ),
+        OptimizableParam(
+            name="mid_month_multiplier",
+            param_type=ParamType.FLOAT,
+            low=0.7,
+            high=1.3,
+            default=1.0,
+            description="Mid month multiplier (days 11-20)",
+        ),
+        OptimizableParam(
+            name="late_month_multiplier",
+            param_type=ParamType.FLOAT,
+            low=0.7,
+            high=1.3,
+            default=0.9,
+            description="Late month multiplier (days 21-31)",
+        ),
+    ],
+    "seasonality.quarter_adjustment": [
+        OptimizableParam(
+            name="enabled",
+            param_type=ParamType.BOOL,
+            default=True,
+            description="Enable quarter adjustment",
+        ),
+        OptimizableParam(
+            name="q1_multiplier",
+            param_type=ParamType.FLOAT,
+            low=0.7,
+            high=1.3,
+            default=1.0,
+            description="Q1 multiplier (Jan-Mar)",
+        ),
+        OptimizableParam(
+            name="q2_multiplier",
+            param_type=ParamType.FLOAT,
+            low=0.7,
+            high=1.3,
+            default=0.9,
+            description="Q2 multiplier (Apr-Jun)",
+        ),
+        OptimizableParam(
+            name="q3_multiplier",
+            param_type=ParamType.FLOAT,
+            low=0.7,
+            high=1.3,
+            default=0.8,
+            description="Q3 multiplier (Jul-Sep)",
+        ),
+        OptimizableParam(
+            name="q4_multiplier",
+            param_type=ParamType.FLOAT,
+            low=0.7,
+            high=1.3,
+            default=1.2,
+            description="Q4 multiplier (Oct-Dec) - Historically stronger",
         ),
     ],
     # Bet Sizing

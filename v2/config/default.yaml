@@ -373,6 +373,44 @@ risk:
     cooldown_multiplier: 2.0      # OPTIMIZE: range(1.0, 3.0)
 
 # ═══════════════════════════════════════════════════════════════════════════
+# SEASONALITY - Ajuste de risco por padrões sazonais
+# ═══════════════════════════════════════════════════════════════════════════
+seasonality:
+  enabled: true                      # OPTIMIZE: [true, false]
+  
+  # Multipliers por mês (1.0 = normal, <1.0 = reduz, >1.0 = aumenta)
+  monthly_adjustment:
+    enabled: true                    # OPTIMIZE: [true, false]
+    january: 1.0                     # OPTIMIZE: range(0.5, 1.5)
+    february: 1.0                    # OPTIMIZE: range(0.5, 1.5)
+    march: 1.0                       # OPTIMIZE: range(0.5, 1.5)
+    april: 1.0                       # OPTIMIZE: range(0.5, 1.5)
+    may: 0.8                         # OPTIMIZE: range(0.5, 1.5) - "Sell in May"
+    june: 0.7                        # OPTIMIZE: range(0.5, 1.5)
+    july: 0.7                        # OPTIMIZE: range(0.5, 1.5)
+    august: 0.7                      # OPTIMIZE: range(0.5, 1.5)
+    september: 0.8                   # OPTIMIZE: range(0.5, 1.5)
+    october: 1.2                     # OPTIMIZE: range(0.5, 1.5) - "Uptober"
+    november: 1.3                    # OPTIMIZE: range(0.5, 1.5)
+    december: 1.2                    # OPTIMIZE: range(0.5, 1.5)
+  
+  # Dias específicos do mês
+  month_period:
+    enabled: true                    # OPTIMIZE: [true, false]
+    # Início do mês (dias 1-10) vs fim do mês (dias 20-31)
+    early_month_multiplier: 1.0      # OPTIMIZE: range(0.7, 1.3)
+    mid_month_multiplier: 1.0        # OPTIMIZE: range(0.7, 1.3)
+    late_month_multiplier: 0.9       # OPTIMIZE: range(0.7, 1.3) - Rebalanceamentos de fundos
+  
+  # Quarter analysis
+  quarter_adjustment:
+    enabled: true                    # OPTIMIZE: [true, false]
+    q1_multiplier: 1.0               # OPTIMIZE: range(0.7, 1.3)
+    q2_multiplier: 0.9               # OPTIMIZE: range(0.7, 1.3)
+    q3_multiplier: 0.8               # OPTIMIZE: range(0.7, 1.3)
+    q4_multiplier: 1.2               # OPTIMIZE: range(0.7, 1.3) - Historicamente mais forte
+
+# ═══════════════════════════════════════════════════════════════════════════
 # POSITION MANAGEMENT
 # ═══════════════════════════════════════════════════════════════════════════
 position:

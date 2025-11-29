@@ -4,6 +4,7 @@ Risk Manager - Gerenciador principal de risco.
 Orquestra todos os componentes de gestão de risco.
 """
 import logging
+from datetime import datetime
 from typing import Dict, Tuple, Optional
 
 from .kill_switch import KillSwitch
@@ -13,6 +14,7 @@ from .stop_loss import StopLossCalculator
 from .take_profit import TakeProfitCalculator
 from .trailing_stop import TrailingStop
 from .regime_adjustment import RegimeAdjustment
+from .seasonality_adjuster import SeasonalityAdjuster
 
 logger = logging.getLogger(__name__)
 
@@ -31,6 +33,12 @@ class RiskManager:
     - max_drawdown_pct: 20.0          # OPTIMIZE: [10, 15, 20, 25, 30]
     - max_concurrent_positions: 1     # OPTIMIZE: [1, 2, 3, 5]
     - max_leverage: 10                # OPTIMIZE: [3, 5, 10, 15, 20]
+    
+    Parâmetros do config (seasonality):
+    - enabled: true                   # OPTIMIZE: [true, false]
+    - monthly_adjustment.*            # Multipliers por mês
+    - month_period.*                  # Multipliers por período do mês
+    - quarter_adjustment.*            # Multipliers por quarter
     """
     
     def __init__(self, config: Dict):
@@ -51,6 +59,7 @@ class RiskManager:
         self.take_profit_calculator = TakeProfitCalculator(config)
         self.trailing_stop = TrailingStop(config)
         self.regime_adjuster = RegimeAdjustment(config)
+        self.seasonality_adjuster = SeasonalityAdjuster(config)
         
         # Estado
         self._daily_pnl = 0.0
@@ -121,13 +130,15 @@ class RiskManager:
         
     def calculate_position_size(self, balance: float, current_price: float, 
                                  atr: float, signal_confidence: float = 1.0,
-                                 regime: Optional[Dict] = None) -> float:
+                                 regime: Optional[Dict] = None,
+                                 timestamp: Optional[datetime] = None) -> float:
         """
         Calcula tamanho da posição.
         
         Considera:
         - Risk per trade
         - Ajuste por regime
+        - Ajuste por sazonalidade
         - Bet sizing method (Kelly, vol target, etc)
         
         Args:
@@ -136,6 +147,7 @@ class RiskManager:
             atr: Average True Range
             signal_confidence: Confiança do sinal
             regime: Informações do regime (opcional)
+            timestamp: Datetime for seasonality adjustment (opcional, defaults to now)
             
         Returns:
             Tamanho da posição em unidades do ativo
@@ -154,17 +166,25 @@ class RiskManager:
             adjusted_size = base_size * regime_mult
         else:
             adjusted_size = base_size
+        
+        # Ajuste por sazonalidade
+        if timestamp is None:
+            timestamp = datetime.now()
+        seasonality_adjusted_size = self.seasonality_adjuster.adjust_position_size(
+            adjusted_size, timestamp
+        )
             
         # Aplica limite máximo de posição
         max_position_pct = self.config['max_position_size_pct']
         max_size = (balance * max_position_pct / 100) / current_price
         
-        final_size = min(adjusted_size, max_size)
+        final_size = min(seasonality_adjusted_size, max_size)
         
         logger.debug(
             f"Position sizing: base={base_size:.6f}, "
-            f"adjusted={adjusted_size:.6f}, max={max_size:.6f}, "
-            f"final={final_size:.6f}"
+            f"regime_adjusted={adjusted_size:.6f}, "
+            f"seasonality_adjusted={seasonality_adjusted_size:.6f}, "
+            f"max={max_size:.6f}, final={final_size:.6f}"
         )
         
         return final_size
@@ -338,14 +358,36 @@ class RiskManager:
     def is_kill_switch_active(self) -> bool:
         """Check if kill switch is active."""
         return self.kill_switch.is_triggered()
+    
+    def get_seasonality_info(self, timestamp: Optional[datetime] = None) -> Dict:
+        """
+        Get current seasonality adjustment information.
         
-    def get_risk_summary(self) -> Dict:
+        Args:
+            timestamp: Datetime for seasonality info (optional, defaults to now)
+            
+        Returns:
+            Dictionary with seasonality metrics
+        """
+        if timestamp is None:
+            timestamp = datetime.now()
+        return self.seasonality_adjuster.get_seasonality_info(timestamp)
+        
+    def get_risk_summary(self, timestamp: Optional[datetime] = None) -> Dict:
         """
         Get summary of current risk state.
+        
+        Args:
+            timestamp: Datetime for seasonality info (optional, defaults to now)
         
         Returns:
             Dictionary with risk metrics
         """
+        if timestamp is None:
+            timestamp = datetime.now()
+            
+        seasonality_info = self.seasonality_adjuster.get_seasonality_info(timestamp)
+        
         return {
             'daily_pnl': self._daily_pnl,
             'weekly_pnl': self._weekly_pnl,
@@ -357,4 +399,5 @@ class RiskManager:
             'kill_switch_reason': self.kill_switch.trigger_reason,
             'daily_limits_exceeded': self.daily_limits.is_exceeded(),
             'remaining_capacity': self.daily_limits.get_remaining_capacity(),
+            'seasonality': seasonality_info,
         }
