@@ -62,3 +62,31 @@ jobs:
             git push
             echo "✅ Data committed and pushed successfully"
           fi
+
+      - name: Install Online Learning dependencies
+        run: |
+          pip install river
+
+      - name: Run Online Learning update
+        run: |
+          cd $GITHUB_WORKSPACE
+          python v2/scripts/online_learning_update.py \
+            --data-dir v2/data/raw/1s \
+            --model-dir v2/models/online \
+            --results-dir v2/results/online_learning
+
+      - name: Commit Online Learning updates
+        run: |
+          # Add model and results files
+          git add v2/models/online/*.pkl || true
+          git add v2/results/online_learning/*.json || true
+
+          # Check if there are changes to commit
+          if git diff --staged --quiet; then
+            echo "No Online Learning updates to commit"
+          else
+            TIMESTAMP=$(date -u +"%Y-%m-%d %H:%M UTC")
+            git commit -m "🧠 Online Learning update - ${TIMESTAMP}"
+            git push
+            echo "✅ Online Learning updates committed successfully"
+          fi

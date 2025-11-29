@@ -26,3 +26,6 @@ pytest-asyncio>=0.21.0
 
 # Logging (colorful)
 colorama>=0.4.6
+
+# Online Learning
+river>=0.21.0
