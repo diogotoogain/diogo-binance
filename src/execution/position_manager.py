@@ -44,6 +44,7 @@ class PositionManager:
         self.current_position: Optional[Position] = None
         self.highest_price = 0.0
         self.lowest_price = float('inf')
+        self.last_valid_price: Optional[float] = None  # Cache do último preço válido
         
         logger.info(f"📍 PositionManager iniciado:")
         logger.info(f"   🛑 SL Padrão: {self.default_sl_percent*100}%")
@@ -52,6 +53,15 @@ class PositionManager:
 
     def has_position(self) -> bool:
         return self.current_position is not None
+
+    def is_valid_price(self, price: float) -> bool:
+        """Valida se o preço é válido (não None, não zero, não negativo)."""
+        return price is not None and price > 0
+
+    def update_last_valid_price(self, price: float):
+        """Atualiza cache do último preço válido."""
+        if self.is_valid_price(price):
+            self.last_valid_price = price
 
     def calculate_sl_tp(self, entry_price: float, side: str) -> tuple:
         if side in ['BUY', 'LONG']:
@@ -86,11 +96,33 @@ class PositionManager:
         logger.info(f"   🛑 SL: ${stop_loss:.2f} | 🎯 TP: ${take_profit:.2f}")
         return self.current_position
 
-    def close_position(self, exit_price: float) -> float:
+    def close_position(self, exit_price: float) -> Optional[float]:
+        """
+        Fecha a posição atual e calcula o PnL.
+        Retorna None se o preço for inválido (não fecha a posição).
+        Retorna o PnL se a posição foi fechada com sucesso.
+        """
         if not self.has_position():
             return 0.0
         
+        # VALIDAÇÃO CRÍTICA: Rejeitar preço inválido
+        if not self.is_valid_price(exit_price):
+            logger.error(f"❌ PREÇO INVÁLIDO: {exit_price}. Abortando fechamento de posição!")
+            return None
+        
+        # Validar que o preço está dentro de um range razoável (±50% do último preço conhecido)
+        if self.last_valid_price and self.last_valid_price > 0:
+            if abs(exit_price - self.last_valid_price) / self.last_valid_price > 0.5:
+                logger.error(f"❌ PREÇO SUSPEITO: {exit_price} vs último válido {self.last_valid_price}. Abortando!")
+                return None
+        
         pos = self.current_position
+        
+        # Validar entry_price da posição
+        if not self.is_valid_price(pos.entry_price):
+            logger.error(f"❌ Entry price inválido: {pos.entry_price}. Abortando fechamento!")
+            return None
+        
         if pos.is_long:
             pnl = (exit_price - pos.entry_price) * pos.quantity
         else:
@@ -130,6 +162,15 @@ class PositionManager:
     def should_close(self, current_price: float) -> Optional[str]:
         if not self.has_position():
             return None
+        
+        # VALIDAÇÃO CRÍTICA: Não processar preço inválido
+        if not self.is_valid_price(current_price):
+            logger.warning(f"⚠️ Preço inválido em should_close: {current_price}. Ignorando.")
+            return None
+        
+        # Atualiza cache do último preço válido
+        self.update_last_valid_price(current_price)
+        
         self.update_trailing_stop(current_price)
         pos = self.current_position
         if pos.is_long:

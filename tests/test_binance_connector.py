@@ -139,3 +139,143 @@ class TestBinanceConnector:
             
             # Verify that the X-MBX-DEMO header was NOT set
             assert 'X-MBX-DEMO' not in mock_session.headers
+
+
+class TestWebSocketHealthCheck:
+    """Tests for WebSocketHealthCheck class."""
+    
+    def test_initialization(self):
+        """Test WebSocketHealthCheck initialization."""
+        with patch.dict('sys.modules', {'src.core': MagicMock(), 'src.core.event_bus': MagicMock()}):
+            module = load_binance_connector()
+            WebSocketHealthCheck = module.WebSocketHealthCheck
+            
+            hc = WebSocketHealthCheck(timeout_seconds=30)
+            assert hc.timeout_seconds == 30
+            assert hc.last_message_time is None
+            assert hc.last_valid_price is None
+
+    def test_on_message_updates_timestamp(self):
+        """Test that on_message updates the last_message_time."""
+        import time
+        with patch.dict('sys.modules', {'src.core': MagicMock(), 'src.core.event_bus': MagicMock()}):
+            module = load_binance_connector()
+            WebSocketHealthCheck = module.WebSocketHealthCheck
+            
+            hc = WebSocketHealthCheck(timeout_seconds=30)
+            assert hc.last_message_time is None
+            
+            hc.on_message()
+            assert hc.last_message_time is not None
+            assert time.time() - hc.last_message_time < 1  # Should be very recent
+
+    def test_on_message_updates_price(self):
+        """Test that on_message updates the last_valid_price with valid prices."""
+        with patch.dict('sys.modules', {'src.core': MagicMock(), 'src.core.event_bus': MagicMock()}):
+            module = load_binance_connector()
+            WebSocketHealthCheck = module.WebSocketHealthCheck
+            
+            hc = WebSocketHealthCheck(timeout_seconds=30)
+            
+            # Valid price
+            hc.on_message(price=50000)
+            assert hc.last_valid_price == 50000
+            
+            # Invalid prices should not update
+            hc.on_message(price=0)
+            assert hc.last_valid_price == 50000
+            
+            hc.on_message(price=-100)
+            assert hc.last_valid_price == 50000
+            
+            hc.on_message(price=None)
+            assert hc.last_valid_price == 50000
+
+    def test_is_healthy_returns_false_initially(self):
+        """Test that is_healthy returns False when no messages received."""
+        with patch.dict('sys.modules', {'src.core': MagicMock(), 'src.core.event_bus': MagicMock()}):
+            module = load_binance_connector()
+            WebSocketHealthCheck = module.WebSocketHealthCheck
+            
+            hc = WebSocketHealthCheck(timeout_seconds=30)
+            assert hc.is_healthy() is False
+
+    def test_is_healthy_returns_true_after_message(self):
+        """Test that is_healthy returns True after receiving a message."""
+        with patch.dict('sys.modules', {'src.core': MagicMock(), 'src.core.event_bus': MagicMock()}):
+            module = load_binance_connector()
+            WebSocketHealthCheck = module.WebSocketHealthCheck
+            
+            hc = WebSocketHealthCheck(timeout_seconds=30)
+            hc.on_message()
+            assert hc.is_healthy() is True
+
+    def test_is_healthy_returns_false_after_timeout(self):
+        """Test that is_healthy returns False after timeout."""
+        import time
+        with patch.dict('sys.modules', {'src.core': MagicMock(), 'src.core.event_bus': MagicMock()}):
+            module = load_binance_connector()
+            WebSocketHealthCheck = module.WebSocketHealthCheck
+            
+            hc = WebSocketHealthCheck(timeout_seconds=1)  # 1 second timeout
+            hc.on_message()
+            
+            # Simulate timeout by setting last_message_time in the past
+            hc.last_message_time = time.time() - 2  # 2 seconds ago
+            assert hc.is_healthy() is False
+
+    def test_connector_has_health_check(self):
+        """Test that BinanceConnector has health_check attribute."""
+        with patch.dict('sys.modules', {'src.core': MagicMock(), 'src.core.event_bus': MagicMock()}):
+            module = load_binance_connector()
+            BinanceConnector = module.BinanceConnector
+            
+            mock_event_bus = MagicMock()
+            connector = BinanceConnector(
+                api_key="test_key",
+                api_secret="test_secret",
+                event_bus=mock_event_bus
+            )
+            
+            assert hasattr(connector, 'health_check')
+            assert connector.health_check is not None
+
+    def test_connector_is_websocket_healthy(self):
+        """Test that BinanceConnector.is_websocket_healthy() works."""
+        with patch.dict('sys.modules', {'src.core': MagicMock(), 'src.core.event_bus': MagicMock()}):
+            module = load_binance_connector()
+            BinanceConnector = module.BinanceConnector
+            
+            mock_event_bus = MagicMock()
+            connector = BinanceConnector(
+                api_key="test_key",
+                api_secret="test_secret",
+                event_bus=mock_event_bus
+            )
+            
+            # Initially unhealthy
+            assert connector.is_websocket_healthy() is False
+            
+            # After receiving a message
+            connector.health_check.on_message(price=50000)
+            assert connector.is_websocket_healthy() is True
+
+    def test_connector_get_last_valid_price(self):
+        """Test that BinanceConnector.get_last_valid_price() works."""
+        with patch.dict('sys.modules', {'src.core': MagicMock(), 'src.core.event_bus': MagicMock()}):
+            module = load_binance_connector()
+            BinanceConnector = module.BinanceConnector
+            
+            mock_event_bus = MagicMock()
+            connector = BinanceConnector(
+                api_key="test_key",
+                api_secret="test_secret",
+                event_bus=mock_event_bus
+            )
+            
+            # Initially None
+            assert connector.get_last_valid_price() is None
+            
+            # After receiving a message with price
+            connector.health_check.on_message(price=50000)
+            assert connector.get_last_valid_price() == 50000

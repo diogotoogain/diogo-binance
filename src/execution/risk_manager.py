@@ -77,6 +77,16 @@ class RiskManager:
         return True, "OK"
 
     def update_daily_pnl(self, pnl: float):
+        # VALIDAÇÃO: Rejeitar PnL inválido (None ou extremamente grande)
+        if pnl is None:
+            logger.error("❌ Tentativa de atualizar P&L com valor None. Ignorando.")
+            return
+        
+        # Validar PnL suspeito (maior que 100% do saldo inicial)
+        if self.initial_balance > 0 and abs(pnl) > self.initial_balance:
+            logger.error(f"❌ P&L SUSPEITO: ${pnl:.2f} é maior que saldo inicial ${self.initial_balance:.2f}. Ignorando!")
+            return
+        
         self.daily_pnl += pnl
         self.trades_today += 1
         emoji = "🟢" if self.daily_pnl >= 0 else "🔴"
