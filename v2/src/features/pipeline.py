@@ -9,6 +9,7 @@ import logging
 
 from v2.src.features.base import Feature
 from v2.src.features.microstructure import OFI, TFI, MicroPrice, ShannonEntropy, VPIN
+from v2.src.features.microstructure.liquidation_features import LiquidationFeatures
 from v2.src.features.technical import EMA, RSI, MACD, ADX, BollingerBands, ATR
 from v2.src.features.volume import VolumeSpike, LiquidityClusters
 from v2.src.features.derivatives import FundingRateFeatures, OpenInterestFeatures
@@ -35,6 +36,7 @@ class FeaturePipeline:
         self.config = config
         self.features: List[Feature] = []
         self.feature_states: Dict[str, Dict] = {}  # Estados para cálculo incremental
+        self.liquidation_features: Optional[LiquidationFeatures] = None
         self._initialize_features()
         
     def _initialize_features(self) -> None:
@@ -56,12 +58,18 @@ class FeaturePipeline:
         if vol_config.get('enabled', True):
             self._init_volume_features(vol_config)
         
+        # Liquidation features (special handling - not a standard Feature)
+        liq_config = self.config.get('liquidations', {})
+        if liq_config.get('enabled', True):
+            self._init_liquidation_features(self.config)
         # Derivatives features (Funding Rate, Open Interest)
         derivatives_config = self.config.get('derivatives', {})
         if derivatives_config.get('enabled', True):
             self._init_derivatives_features(derivatives_config)
         
         logger.info(f"Pipeline inicializado com {len(self.features)} features")
+        if self.liquidation_features:
+            logger.info("Liquidation features habilitadas")
         
     def _init_microstructure_features(self, config: Dict[str, Any]) -> None:
         """Inicializa features de microestrutura."""
@@ -133,6 +141,31 @@ class FeaturePipeline:
         clusters_config = config.get('liquidity_clusters', {})
         if clusters_config.get('enabled', True):
             self.features.append(LiquidityClusters(clusters_config, enabled=True))
+
+    def _init_liquidation_features(self, config: Dict[str, Any]) -> None:
+        """Inicializa features de liquidação."""
+        self.liquidation_features = LiquidationFeatures(config)
+
+    def add_liquidation(self, liquidation: Dict[str, Any]) -> None:
+        """
+        Adiciona uma liquidação ao tracker de liquidações.
+        
+        Args:
+            liquidation: Dados da liquidação
+        """
+        if self.liquidation_features:
+            self.liquidation_features.add_liquidation(liquidation)
+
+    def get_liquidation_features(self) -> Dict[str, float]:
+        """
+        Calcula e retorna features de liquidação atuais.
+        
+        Returns:
+            Dict com features de liquidação
+        """
+        if self.liquidation_features:
+            return self.liquidation_features.calculate()
+        return {}
     
     def _init_derivatives_features(self, config: Dict[str, Any]) -> None:
         """Inicializa features de derivativos (Funding Rate, Open Interest)."""
@@ -215,6 +248,11 @@ class FeaturePipeline:
                     
             except Exception as e:
                 logger.error(f"Erro calculando incremental {feature_name}: {e}")
+        
+        # Add liquidation features
+        if self.liquidation_features:
+            liq_features = self.liquidation_features.calculate()
+            result.update(liq_features)
                 
         return result
         
@@ -225,7 +263,10 @@ class FeaturePipeline:
         Returns:
             Lista de nomes das features habilitadas
         """
-        return [f.get_name() for f in self.features if f.is_enabled()]
+        names = [f.get_name() for f in self.features if f.is_enabled()]
+        if self.liquidation_features:
+            names.append('LiquidationFeatures')
+        return names
     
     def get_feature(self, name: str) -> Optional[Feature]:
         """
@@ -277,6 +318,8 @@ class FeaturePipeline:
     def reset_states(self) -> None:
         """Reseta todos os estados incrementais."""
         self.feature_states.clear()
+        if self.liquidation_features:
+            self.liquidation_features.reset()
         
     def get_all_params(self) -> Dict[str, Dict[str, Any]]:
         """
@@ -285,4 +328,7 @@ class FeaturePipeline:
         Returns:
             Dict com nome da feature -> parâmetros
         """
-        return {f.get_name(): f.get_params() for f in self.features}
+        params = {f.get_name(): f.get_params() for f in self.features}
+        if self.liquidation_features:
+            params['LiquidationFeatures'] = self.liquidation_features.get_status()
+        return params
